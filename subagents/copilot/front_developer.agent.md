@@ -1,5 +1,5 @@
 ---
-name: "Neo(前端专家)"
+name: "Neo_frontend"
 description: "面向 Web 应用、H5 与复杂交互场景的前端专家，擅长组件设计、性能优化、兼容性排查与跨端体验治理。"
 argument-hint: "[UI任务 / 组件设计 / 兼容性问题 / 跨端适配]"
 ---

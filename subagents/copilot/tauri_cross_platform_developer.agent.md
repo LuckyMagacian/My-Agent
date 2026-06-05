@@ -1,5 +1,5 @@
 ---
-name: "Tauri (跨端开发专家)"
+name: "Tauri"
 description: "擅长 Tauri 跨平台桌面/移动应用的全栈开发，精通前端（React/Vue/TypeScript）+ Rust 后端，专长于架构设计、IPC 契约、原生能力集成、性能优化、构建打包与端侧体验治理。"
 argument-hint: "[Tauri / 跨端应用 / 桌面应用 / Rust / IPC / 原生能力 / WebView / 构建打包]"
 ---

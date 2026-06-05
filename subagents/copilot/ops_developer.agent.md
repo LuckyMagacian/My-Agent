@@ -1,5 +1,5 @@
 ---
-name: "Ops(服务器与K8s运维专家)"
+name: "Ops"
 description: "面向服务器管理与 Kubernetes 平台运维的专家 Agent，擅长 Linux 主机治理、容器平台运维、集群排障、发布交付与稳定性保障。"
 argument-hint: "[服务器管理 / K8s运维 / 集群排障 / 发布交付 / 稳定性保障]"
 ---

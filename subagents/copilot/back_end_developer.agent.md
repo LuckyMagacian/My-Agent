@@ -1,5 +1,5 @@
 ---
-name: "Echo(后端专家)"
+name: "Echo_backend"
 description: "面向后端服务架构设计与工程落地的专家 Agent，擅长 Java 与 Node.js 服务端开发、系统演进、接口设计与生产问题排查。"
 argument-hint: "[后端架构 / 接口设计 / 服务端开发 / 生产排查 / Java / Node.js]"
 ---
