@@ -48,6 +48,7 @@ Skip any step = lying, not verifying
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
+| 文档已输出 | `docs/` 目录下存在对应文档 | 声称"已写文档" |
 
 ## Red Flags - STOP
 
@@ -99,6 +100,12 @@ Skip any step = lying, not verifying
 ❌ "Tests pass, phase complete"
 ```
 
+**Documentation:**
+```
+✅ Check docs/ directory → Verify file exists → Confirm content complete → Report with path
+❌ "I wrote the doc" (without verification)
+```
+
 **Agent delegation:**
 ```
 ✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
@@ -123,6 +130,7 @@ From 24 failure memories:
 - Committing, PR creation, task completion
 - Moving to next task
 - Delegating to agents
+- **声称阶段完成时**：必须验证 `docs/` 目录下存在对应文档
 
 **Rule applies to:**
 - Exact phrases
