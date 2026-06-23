@@ -1,134 +1,600 @@
 ---
 name: attention-maintenance
-description: "必须在每一次执行代码修改、分析报错日志、或长对话产生后“持续激活”。每当用户说“继续”、“下一步”或提供新代码时，必须强制加载此技能"
+description: "短期上下文维护系统 v11：最终形态。Focus → Active Decision → ADR（Trace）→ Landmarks。适用于单项目、几十轮对话、持续数周开发。"
 ---
 
-# 注意力维持系统
+# 短期上下文维护系统 v11
 
-## 触发条件
+## 设计目标
 
-| 条件 | 说明 |
+**适用于**：单项目 + 几十轮对话 + 复杂软件设计（持续数周）
+
+**核心理念**：决策历史比知识库存量重要。Landmarks 记录思路演化，快速恢复整个项目思维轨迹。
+
+## 最终结构（按重要性）
+
+```
+★★★★★ Focus            当前讨论什么
+★★★★★ Active Decision  当前决定什么
+★★★★★ ADR + Trace      为什么这样决定
+★★★★★ Session Summary  最近发生什么
+★★★★★ Landmarks        思路如何演化
+★★★★ Current Stage     讨论到哪一步
+★★★★ Current State     当前进展
+★★★  Constraints       边界条件
+★★   Goal              目标方向
+★    Identity          项目身份
+```
+
+---
+
+## Focus（★★★★★）
+
+### 作用
+
+**当前讨论什么**，决定检索方向。
+
+### 输出格式
+
+```xml
+<focus importance="critical">
+  <theme>当前讨论主题</theme>
+  <scope>涉及范围</scope>
+</focus>
+```
+
+### 示例
+
+```xml
+<focus importance="critical">
+  <theme>Selection Context 实现</theme>
+  <scope>状态管理、变更监听、生命周期</scope>
+</focus>
+```
+
+### 限制
+
+```xml
+<Focus max="1"/>  <!-- 永远单例 -->
+```
+
+---
+
+## Active Decision（★★★★★）
+
+### 作用
+
+**当前决定什么**，具体决策问题。
+
+### 输出格式
+
+```xml
+<active-decision importance="critical">
+  <question>决策问题</question>
+  <authority>[ai|user]</authority>
+  <options>
+    <option id="A" status="[considering|rejected|accepted]">
+      方案描述
+    </option>
+  </options>
+</active-decision>
+```
+
+### Authority 简化
+
+| Authority | AI 行为 |
 | --- | --- |
-| 对话轮次 | 超过10轮交互后自动激活 |
-| 任务复杂度 | 涉及多文件修改或多步骤操作 |
-| 用户反馈 | 用户指出AI偏离主题或重复行为 |
-| 长时间任务 | 预计执行时间超过5分钟的任务 |
+| ai | AI 可推理决定 |
+| user | AI **不能**决定，必须询问用户 |
 
-## 核心机制
-
-### 1. 任务锚点（Task Anchor）
-
-使用 `<task-anchor>` XML标签维持核心目标，在每次复杂操作前输出：
+### 示例
 
 ```xml
-<task-anchor>
-  <original-request>用户原始请求的精确表述</original-request>
-  <core-objective>任务的核心目标（一句话）</core-objective>
-  <checklist>
-    - [ ] 待完成项1
-    - [ ] 待完成项2
-    - [x] 已完成项1
-  </checklist>
-  <current-focus>当前正在处理的部分</current-focus>
-</task-anchor>
+<active-decision importance="critical">
+  <question>Observer 生命周期如何管理</question>
+  <authority>ai</authority>
+  <options>
+    <option id="A" status="considering">手动 dispose</option>
+    <option id="B" status="considering">自动垃圾回收</option>
+  </options>
+</active-decision>
 ```
 
-**触发时机**：
-- 连续3次工具调用后
-- 切换任务方向时
-- 遇到错误需要调整策略时
-- 用户指出偏离主题时
-
-### 2. 注意力分散检测
-
-检测以下模式并主动纠正：
-
-| 模式 | 检测信号 | 纠正动作 |
-| --- | --- | --- |
-| 循环重复 | 连续2次输出结构相似的内容 | 立即停止，重新确认任务 |
-| 过度探索 | 连续3次只读操作无输出 | 总结发现，询问用户方向 |
-| 偏离主题 | 工作内容与原始请求无关联 | 回顾任务锚点，重新对齐 |
-| 完美主义 | 反复优化已完成的部分 | 评估改进必要性，必要时询问用户 |
-
-### 3. 上下文维护
-
-定期（每5轮）执行上下文检查，使用 `<context-snapshot>` 标签：
+### 限制
 
 ```xml
-<context-snapshot>
-  <user-goal>用户目标的一句话描述</user-goal>
-  <current-phase>当前所处的工作阶段</current-phase>
-  <key-decisions>
-    - 决策1：原因
-    - 决策2：原因
-  </key-decisions>
-  <next-action>即将执行的下一个动作</next-action>
-</context-snapshot>
+<Active-Decision max="1"/>  <!-- 永远单例 -->
 ```
 
-### 4. 进展同步
+---
 
-在以下时机主动向用户同步进展：
+## ADR + Trace（★★★★★）
 
-- 完成一个主要步骤后
-- 遇到需要用户决策的分支时
-- 发现与预期不符的情况时
-- 预计还需较多工作时
+### 作用
 
-## 执行规则
+**为什么这样决定**，防止重复讨论已否决方案。
 
-1. **任务锚点必须包含checklist**：将任务分解为可勾选的步骤，每完成一步立即标记 `[x]`
-2. **核心目标用XML标签包裹**：始终在 `<task-anchor>` 中维护 `<core-objective>`，防止目标漂移
-3. **先确认后执行**：不确定时先问用户，不要假设
-4. **增量输出**：每完成一步就输出结果，不要积攒大量修改
-5. **错误优先**：遇到错误立即处理，不要继续执行后续步骤
-6. **保持简洁**：输出聚焦于结果，减少过程描述
+### 输出格式
 
-## 与其他Skill的协作
+```xml
+<adr>
+  <record id="001" importance="high">
+    <scope>[architecture|module|implementation]</scope>
+    <decision>决策内容</decision>
+    <trace>
+      <option id="A" status="rejected">
+        方案描述
+        <reason>为什么拒绝</reason>
+      </option>
+      <option id="B" status="accepted">
+        方案描述
+        <reason>为什么接受</reason>
+      </option>
+    </trace>
+  </record>
+</adr>
+```
 
-- 与 `software-development-workflow` 配合：在开发流程的每个阶段检查点应用注意力维持
-- 与 `brainstorming` 配合：在创意探索中防止过度发散
-- 与 `executing-plans` 配合：在执行计划时保持对目标的追踪
+### 示例
+
+```xml
+<adr>
+  <record id="001" importance="high">
+    <scope>architecture</scope>
+    <decision>Selection 与 Document 分离</decision>
+    <trace>
+      <option id="A" status="rejected">
+        Selection 作为 Document 子状态
+        <reason>耦合度高，无法独立演进</reason>
+      </option>
+      <option id="B" status="accepted">
+        独立 Selection Context
+        <reason>可独立演进，符合 Plugin First</reason>
+      </option>
+    </trace>
+  </record>
+</adr>
+```
+
+### 核心价值
+
+**Trace 比决策本身重要**：否决理由防止未来重开讨论。
+
+---
+
+## Landmarks（★★★★★，新增）
+
+### 作用
+
+**思路如何演化**，记录关键认知变化，快速恢复整个项目思维轨迹。
+
+### 与 ADR 的区别
+
+| ADR | Landmarks |
+| --- | --- |
+| 最终决策 | 关键认知变化 |
+| 例：选择 Observer 模式 | 例：发现 NodeView 不适合作为状态容器 |
+
+### 输出格式
+
+```xml
+<landmarks>
+  <landmark id="L001" importance="high">
+    <insight>关键认知</insight>
+    <context>背景</context>
+  </landmark>
+</landmarks>
+```
+
+### 示例
+
+```xml
+<landmarks>
+  <landmark id="L001" importance="high">
+    <insight>Selection 应该从 Document 中拆出</insight>
+    <context>发现 Selection 状态变更不需要触发 Document 更新</context>
+  </landmark>
+  <landmark id="L002" importance="high">
+    <insight>Observer 必须显式销毁</insight>
+    <context>发现 Observer 导致内存泄漏</context>
+  </landmark>
+  <landmark id="L003" importance="normal">
+    <insight>NodeView 不适合作为状态容器</insight>
+    <context>NodeView 生命周期由 PM 管理，不可控</context>
+  </landmark>
+</landmarks>
+```
+
+### 限制
+
+```xml
+<Landmarks max="10"/>
+```
+
+### 价值
+
+快速恢复思维轨迹，比大量知识条目更有价值。
+
+---
+
+## Session Summary（★★★★★）
+
+### 作用
+
+**最近发生什么**，本轮讨论产出。
+
+### 职责边界
+
+只负责"本轮产出"，不与 Current State 重叠。
+
+### 输出格式
+
+```xml
+<session-summary>
+  <new-decisions importance="high">
+    - 本轮新决策
+  </new-decisions>
+  <new-findings importance="normal">
+    - 本轮新发现
+  </new-findings>
+  <open-questions importance="normal">
+    - 待解决问题
+  </open-questions>
+</session-summary>
+```
+
+### 示例
+
+```xml
+<session-summary>
+  <new-decisions importance="high">
+    - Selection 与 Document 分离
+    - 使用 Observer 模式
+  </new-decisions>
+  <new-findings importance="normal">
+    - Selection 更新不触发 Document 变更
+    - Observer 生命周期需手动管理
+  </new-findings>
+  <open-questions importance="normal">
+    - Observer dispose 时机
+    - Selection 缓存策略
+  </open-questions>
+</session-summary>
+```
+
+### 更新时机
+
+事件驱动：决策完成、发现新认知、遇到阻碍。
+
+---
+
+## Current Stage（★★★★）
+
+### 作用
+
+**讨论到哪一步**，贴近对话而非项目管理。
+
+### 与 Milestone 的区别
+
+| Milestone | Current Stage |
+| --- | --- |
+| 项目执行阶段 | 对话讨论阶段 |
+| design → implement → test | exploring → deciding → implementing → validating |
+
+### 输出格式
+
+```xml
+<current-stage importance="high">
+  <name>当前讨论主题</name>
+  <status>[exploring|deciding|implementing|validating|done]</status>
+</current-stage>
+```
+
+### 状态说明
+
+| 状态 | 说明 |
+| --- | --- |
+| exploring | 探索问题，收集信息 |
+| deciding | 讨论决策，权衡方案 |
+| implementing | 实现方案，编写代码 |
+| validating | 验证效果，调整优化 |
+| done | 完成，准备下一阶段 |
+
+### 示例
+
+```xml
+<current-stage importance="high">
+  <name>Selection Context 设计</name>
+  <status>deciding</status>
+</current-stage>
+```
+
+---
+
+## Current State（★★★★）
+
+### 作用
+
+**当前进展**，明确正在做什么。
+
+### 输出格式
+
+```xml
+<current-state>
+  <doing importance="high">正在做什么</doing>
+  <blocked importance="normal">阻碍点</blocked>
+  <evidence importance="normal">为什么 blocked</evidence>
+  <next importance="high">下一步</next>
+</current-state>
+```
+
+### 示例
+
+```xml
+<current-state>
+  <doing importance="high">分析 Observer 生命周期</doing>
+  <blocked importance="normal">不确定 GC 时机</blocked>
+  <evidence importance="normal">
+    查看 Observer.ts 未发现 dispose 调用点
+  </evidence>
+  <next importance="high">查看 Plugin 生命周期</next>
+</current-state>
+```
+
+---
+
+## Constraints（★★★）
+
+```xml
+<constraints>
+  <hard importance="critical">
+    - 硬约束（违反 → block）
+  </hard>
+  <soft importance="high">
+    - 软约束（违反 → warn）
+  </soft>
+</constraints>
+```
+
+---
+
+## Goal（★★）
+
+```xml
+<goal importance="high">
+  <primary>项目目标</primary>
+</goal>
+```
+
+---
+
+## Identity（★）
+
+```xml
+<identity>
+  <project importance="critical">Block Cheese</project>
+  <tech-stack importance="critical">React, Tiptap v3</tech-stack>
+</identity>
+```
+
+---
+
+## 弱化的组件
+
+### Pending Decisions（简化 Decision Queue）
+
+```xml
+<pending-decisions importance="normal">
+  - Observer 生命周期
+  - Selection 缓存策略
+  - 多 Selection 支持
+</pending-decisions>
+```
+
+无需完整结构，列表即可。
+
+---
+
+## 删除的组件
+
+| 组件 | 原因 |
+| --- | --- |
+| Project Knowledge | 合并到 ADR |
+| Activation | 简化为直接引用 ADR/Landmarks |
+| Decision Queue 完整结构 | 简化为 Pending Decisions 列表 |
+| Milestone 任务树 | 改为 Current Stage |
+
+---
+
+## 条目限制
+
+```xml
+<limits>
+  <!-- 单例 -->
+  <Focus max="1"/>
+  <Active-Decision max="1"/>
+  <Current-Stage max="1"/>
+  <Current-State max="1"/>
+  <Session-Summary max="1"/>
+
+  <!-- 队列 -->
+  <ADR max="30"/>
+  <Landmarks max="10"/>
+  <Constraints max="10"/>
+  <Pending-Decisions max="10"/>
+</limits>
+```
+
+---
+
+## 状态机流转
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     核心状态机                               │
+│  Focus → Active Decision → ADR + Trace → Landmark          │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     进度追踪                                 │
+│  Current Stage → Current State → Session Summary           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## 使用示例
 
-**任务开始时**：
 ```xml
-<task-anchor>
-  <original-request>为用户登录功能添加验证码</original-request>
-  <core-objective>实现登录验证码的生成、发送、验证流程</core-objective>
-  <checklist>
-    - [ ] 设计验证码数据模型
-    - [ ] 实现验证码生成接口
-    - [ ] 实现短信发送服务
-    - [ ] 实现验证码验证逻辑
-    - [ ] 添加前端输入组件
-  </checklist>
-  <current-focus>待开始</current-focus>
-</task-anchor>
+<!-- Focus（当前讨论什么） -->
+<focus importance="critical">
+  <theme>Selection Context 实现</theme>
+  <scope>状态管理、变更监听</scope>
+</focus>
+
+<!-- Active Decision（当前决定什么） -->
+<active-decision importance="critical">
+  <question>Observer 生命周期如何管理</question>
+  <authority>ai</authority>
+  <options>
+    <option id="A" status="considering">手动 dispose</option>
+    <option id="B" status="considering">自动垃圾回收</option>
+  </options>
+</active-decision>
+
+<!-- ADR + Trace（为什么这样决定） -->
+<adr>
+  <record id="001" importance="high">
+    <scope>architecture</scope>
+    <decision>Selection 与 Document 分离</decision>
+    <trace>
+      <option id="A" status="rejected">
+        Selection 作为 Document 子状态
+        <reason>耦合度高</reason>
+      </option>
+      <option id="B" status="accepted">
+        独立 Selection Context
+        <reason>可独立演进</reason>
+      </option>
+    </trace>
+  </record>
+</adr>
+
+<!-- Landmarks（思路如何演化） -->
+<landmarks>
+  <landmark id="L001" importance="high">
+    <insight>Selection 应该从 Document 中拆出</insight>
+    <context>发现 Selection 状态变更不需要触发 Document 更新</context>
+  </landmark>
+  <landmark id="L002" importance="high">
+    <insight>Observer 必须显式销毁</insight>
+    <context>发现 Observer 导致内存泄漏</context>
+  </landmark>
+</landmarks>
+
+<!-- Current Stage（讨论到哪一步） -->
+<current-stage importance="high">
+  <name>Selection Context 设计</name>
+  <status>deciding</status>
+</current-stage>
+
+<!-- Current State（当前进展） -->
+<current-state>
+  <doing importance="high">分析 Observer 生命周期</doing>
+  <blocked importance="normal">不确定 GC 时机</blocked>
+  <evidence importance="normal">未发现 dispose 调用点</evidence>
+  <next importance="high">查看 Plugin 生命周期</next>
+</current-state>
+
+<!-- Session Summary（最近发生什么） -->
+<session-summary>
+  <new-decisions importance="high">
+    - Selection 与 Document 分离
+    - 使用 Observer 模式
+  </new-decisions>
+  <new-findings importance="normal">
+    - Observer 生命周期需手动管理
+  </new-findings>
+  <open-questions importance="normal">
+    - Observer dispose 时机
+  </open-questions>
+</session-summary>
+
+<!-- Pending Decisions -->
+<pending-decisions importance="normal">
+  - Selection 缓存策略
+  - 多 Selection 支持
+</pending-decisions>
 ```
 
-**任务进行中（更新checklist）**：
-```xml
-<task-anchor>
-  <original-request>为用户登录功能添加验证码</original-request>
-  <core-objective>实现登录验证码的生成、发送、验证流程</core-objective>
-  <checklist>
-    - [x] 设计验证码数据模型
-    - [x] 实现验证码生成接口
-    - [ ] 实现短信发送服务
-    - [ ] 实现验证码验证逻辑
-    - [ ] 添加前端输入组件
-  </checklist>
-  <current-focus>实现短信发送服务</current-focus>
-</task-anchor>
+---
+
+## 执行流程
+
+```
+用户输入
+    ↓
+检查 Focus（当前讨论什么）
+    ↓
+检查 Active Decision（当前决定什么）
+    ↓
+检查 ADR（已决定，避免重复）
+    ↓
+检查 Landmarks（思维轨迹）
+    ↓
+检查 Authority（AI 可决定 / 需用户决定）
+    ↓
+更新 Current State
+    ↓
+更新 Session Summary（本轮产出）
 ```
 
-## 自检清单
+---
 
-在声称任务完成前，确认：
+## 对比：v10.5 vs v11
 
-- [ ] `<task-anchor>` 中的 checklist 所有项已标记 `[x]`
-- [ ] `<core-objective>` 与用户原始请求一致
-- [ ] 没有遗留的TODO或未处理的错误
-- [ ] 修改经过了基本验证（类型检查、语法检查等）
+| 项目 | v10.5 | v11 |
+| --- | --- | --- |
+| 核心组件 | 多个 | **5 个五星组件** |
+| Landmarks | 无 | **新增，记录思维轨迹** |
+| Milestone | 任务树 | **改为 Current Stage** |
+| Decision Queue | 完整结构 | **简化为列表** |
+| Owner | architect/developer/user | **简化为 ai/user** |
+| Session Summary | done/decided/pending | **new-decisions/findings/questions** |
+| Project Knowledge | 保留 | **删除，合并到 ADR** |
+| Activation | 保留 | **删除，直接引用** |
+
+---
+
+## 执行原则
+
+1. **Focus 单例**：永远只有一个当前讨论主题
+2. **Active Decision 单例**：永远只有一个当前决策问题
+3. **Trace 防重开**：否决理由防止未来重开讨论
+4. **Landmarks 记轨迹**：关键认知变化，快速恢复思维
+5. **事件驱动更新**：决策完成、发现认知时更新
+6. **Authority 简化**：只有 ai/user 两种
+
+---
+
+## 注意事项
+
+1. **Landmarks 是关键**：比知识条目更有价值
+2. **Trace 比决策重要**：否决理由比接受理由更有价值
+3. **Stage 贴近对话**：exploring/deciding/validating，不是项目管理
+4. **Session Summary 职责**：只记录本轮产出，不与 State 重叠
+5. **authority=user**：AI 必须询问用户，不能自动决定
+
+---
+
+## 总结
+
+对于「单项目、几十轮对话、持续数周的软件设计与开发」，v11 已经是完成形态：
+
+- **Focus** → 当前讨论什么
+- **Active Decision** → 当前决定什么
+- **ADR + Trace** → 为什么这样决定
+- **Landmarks** → 思路如何演化
+- **Session Summary** → 最近发生什么
+
+覆盖 90% 以上的上下文恢复需求。再增加结构收益快速下降，维护成本上升。
