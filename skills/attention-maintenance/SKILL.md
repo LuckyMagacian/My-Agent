@@ -1,15 +1,15 @@
 ---
 name: attention-maintenance
-description: "短期上下文维护系统 v13：最终收敛。Focus+Stage+Decision+ADR（Level）+Evidence+State（done-when）+Pending（!/?)。信息密度最优，维护成本最低。"
+description: "短期上下文维护系统 v14：工作记忆模型。Focus+Stage+Decision（active）+ADR（active/superseded）+Evidence（滑动窗口）+State（result）+Pending（!/?)。"
 ---
 
-# 短期上下文维护系统 v13
+# 短期上下文维护系统 v14
 
 ## 设计目标
 
 **适用于**：单项目 + 几十轮对话 + 复杂软件设计（持续数周）
 
-**核心理念**：每个条目都直接参与当前推理，不会逐渐演化成小型知识库。
+**核心理念**：真正的"工作记忆（Working Memory）"模型，而非压缩过的项目档案系统。
 
 ## 最终结构
 
@@ -18,35 +18,32 @@ description: "短期上下文维护系统 v13：最终收敛。Focus+Stage+Decis
 
 <stage>deciding</stage>
 
-<decision>
+<decision active>
 Observer 生命周期如何管理
 </decision>
 
 <adr>
-[A] Selection 与 Document 分离
-[B] 使用 Observer
+[A active] 使用 Observer
+[A superseded] EventEmitter
+[B active] Selection 与 Document 分离
 </adr>
 
 <evidence>
-- Selection 更新不会触发 Document 更新
-- NodeView 生命周期由 PM 管理
+- Observer 导致泄漏
+- Plugin 有 destroy 生命周期
 </evidence>
 
 <state>
 doing: 分析 Observer 生命周期
+result: Plugin.destroy 可作为 dispose 时机
 done-when: 明确 dispose 时机
-next: 查看 Plugin 生命周期
+next: Selection 缓存策略
 </state>
 
 <pending>
 ! Selection 缓存策略
 ? 多 Selection 支持
 </pending>
-
-<rejected>
-Selection 作为 Document 子状态
-EventEmitter
-</rejected>
 ```
 
 ---
@@ -61,7 +58,7 @@ EventEmitter
 
 **只回答**：当前讨论什么对象？
 
-**约束**：Decision 必须属于 Focus，否则自动切换 Focus。
+**自动推导**：当 Decision 能唯一确定 Focus 时，Focus 可省略。只有多主题并行时才保留。
 
 ---
 
@@ -73,103 +70,104 @@ EventEmitter
 
 **只回答**：当前处于什么阶段？
 
-| 阶段 | AI 行为 |
-| --- | --- |
-| exploring | 分析、调研 |
-| deciding | 权衡方案 |
-| implementing | 写代码 |
-| validating | 测试、调优 |
-
-**价值**：Focus + Stage 是最有价值的组合之一。Stage 决定行为模式。
-
 ---
 
-### Decision（当前选择）
+### Decision（当前选择 + 状态）
 
 ```xml
-<decision>
+<decision active>
 Observer 生命周期如何管理
 </decision>
 ```
 
 **只回答**：当前正在决定什么？
 
-**约束**：Decision ⊂ Focus，否则自动切换 Focus。
+### 状态标记
+
+| 标记 | 说明 |
+| --- | --- |
+| active | 当前活跃 |
+| resolved | 已解决 |
+
+**恢复时优先读取 active**。
 
 ---
 
-### ADR（决策 + Level）
+### ADR（决策 + 状态 + 关联）
 
 ```xml
 <adr>
-[A] Selection 与 Document 分离
-[B] 使用 Observer
+[A active] 使用 Observer
+[A superseded] EventEmitter
+[B active] Selection 与 Document 分离
 </adr>
 ```
 
-**只回答**：已决定什么？
+**只回答**：已决定什么？什么被替代了？
 
-**关键改进**：
-- 不存储 rejected，避免膨胀
-- 只保留决策结果
-- Level 决定恢复优先级
+### 状态标记
 
-### Level 分级
-
-| Level | 说明 | 恢复优先级 |
+| 标记 | 说明 | 恢复时行为 |
 | --- | --- | --- |
-| [A] | 架构级 | 最高 |
-| [B] | 模块级 | 高 |
-| [C] | 实现级 | 中 |
+| active | 当前有效 | 优先读取 |
+| superseded | 已被替代 | 仅作历史参考 |
+
+### 与 Rejected 的合并
+
+| v13 Rejected 独立 | v14 合并回 ADR |
+| --- | --- |
+| 关联断裂 | **关联清晰** |
+| 无法知道对应哪个 ADR | **与决策放在一起** |
+
+**关键改进**：EventEmitter 写在 ADR 下，关联不断裂。
 
 ---
 
-### Evidence（导致 ADR 的证据）
+### Evidence（滑动窗口）
 
 ```xml
 <evidence>
-- Selection 更新不会触发 Document 更新
-- NodeView 生命周期由 PM 管理
+- Observer 导致泄漏
+- Plugin 有 destroy 生命周期
 </evidence>
 ```
 
-**只回答**：哪些事实导致了 ADR？
+**只回答**：支撑当前 Active Decision 的事实是什么？
 
-### 与 Landmark 的区别
+### 滑动窗口规则
 
-| Landmark | Evidence |
+**Evidence 只支撑当前 Active Decision，不累计历史。**
+
+| v13 | v14 |
 | --- | --- |
-| 认知转折 | 导致 ADR 的证据 |
-| 可能与 ADR 重复 | 必须是 ADR 的支撑 |
-
-### 收敛规则
-
-**如果删除这个事实，ADR 会变得难以解释，否则不要进入 Evidence。**
+| 支撑所有 ADR | **只支撑 Active Decision** |
+| 会逐渐膨胀 | **滑动窗口，自动清理** |
 
 **约束**：max=5。
 
 ---
 
-### State（当前进展 + 退出条件）
+### State（当前进展 + 结果）
 
 ```xml
 <state>
 doing: 分析 Observer 生命周期
+result: Plugin.destroy 可作为 dispose 时机
 done-when: 明确 dispose 时机
-next: 查看 Plugin 生命周期
+next: Selection 缓存策略
 </state>
 ```
 
-**只回答**：正在做什么？什么时候完成？下一步？
+**只回答**：正在做什么？得到什么结果？何时完成？下一步？
 
-### done-when 价值
+### result 价值
 
-- 形成闭环：doing → done-when → next
-- 防止 AI 一直分析不知道何时结束
+- doing → result → done-when 形成完整闭环
+- 记录"做了什么得到什么"，不会断开
 
 ---
 
-### Pending（待决 + 简化优先级）
+### Pending（待决 + 严格限制）
 
 ```xml
 <pending>
@@ -178,38 +176,36 @@ next: 查看 Plugin 生命周期
 </pending>
 ```
 
-**只回答**：还有什么要处理？
+**只回答**：下一步做什么？还有什么候选？
 
-### 优先级简化
+### 严格限制
 
-| 标记 | 说明 |
-| --- | --- |
-| ! | 下一步必须处理 |
-| ? | 后续候选 |
+| 标记 | max | 说明 |
+| --- | --- | --- |
+| ! | 1 | 下一步唯一 |
+| ? | 5 | 候选列表 |
 
-**改进**：不使用 P1/P2/P3 相对排序，避免频繁重排。
+**防止退化成任务列表**。
 
 ---
 
-### Rejected（被否决的方案）
+## Freshness（新鲜度）
 
-```xml
-<rejected>
-Selection 作为 Document 子状态
-EventEmitter
-</rejected>
-```
+### 核心问题
 
-**只回答**：哪些方案被否决了？
+短期上下文最大问题：旧状态仍然存在，但忘记清理。
 
-### 与 ADR 分离的原因
+### 解决方案
 
-| ADR 内嵌 rejected | Rejected 独立 |
+所有组件增加状态标记：
+
+| 组件 | 状态标记 |
 | --- | --- |
-| ADR 会越来越长 | ADR 保持简洁 |
-| 访问频率混在一起 | 按需读取 rejected |
+| Decision | active / resolved |
+| ADR | active / superseded |
+| Evidence | 滑动窗口（只支撑 Active Decision） |
 
-**约束**：max=10，只保留关键否决。
+**恢复时优先读取 active，忽略 resolved/superseded。**
 
 ---
 
@@ -226,8 +222,7 @@ EventEmitter
   <!-- 队列 -->
   <ADR max="15"/>
   <Evidence max="5"/>
-  <Pending max="10"/>
-  <Rejected max="10"/>
+  <Pending !="1" ?="5"/>
 </limits>
 ```
 
@@ -238,95 +233,38 @@ EventEmitter
 ```
 Stage（大阶段）
     ↓
-Decision（当前决策）
+Decision (active)
     ↓
-State（当前步骤）
+State
     ├─ doing
+    ├─ result
     ├─ done-when
     └─ next
     ↓
-done-when 满足 → next
+done-when 满足
     ↓
-next 完成 → Pending[!]
+Decision (resolved)
     ↓
-Pending[!] → 新 Decision
+Pending[!]
+    ↓
+新 Decision (active)
+    ↓
+Evidence 滑动窗口更新
 ```
 
 ---
 
-## 约束规则
+## 对比：v13 vs v14
 
-### 1. Decision ⊂ Focus
-
-Decision 必须属于当前 Focus，否则自动切换 Focus。
-
-### 2. Evidence 必须支撑 ADR
-
-如果删除 Evidence，ADR 应该变得难以解释。
-
-### 3. Rejected 独立读取
-
-先读 ADR，如果讨论重开，再读 Rejected。
-
-### 4. State 形成闭环
-
-doing → done-when → next。
-
----
-
-## 对比：v12.5 vs v13
-
-| 项目 | v12.5 | v13 |
+| 项目 | v13 | v14 |
 | --- | --- | --- |
-| Landmark | 认知转折，可能与 ADR 重复 | **改为 Evidence，必须支撑 ADR** |
-| ADR rejected | 内嵌，ADR 会膨胀 | **独立为 Rejected** |
-| Pending 优先级 | P1/P2/P3 相对排序 | **!/ ? 简化** |
-| ADR max | 15 | **15** |
-| Evidence max | 5（原 Landmark） | **5** |
-| Rejected max | 无 | **10** |
-
----
-
-## 信息密度对比
-
-### v12.5
-
-```xml
-<adr>
-[A] Selection 与 Document 分离
-    rejected: Selection 作为 Document 子状态
-
-[B] 使用 Observer
-    rejected: EventEmitter
-</adr>
-
-<landmarks>
-- Selection 更新不会触发 Document 更新
-</landmarks>
-```
-
-### v13
-
-```xml
-<adr>
-[A] Selection 与 Document 分离
-[B] 使用 Observer
-</adr>
-
-<evidence>
-- Selection 更新不会触发 Document 更新
-</evidence>
-
-<rejected>
-Selection 作为 Document 子状态
-EventEmitter
-</rejected>
-```
-
-**改进**：
-- ADR 保持简洁
-- Evidence 必须支撑 ADR
-- Rejected 按需读取
+| Decision 状态 | 无 | **active / resolved** |
+| ADR 状态 | 无 | **active / superseded** |
+| Rejected | 独立，关联断裂 | **合并回 ADR** |
+| Evidence | 支撑所有 ADR | **滑动窗口，只支撑 Active Decision** |
+| State result | 无 | **新增，记录结果** |
+| Pending 限制 | 无 | **! max=1, ? max=5** |
+| Focus | 必须 | **可省略，自动推导** |
 
 ---
 
@@ -339,92 +277,99 @@ EventEmitter
 
 <stage>deciding</stage>
 
-<decision>
+<decision active>
 Observer 生命周期如何管理
 </decision>
 
 <adr>
-[A] Selection 与 Document 分离
-[B] 使用 Observer
-[C] SelectionContext 命名
+[A active] 使用 Observer
+[A superseded] EventEmitter
+[B active] Selection 与 Document 分离
+[B superseded] Selection 作为 Document 子状态
 </adr>
 
 <evidence>
-- Selection 更新不会触发 Document 更新
-- NodeView 生命周期由 PM 管理
+- Observer 导致泄漏
+- Plugin 有 destroy 生命周期
 </evidence>
 
 <state>
 doing: 分析 Observer 生命周期
+result: Plugin.destroy 可作为 dispose 时机
 done-when: 明确 dispose 时机
-next: 查看 Plugin 生命周期
+next: Selection 缓存策略
 </state>
 
 <pending>
 ! Selection 缓存策略
 ? 多 Selection 支持
 </pending>
-
-<rejected>
-Selection 作为 Document 子状态
-EventEmitter
-</rejected>
 ```
 
-### 流转示例
+### 决策完成后
 
-```
-Stage: deciding
-Decision: Observer 生命周期如何管理
-State:
-  doing: 分析 Observer 生命周期
-  done-when: 明确 dispose 时机
-  next: 查看 Plugin 生命周期
+```xml
+<decision resolved>
+Observer 生命周期如何管理
+</decision>
 
-→ done-when 满足
-State.next: 查看 Plugin 生命周期
+<adr>
+[A active] 使用 Observer
+</adr>
 
-→ next 完成
-Pending[!]: Selection 缓存策略
-→ 新 Decision
+<state>
+doing: Selection 缓存策略设计
+done-when: 确定缓存策略
+next: 实现缓存逻辑
+</state>
+
+<pending>
+! 实现缓存逻辑
+? 多 Selection 支持
+</pending>
+
+<!-- Evidence 滑动更新 -->
+<evidence>
+- Selection 访问频率高
+- 缓存命中率高
+</evidence>
 ```
 
 ---
 
 ## 执行原则
 
-1. **Decision ⊂ Focus**：否则自动切换 Focus
-2. **Evidence 必须支撑 ADR**：否则不进入
-3. **ADR 保持简洁**：不存储 rejected
-4. **Rejected 按需读取**：讨论重开时才看
-5. **Pending 简化**：!/ ? 而非 P1/P2/P3
-6. **State 形成闭环**：done-when 明确退出
+1. **Decision 状态**：active → resolved
+2. **ADR 状态**：active → superseded
+3. **Evidence 滑动窗口**：只支撑 Active Decision
+4. **State 记录结果**：doing → result → done-when
+5. **Pending 严格限制**：! max=1
+6. **恢复优先级**：active > resolved/superseded
 
 ---
 
 ## 注意事项
 
-1. **Evidence ≠ Landmark**：Evidence 必须支撑 ADR
-2. **Rejected 独立**：避免 ADR 膨胀
-3. **Pending 用 !/?**：不使用相对排序
-4. **Stage 决定行为模式**：Focus + Stage 最有价值
-5. **done-when 形成闭环**：防止无限分析
+1. **Freshness 是关键**：优先读取 active，忽略旧状态
+2. **Evidence 滑动窗口**：不累计历史，只支撑当前
+3. **result 闭环**：记录结果，防止断开
+4. **ADR 关联清晰**：superseded 写在 ADR 下
+5. **Pending 严格限制**：! max=1，防止任务列表化
 
 ---
 
 ## 总结
 
-v13 是最终收敛形态：
+v14 是工作记忆模型的最终形态：
 
 | 组件 | 只回答 | 关键改进 |
 | --- | --- | --- |
-| Focus | 讨论对象 | Decision ⊂ Focus |
+| Focus | 讨论对象 | 可省略，自动推导 |
 | Stage | 大阶段 | 决定行为模式 |
-| Decision | 当前选择 | 必须属于 Focus |
-| ADR | 已决定 | **不存 rejected，保持简洁** |
-| Evidence | ADR 证据 | **必须支撑 ADR** |
-| State | 当前进展 | done-when 闭环 |
-| Pending | 待决问题 | **!/ ? 简化** |
-| Rejected | 被否决方案 | **独立，按需读取** |
+| Decision | 当前选择 | **active / resolved** |
+| ADR | 决策 + 否决 | **active / superseded，关联清晰** |
+| Evidence | 当前证据 | **滑动窗口，不累计** |
+| State | 进展 + 结果 | **result 闭环** |
+| Pending | 待决问题 | **! max=1, ? max=5** |
 
-**每个条目都直接参与当前推理，不会逐渐演化成小型知识库。**
+**真正的"工作记忆（Working Memory）"模型，而非压缩过的项目档案系统。**
