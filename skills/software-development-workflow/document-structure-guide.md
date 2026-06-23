@@ -12,19 +12,24 @@ metadata:
 ```
 docs/
 ├── requirements/              # 需求文档
-│   └── {YYYY-MM-DD}-{主题}-需求说明书.md
+│   ├── {YYYY-MM-DD}-{主题}-需求说明书.md
+│   └── archive/               # 归档历史版本
 ├── design/                    # 设计文档
 │   ├── {YYYY-MM-DD}-{主题}-设计说明书.md       # 概要设计
-│   └── {YYYY-MM-DD}-{主题}-{模块}-详细设计.md  # 详细设计（关联概要设计）
+│   ├── {YYYY-MM-DD}-{主题}-{模块}-详细设计.md  # 详细设计（关联概要设计）
+│   └── archive/
 ├── changes/                   # 变更计划
-│   └── {YYYY-MM-DD}-{主题}.md
+│   ├── {YYYY-MM-DD}-{主题}.md
+│   └── archive/
 ├── bugs/                      # 问题修复
-│   └── {YYYY-MM-DD}-{问题摘要}.md
+│   ├── {YYYY-MM-DD}-{问题摘要}.md
+│   └── archive/
 ├── analysis/                  # 分析报告
-│   └── {模块}-分析报告.md
-├── solution-optimization/     # 方案优化
-│   └── {YYYY-MM-DD}-{主题}.md
-└── 需求vs变更-区分指南.md      # 场景区分规则
+│   ├── {模块}-分析报告.md
+│   └── archive/
+└── solution-optimization/     # 方案优化
+    ├── {YYYY-MM-DD}-{主题}.md
+    └── archive/
 ```
 
 ## 需求 vs 变更 - 快速区分
@@ -82,3 +87,4 @@ solution-optimization/2026-06-23-文档位置规范优化.md
 
 [[software-development-workflow]] - 完整工作流定义（同目录 SKILL.md）
 [[requirements-vs-changes-guide]] - 需求与变更区分指南（同目录）
+[[document-quality-maintenance]] - 文档质量保障机制（同目录）
