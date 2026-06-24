@@ -88,7 +88,7 @@
 - React/Next.js 代码：参考 `react-best-practices`
 - React Native/Expo 代码：参考 `react-native-skills`
 - 页面过渡动画：参考 `react-view-transitions`
-- HTTP 请求/网络操作：参考 `http-retry-handler`
+- 网站代理访问：参考 `http-retry-handler`（处理网站需通过代理访问的问题）
 - UI/UX 原型设计：参考 `prototype-prompt-generator`
 
 ## 使用 subagent
