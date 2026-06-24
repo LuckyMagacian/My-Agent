@@ -90,3 +90,49 @@
 - 页面过渡动画：参考 `react-view-transitions`
 - HTTP 请求/网络操作：参考 `http-retry-handler`
 - UI/UX 原型设计：参考 `prototype-prompt-generator`
+
+## 使用 subagent
+
+### 何时使用 subagent
+
+| 场景 | 判断依据 | 是否使用 |
+|------|---------|---------|
+| 多文件搜索/探索 | 需跨多个目录查找信息 | ✅ 使用 Explore agent |
+| 独立子任务并行 | 多个无依赖的子任务可同时执行 | ✅ 并行启动多个 agent |
+| 长耗时任务 | 单次操作预计超过 30 秒 | ✅ 后台运行 agent |
+| 专业技术领域 | 任务涉及特定技术栈的深度知识 | ✅ 使用专用 agent |
+| 简单单文件修改 | 只需编辑一个文件的少量代码 | ❌ 直接执行 |
+| 顺序依赖任务 | 后续任务依赖前序结果 | ❌ 串行执行，不并行 |
+
+### Subagent 选择指南
+
+| Agent | 适用场景 | 典型任务 |
+|-------|---------|---------|
+| `Neo_frontend` | Web/H5 前端开发 | 组件设计、性能优化、兼容性排查 |
+| `Echo_backend` | 后端服务开发 | Java/Node.js 服务端、接口设计、生产问题排查 |
+| `Ops` | 服务器运维、K8s 平台 | Linux 治理、容器排障、发布交付 |
+| `Ade_agent_designer` | Agent 设计与编写 | 需求分析、角色定位、.agent.md 文件编写 |
+| `Tauri` | Tauri 跨平台应用 | 前端+Rust 后端、IPC 契约、原生能力集成 |
+| `Prose` | ProseMirror 富文本编辑器 | Schema 设计、Plugin 开发、协同编辑 |
+| `general-purpose` | 上述均不匹配的通用任务 | 复杂多步研究、综合搜索 |
+
+**选择原则**：
+1. 优先使用专用 agent，其次 `general-purpose`
+2. 不确定时使用 `general-purpose`
+
+### 执行规范
+
+**并行策略**：
+- 无依赖的子任务必须并行启动（单条消息多个 Agent 调用）
+- 有依赖的任务串行执行，前序结果作为后续输入
+
+**参数配置**：
+- `description`：3-5 词简述任务
+- `prompt`：明确任务目标、输入数据、期望输出格式
+- `isolation: "worktree"`：仅在 agent 需要修改文件且可能冲突时使用
+- `run_in_background: true`：长耗时任务使用，避免阻塞主流程
+
+**结果处理**：
+- agent 返回的是最终结论，不是原始文件内容
+- 收到结果后直接使用，不要重复执行相同搜索
+- 多 agent 并行结果需汇总后再继续主流程
