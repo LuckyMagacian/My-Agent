@@ -109,7 +109,11 @@
 - React/Next.js 代码：参考 `react-best-practices`
 - React Native/Expo 代码：参考 `react-native-skills`
 - 页面过渡动画：参考 `react-view-transitions`
-- 网站代理访问：参考 `http-retry-handler`（处理网站需通过代理访问的问题）
+- **网络访问失败处理**：参考 `http-retry-handler`（当 Claude 自身使用 WebFetch/WebSearch 访问网站失败时，**必须**自动注入代理环境变量重试，代理地址 `127.0.0.1:7890`，详见 skill 第零节）
+- **开发环境管理**：参考 `mise-use`（当遇到环境版本问题时自动应用）
+  - **环境不一致**：项目依赖 jdk8 但 shell 中是 jdk21 → `mise use java@8` 切换环境再执行编译
+  - **环境缺失**：项目需要 jdk17 但未安装 → 先 `mise ls-remote java` 查询可用版本，再用 `AskUserQuestion` 询问用户确认安装版本，最后 `mise use java@17` 安装并切换
+  - **典型触发场景**：编译失败、`command not found`、版本冲突、`which` 指向错误版本、工具链缺失
 - UI/UX 原型设计：参考 `prototype-prompt-generator`
 
 ## 使用 subagent

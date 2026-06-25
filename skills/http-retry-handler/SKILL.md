@@ -1,9 +1,79 @@
 ---
 name: http-retry-handler
-description: "处理 HTTP 请求因网络问题失败的代码实现指导。覆盖超时、断连、部分数据丢失、服务器错误等场景，提供重试策略、断点续传、错误恢复的标准化实现方案。当项目涉及 HTTP 请求、API 调用、文件下载、数据同步等网络操作时自动应用。"
+description: "处理网络访问失败的标准化方案。当 Claude 自身使用 WebFetch/WebSearch 访问网站失败（连接超时、DNS 解析失败、connection refused、网络不可达）时自动应用，通过代理重试。当项目代码涉及 HTTP 请求、API 调用、文件下载、数据同步等网络操作时也自动应用，提供重试策略、断点续传、错误恢复的代码实现方案。"
 ---
 
 # HTTP 请求失败处理规范
+
+## 零、Claude 自身网络访问规范（最高优先级）
+
+> **本节指导 Claude 自身在访问网站失败时如何通过代理重试，优先级高于其他所有章节。**
+
+### 0.1 触发条件
+
+| 条件 | 典型错误信息 |
+| --- | --- |
+| WebFetch 连接失败 | `Connection refused`、`ECONNREFUSED`、`fetch failed` |
+| DNS 解析失败 | `getaddrinfo ENOTFOUND`、`dns resolution failed` |
+| 连接超时 | `ETIMEDOUT`、`Connection timed out`、`timeout` |
+| 网络不可达 | `ENETUNREACH`、`Network is unreachable` |
+| TLS 握手失败 | `SSL/TLS handshake failed`、`certificate verify failed` |
+
+**不触发**：HTTP 4xx 错误（404、403 等）是服务器正常响应，不是网络问题，不需要代理。
+
+### 0.2 自动重试流程
+
+```
+WebFetch/WebSearch 失败（网络错误）
+  → 检测错误类型（见上表）
+  → 注入代理环境变量后重试（最多 2 次）
+  → 仍失败 → 用 curl 命令带代理参数直接访问
+  → 仍失败 → 告知用户网络问题
+```
+
+### 0.3 代理配置
+
+**固定代理地址**：`127.0.0.1:7890`
+
+### 0.4 具体操作
+
+**步骤一：环境变量注入重试**
+
+当 WebFetch/WebSearch 返回网络错误时，通过 Bash 设置环境变量后重新调用：
+
+```bash
+# 注入代理环境变量
+export HTTP_PROXY=http://127.0.0.1:7890
+export HTTPS_PROXY=http://127.0.0.1:7890
+export ALL_PROXY=socks5://127.0.0.1:7890
+export NO_PROXY=localhost,127.0.0.1,::1
+```
+
+然后重新调用 WebFetch/WebSearch 访问目标 URL。
+
+**步骤二：curl 降级访问**
+
+如果环境变量注入后仍失败，使用 curl 带代理参数直接访问：
+
+```bash
+# HTTP/HTTPS 代理
+curl -x http://127.0.0.1:7890 -sL --max-time 30 "$URL"
+
+# SOCKS5 代理
+curl -x socks5://127.0.0.1:7890 -sL --max-time 30 "$URL"
+
+# 保存响应到文件
+curl -x http://127.0.0.1:7890 -sL --max-time 30 -o /tmp/response.html "$URL"
+```
+
+### 0.5 行为规则
+
+1. **自动触发**：检测到网络错误时立即执行重试流程，无需用户指示
+2. **静默重试**：第一次重试不需要告知用户，直接执行；第二次重试前简要说明
+3. **错误区分**：4xx 错误不重试，5xx 错误可考虑重试但不走代理，只有网络层错误才走代理
+4. **不重复**：同一 URL 在同一会话中最多走一次代理重试流程，避免循环
+
+---
 
 ## 触发条件
 
@@ -17,6 +87,8 @@ description: "处理 HTTP 请求因网络问题失败的代码实现指导。覆
 ---
 
 ## 代理配置
+
+> Claude 自身访问网站时的代理使用方法见**第零节**。以下为项目代码中的代理实现参考。
 
 **固定代理地址**：`127.0.0.1:7890`
 
