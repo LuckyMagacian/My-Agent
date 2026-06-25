@@ -1,6 +1,6 @@
 ---
 name: attention-maintenance
-description: "短期上下文维护系统 v19 + persistence：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集 + 跨对话持久化快照。"
+description: "短期上下文维护系统 v19 + workspace：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集 + 跨对话工作上下文快照 + 架构决策库（promote/replace/remove 失效机制）。"
 ---
 
 # 短期上下文维护系统 v19
@@ -194,6 +194,12 @@ until: 覆盖所有销毁路径
 - 手工维护容易失真：新增 hypothesis 后 confidence 已过期
 - 工作记忆优先保存原始证据，而非"我觉得有 70% 把握"
 
+**生命周期绑定**：
+- Decision 存在 ⇔ State 存在
+- Decision 消失 → State 清空
+- 不存在"无 Decision 的 State"
+- 新 Decision 产生 → 新 State 随之产生
+
 ---
 
 ## 被删除的组件
@@ -272,9 +278,12 @@ State.until 满足
 Decision 消失
     ↓
 Evidence = ∅（自动清空）
+State = ∅（自动清空）
 ```
 
-**注意**：没有"Next"环节。Decision 消失后，新 Decision 由对话上下文自然产生。
+**注意**：
+- Decision 存在 ⇔ State 存在。不存在"无 Decision 的 State"。
+- 没有"Next"环节。Decision 消失后，新 Decision 由对话上下文自然产生，新 State 随之产生。
 
 ---
 
@@ -327,15 +336,15 @@ Selection 与 Document 分离
 Plugin.destroy 作为 dispose 时机
 </knowledge>
 
-<!-- Decision 消失，Evidence 自动清空 -->
+<!-- Decision 消失 → Evidence 自动清空 → State 自动清空 -->
 <evidence>
 </evidence>
 
 <state>
-doing: 分析缓存需求
-until: 明确缓存策略
 </state>
 ```
+
+**注意**：Decision 消失后 State 也清空。新 State 由新 Decision 自然产生，不存在"无 Decision 的 State"。
 
 ---
 
@@ -370,13 +379,15 @@ until: 缓存命中率测试通过
 
 1. **Decision 存在即活跃**：无需 active/resolved 属性
 2. **Decision = 问题，State.doing = 动作**：两者不可重复
-3. **Knowledge 只存最终结论**：不记录 Level/superseded/rejected
-4. **Knowledge Freshness**：relevance-first，删除与当前 Decision 最不相关的条目
-5. **Evidence 来源标记**：constraint/fact/test/hypothesis，区分推理权重
-6. **Evidence 自动清空**：Decision 消失 → Evidence = ∅
-7. **confidence 不存储**：从 Evidence 类型组合推导
-8. **结论进入 Knowledge**：不留在 State.result
-9. **不存 Next**：未来目标由对话上下文自然产生
+3. **Decision ⇔ State 绑定**：Decision 存在 ⇔ State 存在，不存在"无 Decision 的 State"
+4. **Knowledge 只存最终结论**：不记录 Level/superseded/rejected
+5. **Knowledge Freshness**：relevance-first，删除与当前 Decision 最不相关的条目
+6. **Evidence 来源标记**：constraint/fact/test/hypothesis，区分推理权重
+7. **Evidence 自动清空**：Decision 消失 → Evidence = ∅
+8. **State 自动清空**：Decision 消失 → State = ∅
+9. **confidence 不存储**：从 Evidence 类型组合推导
+10. **结论进入 Knowledge**：不留在 State.result
+11. **不存 Next**：未来目标由对话上下文自然产生
 
 ---
 
@@ -385,11 +396,12 @@ until: 缓存命中率测试通过
 1. **只保留核心记忆**：删除所有推导信息
 2. **Decision 无状态属性**：存在即活跃，消失即结束
 3. **Decision/State 职责分离**：Decision 是问题，State.doing 是动作
-4. **Evidence 自动遗忘**：决策结束自动清空
-5. **Evidence 来源标记**：constraint > fact > test > hypothesis
-6. **Knowledge 不膨胀**：max=8，relevance-first 遗忘
-7. **confidence 不存储**：从 Evidence 推导，避免派生信息失真
-8. **不存 Next**：未来目标属于计划，不是工作记忆
+4. **Decision ⇔ State 绑定**：同时存在，同时消失
+5. **Evidence 自动遗忘**：决策结束自动清空
+6. **Evidence 来源标记**：constraint > fact > test > hypothesis
+7. **Knowledge 不膨胀**：max=8，relevance-first 遗忘
+8. **confidence 不存储**：从 Evidence 推导，避免派生信息失真
+9. **不存 Next**：未来目标属于计划，不是工作记忆
 
 ---
 
@@ -440,164 +452,383 @@ Current Action
 
 ---
 
-# attention-persistence：脱离内存的短期记忆模块
+# attention-workspace：脱离内存的短期记忆模块
 
 ## 设计目标
 
 **解决**：v19 工作记忆纯对话内维护，对话结束即消失，下次对话需重新建立上下文。
 
-**定位**：v19 的独立外挂层，不修改 v19 的 4 组件结构。类比 CPU L1 cache（v19）与磁盘 swap（persistence）。
+**定位**：v19 的独立外挂层，不修改 v19 的 4 组件结构。持久化的是 **Workspace Snapshot**（工作上下文快照），不是 Knowledge Base（知识库）。类比 IDE 恢复上次打开的文件、光标位置、未完成任务——这是 Workspace，不是 Memory。
+
+**核心哲学对齐**：v19 的遗忘机制是 **relevance-first**（按相关性淘汰），workspace 层必须遵循同一原则，不引入时间衰减遗忘。两套遗忘机制会相互冲突。
 
 **原则**：
-- 持久化的是"工作记忆快照"，不是项目档案
+- 持久化的是"工作上下文快照"，不是项目档案
 - 恢复的记忆是"建议"，Claude 有权拒绝不相关的恢复
 - 不改变 v19 的任何规则（max 限制、生命周期、relevance-first）
+- Knowledge 遗忘 = relevance-first，不是 time-first
 
 ## 持久化范围
 
 | 组件 | 持久化策略 | 理由 |
 |------|-----------|------|
-| Knowledge | 全量持久化 | 跨对话最有价值，是推理前提 |
-| Decision | 条件持久化（未解决时） | Decision 已消失 = 问题已解决，无需持久化 |
-| State | 条件持久化（与 Decision 绑定） | Decision 不存在时 State 无持久化价值 |
-| Evidence | 不持久化，保留摘要 | Evidence 生命周期=Decision 生命周期，跨对话后来源标记可能失效 |
+| Principles | 全量持久化（无时间戳，带 reason，带失效机制） | 架构决策记录，可长期有效，可被替换/废弃 |
+| Decision | 条件持久化为 `pending-decision` | 未解决的 Decision 恢复为待确认状态，不直接进入 v19 |
+| State | 条件持久化（随 pending-decision） | pending-decision 不存在时 State 无持久化价值 |
+| Evidence | 不持久化 | Evidence 生命周期=Decision 生命周期，跨对话后来源标记失效 |
+
+## 命名说明：Knowledge → Principles
+
+v19 中使用 `<knowledge>` 存储已确定结论。但持久化后，这些条目包含 **Decision + Reason**，已不再是单纯的"知识"，而是"架构决策记录"：
+
+```
+<item>
+使用 WeakMap
+<reason>自动释放引用防泄漏</reason>
+</item>
+```
+
+这包含：
+- Decision：使用 WeakMap
+- Reason：自动释放引用防泄漏
+
+因此持久化层使用 `<principles>` 而非 `<knowledge>`，语义更准确：
+- **Knowledge**（v19）：当前有效前提，对话内即时可追溯
+- **Principles**（workspace）：架构决策记录，跨对话需要 reason 才可追溯
+
+**注意**：v19 内部仍使用 `<knowledge>`，只在 workspace 持久化层使用 `<principles>`。Restore 时 `<principles>` 条目进入 v19 的 `<knowledge>` 区域。
 
 ## 存储位置
 
 ```
 skills/attention-maintenance/persistence/
-  snapshot.xml                    # 当前工作记忆快照
-  archive/                        # 历史快照归档（保留最近 5 个）
-    2026-06-25T19-30-00.xml
+  workspace.xml                   # 工作上下文（pending-decision + state）
+  principles.xml                  # 架构决策库（已确定结论 + reason）
 ```
 
-## snapshot.xml 格式
+**拆分理由**：Workspace 和 Principles 生命周期不同。
+- Workspace（pending-decision + state）：强时效，Decision 解决即清空
+- Principles：弱时效，结论可长期有效，但可被替换/废弃
+- 拆分后：clear workspace 不会误删 principles；Promotion 也更自然
+
+**无 archive**：v19 是工作记忆，只关心当前状态，不关心历史状态。archive 是项目历史，不是工作记忆。
+
+## workspace.xml 格式
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<attention-snapshot version="1.0">
-  <meta>
-    <saved-at>2026-06-25T19:30:00+08:00</saved-at>
-    <session-id>abc123</session-id>
-    <decision-active>true</decision-active>
-    <knowledge-count>4</knowledge-count>
-  </meta>
-
-  <!-- Decision: 只在未解决时存在 -->
-  <decision>
+<workspace>
+  <pending-decision>
   Observer 生命周期如何管理
-  </decision>
+  </pending-decision>
 
-  <!-- Knowledge: 全量持久化，每条带 saved-at 用于衰减计算 -->
-  <knowledge>
-  <item saved-at="2026-06-25T10:00:00+08:00">Selection 与 Document 分离</item>
-  <item saved-at="2026-06-25T14:00:00+08:00">使用 Observer</item>
-  <item saved-at="2026-06-25T16:00:00+08:00">Plugin.destroy 作为 dispose 时机</item>
-  <item saved-at="2026-06-25T18:00:00+08:00">使用 WeakMap 作为缓存</item>
-  </knowledge>
-
-  <!-- State: 与 Decision 绑定，Decision 存在时才有 -->
   <state>
   doing: 验证 Plugin.destroy 覆盖范围
   until: 覆盖所有销毁路径
   </state>
-
-  <!-- Evidence 摘要: 仅供参考，不参与 v19 Evidence 机制，不占 max=5 位置 -->
-  <evidence-summary count="3">
-  [constraint] 必须兼容 Tiptap Extension API
-  [fact] Plugin 有 destroy 生命周期
-  [hypothesis] Observer 导致泄漏
-  </evidence-summary>
-</attention-snapshot>
+</workspace>
 ```
 
-### Decision 已解决时的快照
+**Decision 已解决时**：
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<attention-snapshot version="1.0">
-  <meta>
-    <saved-at>2026-06-25T20:00:00+08:00</saved-at>
-    <session-id>def456</session-id>
-    <decision-active>false</decision-active>
-    <knowledge-count>5</knowledge-count>
-  </meta>
-
-  <!-- Decision 不存在：问题已解决 -->
-
-  <knowledge>
-  <item saved-at="2026-06-25T10:00:00+08:00">Selection 与 Document 分离</item>
-  <item saved-at="2026-06-25T14:00:00+08:00">使用 Observer</item>
-  <item saved-at="2026-06-25T16:00:00+08:00">Plugin.destroy 作为 dispose 时机</item>
-  <item saved-at="2026-06-25T18:00:00+08:00">使用 WeakMap 作为缓存</item>
-  <item saved-at="2026-06-25T20:00:00+08:00">Observer 需在 Plugin.destroy 中清理</item>
-  </knowledge>
-
-  <!-- State 不持久化：Decision 已解决 -->
-
-  <!-- Evidence 摘要为空：Decision 消失后 Evidence 自动清空 -->
-  <evidence-summary count="0">
-  </evidence-summary>
-</attention-snapshot>
+<workspace>
+  <!-- 无未解决问题 -->
+</workspace>
 ```
 
-## 衰减规则
+**格式要点**：
+- State 必须依附 pending-decision：无 pending-decision 时 workspace 为空
+- 与 v19 保持一致：Decision ⇔ State 绑定
 
-| Knowledge 条目年龄 | 状态 | 恢复行为 |
-|---|---|---|
-| < 24h | fresh | 正常注入 v19 Knowledge |
-| 24h - 72h | stale | 注入时标注 `[stale]`，Claude 自行判断是否保留 |
-| > 72h | expired | 不注入，从快照中删除 |
+## principles.xml 格式
 
-**stale 标注示例**：
 ```xml
-<restored-knowledge>
+<principles>
+<item>
+Selection 与 Document 分离
+<reason>Document 变更时需独立追踪选区</reason>
+</item>
+
+<item>
+使用 Observer
+<reason>监听 Document 变更触发更新</reason>
+<avoid>MutationTracker 复杂度过高</avoid>
+</item>
+
+<item status="replaced-by" ref="MutationTracker">
+使用 Observer
+<reason>监听 Document 变更触发更新</reason>
+</item>
+
+<item status="removed">
+Observer 全局共享实例
+<reason>已被废弃，改为按 Plugin 隔离</reason>
+</item>
+
+<item>
+Plugin.destroy 作为 dispose 时机
+<reason>Observer 需在插件销毁时清理</reason>
+</item>
+
+<item>
+使用 WeakMap 作为缓存
+<reason>自动释放引用防止内存泄漏</reason>
+<avoid>Map 会导致强引用无法 GC</avoid>
+</item>
+</principles>
+```
+
+### reason 字段规则
+
+- **必填**：每个 item 必须附带 `<reason>`
+- **长度限制**：≤ 50 字
+- **作用**：恢复后保持可解释性——"为什么这样做？"
+- **本质**：ADR Summary（架构决策摘要），不是标签
+
+### avoid 字段规则
+
+- **可选**：记录"为什么不选其他方案"的极简反向理由
+- **长度限制**：≤ 30 字
+- **作用**：恢复后回答"为什么不那样做？"。没有 avoid 的条目跨对话后可能被重新质疑
+- **本质**：ADR Alternatives 的极简形式，不是完整方案对比
+
+**为什么需要 avoid**：
+- reason 回答"为什么这样做"
+- avoid 回答"为什么不那样做"
+- 两者组合 = 最小可追溯的决策记录
+- 示例：`使用 WeakMap` + `reason: 自动释放引用` + `avoid: Map 导致强引用无法 GC`
+
+**对比**：
+
+| 内容 | 位置 | 长度 | 回答的问题 | 生命周期 |
+|------|------|------|-----------|---------|
+| Evidence | v19 `<evidence>` | 不限 | 为什么这样推理 | Decision 生命周期 |
+| reason | principles.xml `<reason>` | ≤ 50 字 | 为什么这样做 | Principle 生命周期 |
+| avoid | principles.xml `<avoid>` | ≤ 30 字 | 为什么不那样做 | Principle 生命周期 |
+
+### 失效机制
+
+Principles 不是只增不减的。架构演进中决策会被替换或废弃。三种失效操作：
+
+| 操作 | 含义 | 格式 |
+|------|------|------|
+| **promote** | 长期稳定 → 迁移到 MEMORY.md | 从 principles.xml 删除 |
+| **replace** | 被新决策替代 | `status="replaced-by" ref="{新决策关键词}"` |
+| **remove** | 直接废弃 | `status="removed"` |
+
+**replace 示例**：
+```xml
+<!-- 旧决策：被 MutationTracker 替代 -->
+<item status="replaced-by" ref="MutationTracker">
+使用 Observer
+<reason>监听 Document 变更触发更新</reason>
+</item>
+
+<!-- 新决策 -->
+<item>
+使用 MutationTracker 替代 Observer
+<reason>Observer 无法追踪局部变更，MutationTracker 支持 Range 级粒度</reason>
+</item>
+```
+
+**remove 示例**：
+```xml
+<item status="removed">
+Observer 全局共享实例
+<reason>已被废弃，改为按 Plugin 隔离</reason>
+</item>
+```
+
+**Restore 时处理规则**：
+- `status` 无（默认）= active → 正常恢复
+- `status="replaced-by"` → 不恢复，如 ref 条目存在则恢复 ref 条目
+- `status="removed"` → 不恢复
+
+**为什么保留 replaced-by/removed 条目而不直接删除**：
+- 保留失效记录可防止"重新做出已废弃的决策"
+- 体积极小（每条 ≤ 100 字），不构成膨胀风险
+- 如 principles.xml 条目超过 max=16，优先清理 removed 条目
+
+### Merge + 失效的完整规则
+
+```
+principles.xml（旧） + v19 Knowledge（当前） → principles.xml（新）
+```
+
+| 场景 | 行为 |
+|------|------|
+| 旧有(active) + 新有 | 保留（去重），reason 以新为准 |
+| 旧有(active) + 新无 | 保留（未使用 ≠ 无效） |
+| 旧有(replaced-by) + 新有同内容 | 升级为 active，更新 reason |
+| 旧无 + 新有 | 新增 |
+| 旧有(active) + 新有矛盾内容 | 旧条目标记 replaced-by |
+
+## 恢复机制
+
+### 三级恢复策略
+
+SessionStart 时，根据 **LLM 相关性判断** 自动选择恢复策略：
+
+| 判断结果 | 策略 | 行为 |
+|---------|------|------|
+| 高相关 | **Auto**（自动恢复） | Principles + pending-decision 全部恢复 |
+| 中相关 | **Prompt**（提示确认） | 显示快照摘要，询问是否恢复 |
+| 低相关 / 无关 | **Ignore**（忽略） | 不恢复，不提示 |
+
+### 相关性判断：LLM Judgement
+
+语义相关性无法用数值公式客观定义，这是 LLM 擅长的事。不伪造数值评分。
+
+**判断 Prompt**：
+
+```
+Given:
+- Current topic: {用户第一条消息的核心主题}
+- Pending decision: {workspace.xml 中的 pending-decision}
+- Principles summary: {principles.xml 中 active 条目的摘要}
+
+Output one of:
+- HIGH: same project, same module, or direct dependency
+- MEDIUM: same project, different module, shared tech stack
+- LOW: different project or unrelated domain
+```
+
+**映射**：
+
+| LLM 输出 | 策略 |
+|----------|------|
+| HIGH | Auto |
+| MEDIUM | Prompt |
+| LOW | Ignore |
+
+**为什么不用数值评分**：
+- "主题重叠 × 3 + 实体重叠 × 2"看似精确，实则每个维度都无法客观定义
+- 不同模型对"主题重叠"判断不同，数值不可复现
+- LLM 天然擅长语义相关性判断，直接用 LLM Judgement 更可靠
+
+### 恢复注入格式
+
+**Auto 恢复**（直接注入）：
+
+```
+[attention-workspace] 自动恢复工作上下文（高相关）：
+
+<restored-principles>
 Selection 与 Document 分离
 使用 Observer
-[stale] 使用 WeakMap 作为缓存
-</restored-knowledge>
-```
+Plugin.destroy 作为 dispose 时机
+使用 WeakMap 作为缓存
+</restored-principles>
 
-**清理规则**：
-- 每次 save 时：检查 Knowledge 条目年龄，expired 条目从快照中删除
-- 每次 restore 时：如果整个快照 > 72h 且无 Decision，删除整个快照文件
-- archive 保留最近 5 个，更早的自动删除
-
-## 恢复注入格式
-
-新对话开始时，将快照内容注入上下文：
-
-```
-[attention-persistence] 上次对话工作记忆快照（保存于 {saved-at}）：
-
-<restored-decision>
-{decision 内容}
-</restored-decision>
-
-<restored-knowledge>
-{knowledge 条目，stale 条目标注 [stale]}
-</restored-knowledge>
+<pending-decision>
+Observer 生命周期如何管理
+</pending-decision>
 
 <restored-state>
-doing: {state.doing}
-until: {state.until}
+doing: 验证 Plugin.destroy 覆盖范围
+until: 覆盖所有销毁路径
 </restored-state>
 
-<restored-evidence-summary>
-上次推理证据（仅供参考，不作为当前 Evidence）：
-{evidence 摘要}
-</restored-evidence-summary>
-
-请根据当前对话上下文决定是否采纳以上恢复的记忆。stale 条目可能已过时，请验证后决定是否保留。
+请判断：pending-decision 是否仍需继续？Principles 条目是否仍 relevant？不相关的请忽略。
 ```
 
-## 恢复后的 v19 行为
+**Prompt 恢复**（提示确认）：
 
-1. **Knowledge 恢复**：恢复的条目进入 `<knowledge>` 区域，受 max=8 约束，与新生成条目统一受 relevance-first 规则管理
-2. **Decision 恢复**：恢复的 Decision 进入 `<decision>` 区域，新对话可替换
-3. **State 恢复**：恢复的 State 进入 `<state>` 区域，Decision 被替换时 State 自然失效
-4. **Evidence 不恢复**：`<evidence>` 区域从空开始，按 v19 原有规则收集
-5. **恢复的记忆是"建议"**：Claude 有权根据新对话上下文拒绝不相关的恢复
+```
+[attention-workspace] 检测到上次工作上下文（中相关）：
+- 未解决问题: Observer 生命周期如何管理
+- Principles: 4 条
+
+是否恢复？
+```
+
+**Ignore**：不输出任何内容。
+
+### 恢复后的 v19 行为
+
+1. **Principles 恢复**：active 条目进入 v19 `<knowledge>` 区域，受 max=8 约束，统一受 relevance-first 规则管理
+2. **pending-decision**：Agent 判断是否激活为当前 `<decision>`。如激活，State 随之恢复；如不激活，pending-decision 忽略
+3. **Evidence 不恢复**：`<evidence>` 区域从空开始，按 v19 原有规则收集
+4. **Knowledge 淘汰 = relevance-first**：与 v19 完全一致，不引入时间维度
+
+## Principles 与 MEMORY.md 的关系：Promotion
+
+Principles 条目可迁移到 MEMORY.md，但判定标准是**作用域**而非次数。
+
+### 作用域判定
+
+| 作用域 | 含义 | 归属 | 示例 |
+|--------|------|------|------|
+| **Project Scope** | 项目级架构决策 | 留在 principles.xml | Selection 与 Document 分离、使用 Observer |
+| **Global Scope** | 跨项目、跨任务、长期稳定 | Promotion → MEMORY.md | 用户偏好中文交流、项目统一采用 WeakMap 缓存策略 |
+
+**为什么不用次数判定**：
+- "3 次对话仍 relevant" 太弱：`Selection 与 Document 分离` 可能 100 次对话都 relevant，但仍是项目级 ADR，不应进入 MEMORY.md
+- MEMORY.md 应保存**跨项目通用**的知识，不是**项目内持久**的知识
+- 项目级 ADR 永远留在 principles.xml，即使它非常稳定
+
+### Promotion 规则
+
+- 判定标准：**Global Scope**（跨项目通用）→ 迁移到 MEMORY.md
+- 迁移 = **从 principles.xml 删除** + **写入 MEMORY.md**
+- 已迁移到 MEMORY.md 的条目不再出现在 principles.xml 中（避免双写/重复恢复）
+
+**对比**：
+
+| 操作 | 行为 | 问题 |
+|------|------|------|
+| ~~次数判定~~（旧方案） | 跨 3+ 次对话 → 迁移 | 项目级 ADR 被误迁出 |
+| **作用域判定**（当前方案） | Global Scope → 迁移 | 项目级 ADR 留在 principles.xml |
+
+**数据流向**：
+```
+对话中产生 Knowledge
+    ↓
+写入 principles.xml（Project Scope）
+    ↓
+作用域 = Global Scope？
+    ↓ 是
+迁移到 MEMORY.md（Promotion）
+    ↓
+从 principles.xml 删除
+```
+
+**整体记忆体系**：
+
+```
+MEMORY.md           ← Global Scope 决策（跨项目通用）
+    ↑ Promotion（Global Scope）
+principles.xml      ← Project Scope 决策（项目级 ADR + replace/remove 失效）
+    ↑ Restore
+workspace.xml       ← 短期工作上下文（pending-decision 驱动）
+    ↑ Activate
+v19 Working Memory  ← 实时工作记忆（4 组件）
+```
+
+## 保存机制：Merge + 失效
+
+save 不是全量覆盖，而是 **merge + 失效检查**。避免意外遗忘，也避免知识腐烂。
+
+### workspace.xml 保存规则
+
+workspace.xml 不需要 merge，因为它是强时效状态：
+- Decision 未解决 → 写入 pending-decision + state
+- Decision 已解决 → workspace 清空
+- 无需合并，直接覆盖
+
+### save 操作指令
+
+1. 读取当前 v19 工作记忆状态（Decision/Knowledge/Evidence/State）
+2. **workspace.xml**：直接覆盖写入
+   - Decision 未解决 → 写入 `<pending-decision>` + `<state>`
+   - Decision 已解决 → workspace 清空
+3. **principles.xml**：merge + 失效检查
+   - 读取旧 principles.xml
+   - 与 v19 当前 Knowledge 合并（去重，新 reason 覆盖旧 reason）
+   - 检查是否有矛盾：新 Knowledge 与旧 active 条目冲突 → 旧条目标记 replaced-by
+   - 写入 principles.xml
+4. 检查 Promotion 条件：Global Scope 条目迁移到 MEMORY.md，从 principles.xml 删除
+5. 检查膨胀：超过 max=16 时，优先清理 removed 条目
 
 ## Skill 命令
 
@@ -605,56 +836,54 @@ until: {state.until}
 
 | 命令 | 行为 |
 |------|------|
-| `save` | 手动保存当前工作记忆快照到 snapshot.xml |
-| `restore` | 手动从 snapshot.xml 恢复工作记忆 |
-| `status` | 查看持久化状态（上次保存时间、快照年龄、Knowledge 条目数） |
-| `clear` | 清除持久化快照（snapshot.xml 移入 archive） |
-
-### save 操作指令
-
-1. 读取当前 v19 工作记忆状态（Decision/Knowledge/Evidence/State）
-2. 判断是否有有意义的状态（Decision 存在 或 Knowledge 非空）
-3. 如果无有意义状态，跳过保存
-4. 如果旧 snapshot.xml 存在，将其移入 archive/（按 saved-at 时间戳命名）
-5. 清理 archive/ 中超过 5 个的旧快照
-6. 写入新 snapshot.xml：
-   - Knowledge 条目：保留已有的 saved-at，新增条目使用当前时间
-   - Decision：只在未解决时写入
-   - State：只在 Decision 存在时写入
-   - Evidence：只写入 evidence-summary
-7. 清理 expired Knowledge 条目（> 72h）
+| `save` | 保存当前工作上下文（workspace 覆盖，principles merge + 失效检查） |
+| `restore` | 从快照恢复工作上下文（含 LLM 相关性判断） |
+| `status` | 查看快照状态（workspace + principles） |
+| `clear` | 清除 workspace.xml |
+| `promote` | 手动触发 Principles → MEMORY.md Promotion |
+| `replace` | 手动标记条目为 replaced-by |
+| `remove` | 手动标记条目为 removed |
 
 ### restore 操作指令
 
-1. 读取 snapshot.xml
-2. 检查快照年龄：如果 > 72h 且无 Decision，删除快照并提示"快照已过期"
-3. 对 Knowledge 条目计算衰减状态（fresh/stale/expired）
-4. 删除 expired 条目并更新 snapshot.xml
-5. 按恢复注入格式输出到对话上下文
-6. Claude 自行决定是否采纳恢复的记忆
+1. 读取 workspace.xml + principles.xml（如都不存在，提示"无快照"）
+2. LLM 判断相关性（HIGH / MEDIUM / LOW）
+3. 按三级策略处理（Auto / Prompt / Ignore）
+4. pending-decision → Agent 判断是否激活为当前 Decision
+5. Principles active 条目 → 进入 v19 `<knowledge>`，replaced-by/removed 条目不恢复
 
 ### status 操作指令
 
-1. 读取 snapshot.xml（如不存在，输出"无持久化快照"）
+1. 读取 workspace.xml + principles.xml（如不存在，输出"无快照"）
 2. 输出：
-   - 上次保存时间
-   - 快照年龄
-   - Decision 状态（活跃/已解决）
-   - Knowledge 条目数及各条目状态（fresh/stale/expired）
-   - archive 中快照数
+   - pending-decision 状态（有/无）
+   - Principles 条目数（active / replaced-by / removed 分别统计）
 
 ### clear 操作指令
 
-1. 将 snapshot.xml 移入 archive/
-2. 输出"已清除持久化快照"
+1. 清除 workspace.xml
+2. principles.xml 保留（Principles 生命周期 ≠ Workspace 生命周期）
+3. 如需同时清除 principles.xml，使用 `clear --all`
 
-## 与 MEMORY.md 协作
+### promote 操作指令
 
-- attention-persistence **不写入** MEMORY.md
-- MEMORY.md **不包含**工作记忆快照
-- 两者互补：MEMORY.md = 长期知识沉淀，snapshot.xml = 短期工作状态
-- **Knowledge 沉淀规则**：Knowledge 条目跨 3+ 次对话仍 relevant → 建议用户沉淀到 MEMORY.md
-- 已沉淀到 MEMORY.md 的 Knowledge 条目不再从快照恢复（避免重复）
+1. 读取 principles.xml
+2. 识别 Global Scope 条目（跨项目通用，非项目级 ADR）
+3. 迁移到 MEMORY.md
+4. 从 principles.xml 删除已迁移条目
+5. Project Scope 条目（如 `Selection 与 Document 分离`）永远留在 principles.xml
+
+### replace 操作指令
+
+1. 指定旧条目关键词
+2. 标记 `status="replaced-by" ref="{新决策关键词}"`
+3. 保留 reason（防止重新做出已废弃的决策）
+
+### remove 操作指令
+
+1. 指定条目关键词
+2. 标记 `status="removed"`
+3. 更新 reason 为废弃原因
 
 ## 保存/恢复时机
 
@@ -662,5 +891,39 @@ until: {state.until}
 |------|------|---------|
 | 对话结束（Stop） | save | Hook 自动 / 手动 `/attention save` |
 | 上下文压缩前（PreCompact） | save | Hook 自动 |
-| 新对话开始（SessionStart） | restore | Hook 自动 / 手动 `/attention restore` |
-| 用户主动 | save/restore/status/clear | Skill 命令 |
+| 新对话开始（SessionStart） | LLM 判断 + 三级恢复 | Hook 自动 / 手动 `/attention restore` |
+| 用户主动 | save/restore/status/clear/promote/replace/remove | Skill 命令 |
+
+## 设计哲学总结
+
+**v19 是基于 relevance-first 遗忘的工作记忆模型，workspace 层遵循同一原则：**
+
+| 维度 | v19 | workspace |
+|------|-----|-----------|
+| Knowledge/Principles 遗忘 | relevance-first | relevance-first（一致） |
+| 失效机制 | 无（对话内不需要） | promote / replace / remove |
+| 知识来源 | 对话中产生 | principles.xml 恢复 + 对话中产生 |
+| 可解释性 | 对话上下文即时可追溯 | `<reason>` + `<avoid>` 跨对话可追溯 |
+| Decision 生命周期 | 存在即活跃 | 恢复为 pending-decision，Agent 决定是否激活 |
+| Decision ⇔ State | 绑定 | 绑定（workspace.xml 中一致） |
+| Evidence | 生命周期=Decision | 不持久化 |
+| 相关性判断 | 对话内自然判断 | LLM Judgement（HIGH/MEDIUM/LOW） |
+| Promotion 判定 | N/A | 作用域（Global Scope → MEMORY.md，Project Scope → 留在 principles.xml） |
+| 保存方式 | N/A | workspace 覆盖，principles merge + 失效检查 |
+
+**不引入第二套遗忘机制。**
+
+**两个运行时问题已解决**：
+1. **Principles 失效机制**：promote（迁移） / replace（替代） / remove（废弃），防止知识腐烂
+2. **relevance-first 执行机制**：LLM Judgement 替代伪数值评分，语义相关性让语义模型判断
+
+**记忆体系完整链路**：
+```
+MEMORY.md       ← Global Scope（跨项目通用，作用域判定 Promotion）
+    ↑ Promotion
+principles.xml  ← Project Scope（项目级 ADR + reason/avoid + replace/remove 失效）
+    ↑ Restore
+workspace.xml   ← 短期（pending-decision 驱动，覆盖保存）
+    ↑ Activate
+v19 Working Memory ← 实时（4 组件，relevance-first 遗忘）
+```
