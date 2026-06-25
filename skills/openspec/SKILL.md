@@ -356,21 +356,147 @@ The system SHALL {behavior}.
 - ✅ 可观察的行为、输入/输出/错误条件、外部约束
 - ❌ 内部类/函数名、库/框架选择、逐步实现细节
 
-## 与 software-development-workflow 的关系
+## 与 software-development-workflow 的协作
 
-两者在不同维度互补，可组合使用：
+两者在不同维度互补，可独立使用也可组合使用。
+
+### 维度对比
 
 | 维度 | OpenSpec | software-development-workflow |
 | --- | --- | --- |
-| 核心定位 | 变更管理结构 | 开发流程策略 |
-| 提供什么 | change folder + delta specs + archive | 需求开发/变更/修复/分析/优化 五种模式 |
+| 核心定位 | **变更管理结构** — 管理变更的生命周期 | **开发流程策略** — 决定走哪种开发模式 |
+| 提供什么 | change folder + delta specs + archive 循环 | 需求开发/变更/修复/分析/优化 五种模式 |
 | 文档容器 | `openspec/changes/{name}/` | `docs/requirements/` `docs/design/` 等 |
 | 流程控制 | explore → propose → apply → verify → archive | 文档先行 → 用户确认 → 按文档编码 |
+| 核心价值 | Delta 描述差异，适合存量项目迭代 | 文档先行，适合从零到一的规范开发 |
+| Specs 作用 | 行为契约 + 自动合并 | 无对应概念（文档是执行依据） |
 
-**组合使用建议**：
-- OpenSpec 的 change 结构作为文档容器
-- software-development-workflow 的流程模式决定执行策略
-- 两者不冲突，按项目需要选择或组合
+### 协作模式
+
+#### 模式 A：独立使用（默认）
+
+- **OpenSpec 独立**：项目已有 OpenSpec CLI，使用 explore → propose → apply → verify → archive 全流程
+- **sdw 独立**：项目未引入 OpenSpec，使用 sdw 的五种模式（需求开发/变更/修复/分析/优化）
+
+#### 模式 B：OpenSpec 为主，sdw 辅助
+
+**适用场景**：项目已采用 OpenSpec，但需要 sdw 的模式判断能力
+
+```
+用户发起任务
+  ↓
+sdw 模式判断（三问验证）→ 确定走哪种模式
+  ↓
+OpenSpec explore → 确认方向
+  ↓
+OpenSpec propose → 创建变更提案（制品放入 openspec/changes/）
+  ↓
+OpenSpec apply → 按文档实施
+  ↓
+OpenSpec verify → 验证实现
+  ↓
+OpenSpec archive → 归档
+```
+
+**映射关系**：
+
+| sdw 模式 | OpenSpec 操作 | 制品映射 |
+| --- | --- | --- |
+| 完整需求开发 | propose（scope=新模块） | proposal.md ≈ 需求说明书，design.md ≈ 设计说明书，tasks.md ≈ 详细设计 |
+| 功能变更 | propose（scope=现有模块修改） | proposal.md ≈ 变更计划，delta specs 描述变更差异 |
+| 问题修复 | propose（scope=bug fix） | proposal.md ≈ 问题分析文档，delta specs 描述修复后的行为变化 |
+| 技术分析 | explore（只读） | 无制品产出，纯对话分析 |
+| 方案优化 | explore + propose | explore 输出方案对比，propose 创建选中的方案 |
+
+#### 模式 C：sdw 为主，OpenSpec 辅助
+
+**适用场景**：项目以 sdw 为主流程，但需要 OpenSpec 的 delta specs 和变更追踪能力
+
+```
+用户发起任务
+  ↓
+sdw 模式判断 → 确定走哪种模式
+  ↓
+sdw 执行流程（文档先行）
+  ↓
+OpenSpec sync → 将 sdw 产出的文档同步到 openspec/specs/ 作为行为真相
+  ↓
+（下次变更时，OpenSpec 的 delta specs 基于 openspec/specs/ 描述差异）
+```
+
+**文档同步映射**：
+
+| sdw 文档 | OpenSpec spec 对应 |
+| --- | --- |
+| `docs/requirements/{主题}-需求说明书.md` | `openspec/specs/{domain}/spec.md` 的 Requirements |
+| `docs/design/{主题}-设计说明书.md` | `openspec/changes/{name}/design.md` |
+| `docs/changes/{主题}.md` | `openspec/changes/{name}/proposal.md` + delta specs |
+| `docs/bugs/{问题}.md` | `openspec/changes/fix-{bug}/proposal.md` + delta specs |
+
+### 协作决策
+
+```
+项目是否已安装 OpenSpec CLI？
+  ├── 是 → 项目是否已使用 sdw？
+  │       ├── 是 → 使用模式 B（OpenSpec 为主，sdw 辅助模式判断）
+  │       └── 否 → 使用 OpenSpec 独立流程
+  └── 否 → 使用 sdw 独立流程
+```
+
+## 与 attention-maintenance 的协作
+
+attention-maintenance 维护**短期工作记忆**（Decision/Knowledge/Evidence/State），OpenSpec 管理**变更持久化结构**（specs/changes/archive）。两者分别解决"对话中的注意力保持"和"跨对话的知识沉淀"。
+
+### 维度对比
+
+| 维度 | attention-maintenance | OpenSpec |
+| --- | --- | --- |
+| 时间跨度 | 单次对话会话内 | 跨对话会话 |
+| 生命周期 | Decision 消失 → Evidence 清空 | Archive → specs 永久保留 |
+| 核心问题 | 当前在解决什么？推理依据？ | 系统当前行为是什么？变更差异？ |
+| 信息密度 | 极简（4 组件，Knowledge≤8, Evidence≤5） | 完整（proposal+design+tasks+delta） |
+| 存储位置 | 对话上下文中（非文件） | `openspec/` 目录（文件） |
+
+### 协作方式：工作记忆 ↔ 持久化结构
+
+**核心原则**：attention-maintenance 管推理过程，OpenSpec 管推理结论的沉淀。
+
+```
+对话内推理（attention-maintenance）       跨对话持久化（OpenSpec）
+┌─────────────────────────┐            ┌─────────────────────────┐
+│ <decision>              │            │ openspec/changes/{name}/│
+│ 如何实现暗黑模式切换     │            │ proposal.md             │
+│ </decision>             │   沉淀     │ design.md               │
+│                         │ ────────►  │ tasks.md                │
+│ <knowledge>             │            │ specs/ui/spec.md        │
+│ CSS variables 方案      │            │                         │
+│ 系统偏好检测可行        │            │ openspec/specs/          │
+│ </knowledge>            │   载入     │ ui/spec.md              │
+│                         │ ◄────────  │                         │
+│ <evidence>              │            │                         │
+│ [constraint] 无新依赖   │            │                         │
+│ [fact] 浏览器支持       │            │                         │
+│ </evidence>             │            │                         │
+└─────────────────────────┘            └─────────────────────────┘
+```
+
+### 各工作流中的协作映射
+
+| OpenSpec 工作流 | attention-maintenance 角色 | 协作动作 |
+| --- | --- | --- |
+| **Explore** | Decision=探索方向，Evidence 收集方案对比证据 | Explore 结论 → 准备 Propose 时，Knowledge 中的结论融入 proposal.md |
+| **Propose** | Decision=变更范围/方案选择，Evidence 收集约束和事实 | Knowledge 结论 → 写入 proposal.md 的 Intent/Scope；Evidence 中的 constraint → 写入 design.md 的 Architecture Decisions |
+| **Apply** | Decision=当前 task 的实现问题，State.doing=正在实现的 task | State.doing 与 tasks.md 的当前 checkbox 对齐；Knowledge 中实现相关的结论 → 指导编码 |
+| **Verify** | Decision=验证中发现的问题，Evidence 收集验证证据 | Verify 的 CRITICAL/WARNING → 新 Decision + Evidence 驱动修复 |
+| **Archive** | Decision 消失（变更完成），Evidence 清空 | Knowledge 中的最终结论已沉淀在 specs/ 中，无需人工迁移 |
+
+### 关键规则
+
+1. **Decision 对齐变更**：OpenSpec 活跃变更期间，`<decision>` 应与当前变更的核心问题对齐
+2. **Knowledge 与 Specs 互补**：Knowledge 存推理前提（为什么选 A 不选 B），specs 存行为契约（系统应该怎样）。两者不重复
+3. **State.doing 与 tasks.md 对齐**：`State.doing` 应与 `tasks.md` 中当前正在实施的 task 一致
+4. **Archive 触发清空**：Archive 完成后，Decision 消失 + Evidence 清空，Knowledge 保留与下一变更相关的条目
+5. **新对话载入**：新对话开始时，从 `openspec/specs/` 和活跃 `changes/` 的制品中提取关键信息填入 Knowledge
 
 ## 检查清单
 

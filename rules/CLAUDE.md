@@ -57,7 +57,23 @@
 
 **边界判断**：不确定是否需要文档时，用 `AskUserQuestion` 询问用户。
 
-**文档路径**：由 `software-development-workflow` skill 统一定义，详见该 skill 的文档路径规范。
+### 文档管理方式选择
+
+**项目已安装 OpenSpec CLI 时**，优先使用 `openspec` skill 的变更管理结构：
+
+| 操作 | OpenSpec 路径 | 说明 |
+|------|--------------|------|
+| 创建变更 | `openspec/changes/{name}/` | 一个变更 = 一个文件夹 |
+| 提案 | `openspec/changes/{name}/proposal.md` | 为什么做 + 范围 |
+| 设计 | `openspec/changes/{name}/design.md` | 技术方案 |
+| 任务 | `openspec/changes/{name}/tasks.md` | 实施清单 |
+| 行为变更 | `openspec/changes/{name}/specs/{domain}/spec.md` | Delta specs（ADDED/MODIFIED/REMOVED） |
+| 系统真相 | `openspec/specs/{domain}/spec.md` | 当前行为的权威来源 |
+| 归档 | `openspec/changes/archive/YYYY-MM-DD-{name}/` | 完成后合并 delta + 归档 |
+
+**工作流**：`explore → propose → apply → verify → archive`，详见 `openspec` skill。
+
+**项目未安装 OpenSpec CLI 时**，使用 `software-development-workflow` skill 的文档路径：
 
 | 场景     | 文档路径                                                    | 作用         |
 | -------- | ----------------------------------------------------------- | ------------ |
@@ -68,6 +84,8 @@
 | 问题修复 | `docs/bugs/{日期}-{问题}.md`                               | 定义修什么   |
 | 分析报告 | `docs/analysis/{模块}-分析报告.md`                         | 记录分析结果 |
 | 方案优化 | `docs/solution-optimization/{日期}-{主题}.md`              | 定义优化路径 |
+
+**两者协作**：OpenSpec 提供变更管理结构（delta specs + archive），sdw 提供开发流程策略（模式判断 + 文档先行），按项目情况选择或组合。
 
 ## 开发流程
 
@@ -83,8 +101,11 @@
 
 **模式判断**：不确定走哪种流程时，参考 skill 中的"模式判断"和"三问验证"。
 
+**OpenSpec 项目**：项目已安装 OpenSpec CLI 时，sdw 的模式判断结果映射到 OpenSpec 工作流——技术分析对应 `explore`，其余模式对应 `propose`，详见 `openspec` skill 的协作映射表。
+
 ## 技术场景 Skills（按需触发）
 
+- **规范驱动开发**：参考 `openspec`（项目已安装 OpenSpec CLI 时，使用 explore→propose→apply→verify→archive 工作流管理变更）
 - React/Next.js 代码：参考 `react-best-practices`
 - React Native/Expo 代码：参考 `react-native-skills`
 - 页面过渡动画：参考 `react-view-transitions`
