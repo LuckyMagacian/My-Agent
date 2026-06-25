@@ -1,6 +1,6 @@
 ---
 name: attention-maintenance
-description: "短期上下文维护系统 v19：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集。"
+description: "短期上下文维护系统 v19 + persistence：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集 + 跨对话持久化快照。"
 ---
 
 # 短期上下文维护系统 v19
@@ -437,3 +437,230 @@ Current Action
 - v17:   5 组件，语义精炼
 - v18:   5 组件，语义对齐
 - v19:   4 组件，MVP Stable Version
+
+---
+
+# attention-persistence：脱离内存的短期记忆模块
+
+## 设计目标
+
+**解决**：v19 工作记忆纯对话内维护，对话结束即消失，下次对话需重新建立上下文。
+
+**定位**：v19 的独立外挂层，不修改 v19 的 4 组件结构。类比 CPU L1 cache（v19）与磁盘 swap（persistence）。
+
+**原则**：
+- 持久化的是"工作记忆快照"，不是项目档案
+- 恢复的记忆是"建议"，Claude 有权拒绝不相关的恢复
+- 不改变 v19 的任何规则（max 限制、生命周期、relevance-first）
+
+## 持久化范围
+
+| 组件 | 持久化策略 | 理由 |
+|------|-----------|------|
+| Knowledge | 全量持久化 | 跨对话最有价值，是推理前提 |
+| Decision | 条件持久化（未解决时） | Decision 已消失 = 问题已解决，无需持久化 |
+| State | 条件持久化（与 Decision 绑定） | Decision 不存在时 State 无持久化价值 |
+| Evidence | 不持久化，保留摘要 | Evidence 生命周期=Decision 生命周期，跨对话后来源标记可能失效 |
+
+## 存储位置
+
+```
+skills/attention-maintenance/persistence/
+  snapshot.xml                    # 当前工作记忆快照
+  archive/                        # 历史快照归档（保留最近 5 个）
+    2026-06-25T19-30-00.xml
+```
+
+## snapshot.xml 格式
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<attention-snapshot version="1.0">
+  <meta>
+    <saved-at>2026-06-25T19:30:00+08:00</saved-at>
+    <session-id>abc123</session-id>
+    <decision-active>true</decision-active>
+    <knowledge-count>4</knowledge-count>
+  </meta>
+
+  <!-- Decision: 只在未解决时存在 -->
+  <decision>
+  Observer 生命周期如何管理
+  </decision>
+
+  <!-- Knowledge: 全量持久化，每条带 saved-at 用于衰减计算 -->
+  <knowledge>
+  <item saved-at="2026-06-25T10:00:00+08:00">Selection 与 Document 分离</item>
+  <item saved-at="2026-06-25T14:00:00+08:00">使用 Observer</item>
+  <item saved-at="2026-06-25T16:00:00+08:00">Plugin.destroy 作为 dispose 时机</item>
+  <item saved-at="2026-06-25T18:00:00+08:00">使用 WeakMap 作为缓存</item>
+  </knowledge>
+
+  <!-- State: 与 Decision 绑定，Decision 存在时才有 -->
+  <state>
+  doing: 验证 Plugin.destroy 覆盖范围
+  until: 覆盖所有销毁路径
+  </state>
+
+  <!-- Evidence 摘要: 仅供参考，不参与 v19 Evidence 机制，不占 max=5 位置 -->
+  <evidence-summary count="3">
+  [constraint] 必须兼容 Tiptap Extension API
+  [fact] Plugin 有 destroy 生命周期
+  [hypothesis] Observer 导致泄漏
+  </evidence-summary>
+</attention-snapshot>
+```
+
+### Decision 已解决时的快照
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<attention-snapshot version="1.0">
+  <meta>
+    <saved-at>2026-06-25T20:00:00+08:00</saved-at>
+    <session-id>def456</session-id>
+    <decision-active>false</decision-active>
+    <knowledge-count>5</knowledge-count>
+  </meta>
+
+  <!-- Decision 不存在：问题已解决 -->
+
+  <knowledge>
+  <item saved-at="2026-06-25T10:00:00+08:00">Selection 与 Document 分离</item>
+  <item saved-at="2026-06-25T14:00:00+08:00">使用 Observer</item>
+  <item saved-at="2026-06-25T16:00:00+08:00">Plugin.destroy 作为 dispose 时机</item>
+  <item saved-at="2026-06-25T18:00:00+08:00">使用 WeakMap 作为缓存</item>
+  <item saved-at="2026-06-25T20:00:00+08:00">Observer 需在 Plugin.destroy 中清理</item>
+  </knowledge>
+
+  <!-- State 不持久化：Decision 已解决 -->
+
+  <!-- Evidence 摘要为空：Decision 消失后 Evidence 自动清空 -->
+  <evidence-summary count="0">
+  </evidence-summary>
+</attention-snapshot>
+```
+
+## 衰减规则
+
+| Knowledge 条目年龄 | 状态 | 恢复行为 |
+|---|---|---|
+| < 24h | fresh | 正常注入 v19 Knowledge |
+| 24h - 72h | stale | 注入时标注 `[stale]`，Claude 自行判断是否保留 |
+| > 72h | expired | 不注入，从快照中删除 |
+
+**stale 标注示例**：
+```xml
+<restored-knowledge>
+Selection 与 Document 分离
+使用 Observer
+[stale] 使用 WeakMap 作为缓存
+</restored-knowledge>
+```
+
+**清理规则**：
+- 每次 save 时：检查 Knowledge 条目年龄，expired 条目从快照中删除
+- 每次 restore 时：如果整个快照 > 72h 且无 Decision，删除整个快照文件
+- archive 保留最近 5 个，更早的自动删除
+
+## 恢复注入格式
+
+新对话开始时，将快照内容注入上下文：
+
+```
+[attention-persistence] 上次对话工作记忆快照（保存于 {saved-at}）：
+
+<restored-decision>
+{decision 内容}
+</restored-decision>
+
+<restored-knowledge>
+{knowledge 条目，stale 条目标注 [stale]}
+</restored-knowledge>
+
+<restored-state>
+doing: {state.doing}
+until: {state.until}
+</restored-state>
+
+<restored-evidence-summary>
+上次推理证据（仅供参考，不作为当前 Evidence）：
+{evidence 摘要}
+</restored-evidence-summary>
+
+请根据当前对话上下文决定是否采纳以上恢复的记忆。stale 条目可能已过时，请验证后决定是否保留。
+```
+
+## 恢复后的 v19 行为
+
+1. **Knowledge 恢复**：恢复的条目进入 `<knowledge>` 区域，受 max=8 约束，与新生成条目统一受 relevance-first 规则管理
+2. **Decision 恢复**：恢复的 Decision 进入 `<decision>` 区域，新对话可替换
+3. **State 恢复**：恢复的 State 进入 `<state>` 区域，Decision 被替换时 State 自然失效
+4. **Evidence 不恢复**：`<evidence>` 区域从空开始，按 v19 原有规则收集
+5. **恢复的记忆是"建议"**：Claude 有权根据新对话上下文拒绝不相关的恢复
+
+## Skill 命令
+
+通过 Skill tool 触发，args 传入命令名：
+
+| 命令 | 行为 |
+|------|------|
+| `save` | 手动保存当前工作记忆快照到 snapshot.xml |
+| `restore` | 手动从 snapshot.xml 恢复工作记忆 |
+| `status` | 查看持久化状态（上次保存时间、快照年龄、Knowledge 条目数） |
+| `clear` | 清除持久化快照（snapshot.xml 移入 archive） |
+
+### save 操作指令
+
+1. 读取当前 v19 工作记忆状态（Decision/Knowledge/Evidence/State）
+2. 判断是否有有意义的状态（Decision 存在 或 Knowledge 非空）
+3. 如果无有意义状态，跳过保存
+4. 如果旧 snapshot.xml 存在，将其移入 archive/（按 saved-at 时间戳命名）
+5. 清理 archive/ 中超过 5 个的旧快照
+6. 写入新 snapshot.xml：
+   - Knowledge 条目：保留已有的 saved-at，新增条目使用当前时间
+   - Decision：只在未解决时写入
+   - State：只在 Decision 存在时写入
+   - Evidence：只写入 evidence-summary
+7. 清理 expired Knowledge 条目（> 72h）
+
+### restore 操作指令
+
+1. 读取 snapshot.xml
+2. 检查快照年龄：如果 > 72h 且无 Decision，删除快照并提示"快照已过期"
+3. 对 Knowledge 条目计算衰减状态（fresh/stale/expired）
+4. 删除 expired 条目并更新 snapshot.xml
+5. 按恢复注入格式输出到对话上下文
+6. Claude 自行决定是否采纳恢复的记忆
+
+### status 操作指令
+
+1. 读取 snapshot.xml（如不存在，输出"无持久化快照"）
+2. 输出：
+   - 上次保存时间
+   - 快照年龄
+   - Decision 状态（活跃/已解决）
+   - Knowledge 条目数及各条目状态（fresh/stale/expired）
+   - archive 中快照数
+
+### clear 操作指令
+
+1. 将 snapshot.xml 移入 archive/
+2. 输出"已清除持久化快照"
+
+## 与 MEMORY.md 协作
+
+- attention-persistence **不写入** MEMORY.md
+- MEMORY.md **不包含**工作记忆快照
+- 两者互补：MEMORY.md = 长期知识沉淀，snapshot.xml = 短期工作状态
+- **Knowledge 沉淀规则**：Knowledge 条目跨 3+ 次对话仍 relevant → 建议用户沉淀到 MEMORY.md
+- 已沉淀到 MEMORY.md 的 Knowledge 条目不再从快照恢复（避免重复）
+
+## 保存/恢复时机
+
+| 时机 | 操作 | 触发方式 |
+|------|------|---------|
+| 对话结束（Stop） | save | Hook 自动 / 手动 `/attention save` |
+| 上下文压缩前（PreCompact） | save | Hook 自动 |
+| 新对话开始（SessionStart） | restore | Hook 自动 / 手动 `/attention restore` |
+| 用户主动 | save/restore/status/clear | Skill 命令 |
