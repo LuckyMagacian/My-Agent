@@ -1,0 +1,34 @@
+{
+  "source_url": "https://prosemirror.net/docs/",
+  "domain": "prosemirror.net",
+  "framework": "traditional-ssr",
+  "content_selector": "article",
+  "sidebar_selector": "nav#toc",
+  "header_selector": "header nav",
+  "discovered_at": "2026-06-29T14:00:00Z",
+  "total_pages": 2,
+  "pages": [
+    {
+      "url": "https://prosemirror.net/docs/",
+      "path": "/docs/",
+      "title_en": "ProseMirror Docs",
+      "title_zh": "ProseMirror 文档",
+      "category": "docs",
+      "depth": 0,
+      "status": "translated",
+      "output_file": "docs/index.html",
+      "translated_at": "2026-06-29T14:10:00Z"
+    },
+    {
+      "url": "https://prosemirror.net/docs/guide/",
+      "path": "/docs/guide/",
+      "title_en": "ProseMirror Guide",
+      "title_zh": "ProseMirror 指南",
+      "category": "docs",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "docs/guide.html",
+      "translated_at": "2026-06-29T14:20:00Z"
+    }
+  ]
+}
