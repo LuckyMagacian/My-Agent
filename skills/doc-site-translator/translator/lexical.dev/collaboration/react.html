@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaboration (React) | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-warning {
+      background: #fff5f5;
+      border-left: 4px solid #e53e3e;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-warning-title {
+      font-weight: 600;
+      color: #e53e3e;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/collaboration/react">Lexical 官方文档 Collaboration (React) 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/collaboration/react">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » Collaboration » React
+  </nav>
+
+  <main>
+    <header>
+      <h1>Collaboration (React)</h1>
+    </header>
+
+    <p>本指南将帮助您在 React 应用中使用 Lexical 设置实时协作编辑功能。</p>
+
+    <h2 id="getting-started">
+      快速开始
+      <a href="#getting-started" class="hash-link">#</a>
+    </h2>
+
+    <p>要在 React 中启用协作编辑，请安装必要的依赖项：</p>
+
+    <pre><code class="language-bash">$ npm i -S @lexical/react @lexical/yjs lexical react react-dom y-websocket yjs</code></pre>
+
+    <h2 id="websocket-server">
+      启动 WebSocket 服务器
+      <a href="#websocket-server" class="hash-link">#</a>
+    </h2>
+
+    <p>运行 WebSocket 服务器以启用不同浏览器客户端之间的通信。此设置使用 y-websocket，并支持持久化以在服务器重启之间保存 Yjs 文档：</p>
+
+    <pre><code class="language-bash">$ HOST=localhost PORT=1234 YPERSISTENCE=./yjs-wss-db npx y-websocket</code></pre>
+
+    <h2 id="basic-setup">
+      基本设置
+      <a href="#basic-setup" class="hash-link">#</a>
+    </h2>
+
+    <p>在 React 中设置协作编辑器时，<code>editorState</code> 应在 <code>LexicalComposer</code> 配置中初始化为 <code>null</code>。这表示 collaboration plugin 管理编辑器的初始状态，防止冲突。</p>
+
+    <pre><code class="language-jsx">import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {ContentEditable} from '@lexical/react/LexicalContentEditable';
+import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
+import {WebsocketProvider} from 'y-websocket';
+import {Doc} from 'yjs';
+
+const initialConfig = {
+  namespace: 'CollaborativeEditor',
+  editorState: null,  // 重要：让 collaboration plugin 管理初始状态
+  theme,
+  onError,
+};
+
+function createProvider(id, yjsDocMap) {
+  const doc = new Doc();
+  yjsDocMap.set(id, doc);
+  return new WebsocketProvider('ws://localhost:1234', id, doc);
+}
+
+function CollaborativeEditor() {
+  return (
+    &lt;LexicalComposer initialConfig={initialConfig}&gt;
+      &lt;RichTextPlugin
+        contentEditable={&lt;ContentEditable /&gt;}
+        placeholder={&lt;div&gt;开始协作编辑...&lt;/div&gt;}
+      /&gt;
+      &lt;CollaborationPlugin
+        id="my-document"
+        providerFactory={createProvider}
+        shouldBootstrap={true}
+        username="Alice"
+        cursorColor="#FF0000"
+      /&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <h2 id="yjs-providers">
+      Yjs Providers
+      <a href="#yjs-providers" class="hash-link">#</a>
+    </h2>
+
+    <p>Yjs providers 处理客户端通信、awareness 管理和离线数据存储的复杂性，使它们成为协作应用的理想起点。您可以在 Yjs 官网找到官方推荐的 providers 列表。</p>
+
+    <p>常用的 providers 包括：</p>
+
+    <ul>
+      <li><strong>y-websocket</strong> - 基于 WebSocket 的 provider，适合实时协作</li>
+      <li><strong>y-indexeddb</strong> - 浏览器本地持久化，支持离线编辑</li>
+      <li><strong>WebrtcProvider</strong> - 基于 WebRTC 的点对点通信</li>
+      <li><strong>Hocuspocus</strong> - 企业级 WebSocket 服务器</li>
+    </ul>
+
+    <h2 id="collaboration-plugin-options">
+      CollaborationPlugin 参数
+      <a href="#collaboration-plugin-options" class="hash-link">#</a>
+    </h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>参数</th>
+          <th>类型</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>id</code></td>
+          <td><code>string</code></td>
+          <td>文档唯一标识符</td>
+        </tr>
+        <tr>
+          <td><code>providerFactory</code></td>
+          <td><code>function</code></td>
+          <td>创建 Yjs provider 的工厂函数</td>
+        </tr>
+        <tr>
+          <td><code>shouldBootstrap</code></td>
+          <td><code>boolean</code></td>
+          <td>是否在连接时初始化文档内容</td>
+        </tr>
+        <tr>
+          <td><code>username</code></td>
+          <td><code>string</code></td>
+          <td>当前用户的显示名称</td>
+        </tr>
+        <tr>
+          <td><code>cursorColor</code></td>
+          <td><code>string</code></td>
+          <td>当前用户的光标颜色</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="cursors">
+      远程光标
+      <a href="#cursors" class="hash-link">#</a>
+    </h2>
+
+    <p><code>CollaborationPlugin</code> 会自动渲染远程用户的光标和选区。每个用户的光标颜色可以通过 <code>cursorColor</code> 参数设置，用户名通过 <code>username</code> 参数显示。</p>
+
+    <h2 id="collaboration-context">
+      Collaboration Context
+      <a href="#collaboration-context" class="hash-link">#</a>
+    </h2>
+
+    <p>Collaboration context 提供用户相关信息和 Yjs 文档映射：</p>
+
+    <pre><code class="language-typescript">interface CollaborationContextType {
+  color: string;           // 用户光标颜色
+  isCollabActive: boolean; // 协作是否激活
+  name: string;            // 用户名称
+  yjsDocMap: Map&lt;string, Doc&gt;;  // Yjs 文档映射
+}</code></pre>
+
+    <h2 id="commands">
+      协作相关命令
+      <a href="#commands" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical Yjs 提供了一些命令来控制连接状态：</p>
+
+    <ul>
+      <li><code>TOGGLE_CONNECT_COMMAND</code> - 切换 Yjs provider 的连接状态</li>
+      <li><code>CONNECTED_COMMAND</code> - 指示 Yjs provider 是否已连接</li>
+    </ul>
+
+    <pre><code class="language-jsx">// 断开连接
+editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, false);
+
+// 重新连接
+editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, true);</code></pre>
+
+    <h2 id="binding">
+      Yjs Binding
+      <a href="#binding" class="hash-link">#</a>
+    </h2>
+
+    <p><code>createBinding()</code> 函数初始化并返回一个 Yjs binding 实例。此 binding 将 Lexical 编辑器连接到 Yjs 文档，实现实时协作。</p>
+
+    <pre><code class="language-jsx">import {createBinding} from '@lexical/yjs';
+
+const binding = createBinding(
+  editor,      // Lexical editor 实例
+  provider,    // Yjs provider 实例
+  id,          // 唯一标识符
+  doc,         // Yjs 文档
+  docMap,      // 文档映射
+  excludedProperties  // 可选：排除同步的属性
+);</code></pre>
+
+    <h2 id="experimental-v2">
+      实验性 V2 Binding
+      <a href="#experimental-v2" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 提供了实验性的 V2 binding，用于更高效的同步：</p>
+
+    <pre><code class="language-jsx">&lt;CollaborationPluginV2__EXPERIMENTAL
+  // V2 特定参数
+/&gt;</code></pre>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">⚠️ 注意</div>
+      <p>V2 binding 是实验性功能，API 可能会在未来版本中更改。</p>
+    </div>
+
+    <h2 id="building-plugins">
+      构建协作 Plugins
+      <a href="#building-plugins" class="hash-link">#</a>
+    </h2>
+
+    <p>虽然 Lexical Playground 的协作 plugins 不是生产就绪的，但它们可以作为 Lexical 协作能力的优秀示例，并为开发提供坚实的起点。</p>
+
+    <h2 id="undo-redo">
+      协作撤销/重做
+      <a href="#undo-redo" class="hash-link">#</a>
+    </h2>
+
+    <p><code>CollaborationPlugin</code> 提供协作撤销/重做历史。在协作环境中，timeout 对撤销合并至关重要，通常间隔为 1 到 5 秒。较长的 timeout 可以改善用户体验，特别是在协作环境中，通过为输入提供更多时间并减少其他客户端编辑的干扰。</p>
+
+    <h2 id="history">
+      历史记录设置
+      <a href="#history" class="hash-link">#</a>
+    </h2>
+
+    <p>Timeouts 对撤销合并至关重要，间隔通常在 1 到 5 秒之间。较长的 timeout 可以改善用户体验，特别是在协作环境中，通过允许更多时间进行输入并减少其他客户端编辑带来的干扰。适当的 timeout 持续时间取决于用户期望和协作功能。</p>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>Extensions 促进不同 extensions 之间的功能共享和增强，例如集成协作工具或添加 markdown 导入/导出能力。它们提供特定于 extension 的 context，范围限定到一个编辑器，克服了旧版 plugins 的限制和 React context providers 所需的严格层级结构。</p>
+    </div>
+
+    <h2 id="next-steps">
+      相关资源
+      <a href="#next-steps" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="faq.html">Collaboration FAQ</a> - 协作功能常见问题</li>
+      <li><a href="../packages/lexical-yjs.html">@lexical/yjs</a> - Yjs binding 包文档</li>
+      <li><a href="../react/plugins.html#collaboration-plugin">CollaborationPlugin</a> - React plugin 文档</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/collaboration/react.md" target="_blank">编辑此页</a> |
+      <a href="faq.html">下一篇：Collaboration FAQ</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@lexical/table | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/packages/lexical-table">原文</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/packages/lexical-table">原文</a> 为准。
+  </div>
+
+  <!-- 面包屑导航 -->
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
+    <ul>
+      <li><a href="https://lexical.dev/"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li>
+      <li><span>包（Packages）</span></li>
+      <li><span class="active">@lexical/table</span></li>
+    </ul>
+  </nav>
+
+  <!-- 目录 -->
+  <div class="toc">
+    <h3>本页目录</h3>
+    <ul>
+      <li><a href="#installation">安装</a></li>
+      <li><a href="#usage">使用</a></li>
+      <li><a href="#features">功能</a></li>
+      <li><a href="#limitations">限制</a></li>
+    </ul>
+  </div>
+
+  <!-- 主内容 -->
+  <main>
+    <article class="markdown">
+      <header>
+        <h1><code>@lexical/table</code></h1>
+      </header>
+
+      <p><a href="https://lexical.dev/docs/api/modules/lexical_table" target="_blank" rel="noopener noreferrer"><img src="https://lexical.dev/img/see-api-documentation.svg" alt="查看 API 文档"></a></p>
+
+      <p>此包包含 Lexical 表格功能的相关实现。</p>
+
+      <h1>Lexical 表格插件</h1>
+
+      <p>用于在 Lexical 中处理表格的插件。</p>
+
+      <h2 id="installation">安装<a href="#installation" class="hash-link" aria-label="安装的直接链接">​</a></h2>
+
+      <div class="code-block">
+        <pre><code class="language-bash">npm install @lexical/table @lexical/react</code></pre>
+      </div>
+
+      <h2 id="usage">使用<a href="#usage" class="hash-link" aria-label="使用的直接链接">​</a></h2>
+
+      <p>请参阅 <a href="https://github.com/facebook/lexical/tree/main/examples/react-table" target="_blank" rel="noopener noreferrer">react-table 示例</a>，这是一个使用此包以及 <code>@lexical/react/LexicalTablePlugin</code> 中 <a href="https://lexical.dev/docs/api/modules/lexical_react_LexicalTablePlugin" target="_blank" rel="noopener noreferrer">TablePlugin</a> 的最小示例。</p>
+
+      <p><a href="https://stackblitz.com/github/facebook/lexical/tree/main/examples/react-table?file=src/main.tsx" target="_blank" rel="noopener noreferrer"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="在 StackBlitz 中打开"></a></p>
+
+      <h2 id="features">功能<a href="#features" class="hash-link" aria-label="功能的直接链接">​</a></h2>
+
+      <h3 id="tables">表格<a href="#tables" class="hash-link" aria-label="表格的直接链接">​</a></h3>
+
+      <ul>
+        <li>创建和编辑具有可自定义行列的表格</li>
+        <li>支持表头</li>
+        <li>单元格选择和导航</li>
+        <li>复制和粘贴支持</li>
+      </ul>
+
+      <h3 id="limitations">限制<a href="#limitations" class="hash-link" aria-label="限制的直接链接">​</a></h3>
+
+      <h4 id="nested-tables">嵌套表格<a href="#nested-tables" class="hash-link" aria-label="嵌套表格的直接链接">​</a></h4>
+
+      <p>编辑器不支持嵌套表格（表格单元内的表格）。强制执行以下行为：</p>
+
+      <ol>
+        <li>尝试在现有表格单元内粘贴表格时，粘贴操作会被阻止。</li>
+        <li>编辑器会主动阻止通过 UI 或编程方式创建嵌套表格。</li>
+      </ol>
+
+      <p><strong>注意：</strong>当粘贴包含嵌套表格的 HTML 内容时，嵌套内容默认会被移除。如果需要以某种形式保留这些内容，请确保实现适当的 <code>importDOM</code> 处理。</p>
+
+      <p>这种方法允许你：</p>
+
+      <ol>
+        <li>检测导入 HTML 中的嵌套表格</li>
+        <li>在内容被移除之前提取其内容</li>
+        <li>以适合你用例的格式保留内容</li>
+      </ol>
+
+      <p>选择最适合你需求的方法：</p>
+
+      <ul>
+        <li>将嵌套表格扁平化为单个表格</li>
+        <li>将嵌套表格转换为其他格式（如列表或段落）</li>
+        <li>将嵌套内容存储为元数据以供后续处理</li>
+      </ul>
+    </article>
+  </main>
+
+  <!-- 页面导航 -->
+  <nav class="page-nav">
+    <div class="prev">
+      <span>上一页</span>
+      <a href="lexical-selection.html">@lexical/selection</a>
+    </div>
+    <div class="next">
+      <span>下一页</span>
+      <a href="lexical-tailwind.html">@lexical/tailwind</a>
+    </div>
+  </nav>
+
+  <!-- 页脚 -->
+  <footer>
+    <p>Copyright © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。</p>
+    <p>
+      <a href="https://opensource.fb.com/legal/privacy/" target="_blank" rel="noopener noreferrer">隐私政策</a> |
+      <a href="https://opensource.fb.com/legal/terms/" target="_blank" rel="noopener noreferrer">使用条款</a>
+    </p>
+    <p><a href="https://github.com/facebook/lexical/tree/main/packages/lexical-table/README.md" target="_blank" rel="noopener noreferrer">编辑此页</a></p>
+  </footer>
+</body>
+</html>

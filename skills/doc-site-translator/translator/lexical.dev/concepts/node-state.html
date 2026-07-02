@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NodeState | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .admonition-tip { background: #f0fff4; border-left: 4px solid #38a169; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-tip-title { font-weight: 600; color: #38a169; margin-bottom: 0.5rem; }
+    .admonition-info { background: #e7f5ff; border-left: 4px solid #0366d6; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-info-title { font-weight: 600; color: #0366d6; margin-bottom: 0.5rem; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/node-state">Lexical 官方文档 NodeState 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/node-state">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » NodeState
+  </nav>
+
+  <main>
+    <header>
+      <h1>NodeState</h1>
+    </header>
+
+    <p>在 v0.26.0 中引入的 NodeState API 允许以参与协调、历史和 JSON 序列化的方式向任何节点临时添加任意状态。</p>
+
+    <h2 id="use-case">Use Case <a href="#use-case" class="hash-link">#</a></h2>
+
+    <p>NodeState 允许您的应用程序定义可以存储在任何节点上的键，并自动支持 JSON，您甚至可以向根节点添加状态以存储文档级元数据。</p>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>您甚至可以向 RootNode 添加节点状态以存储文档级元数据，这在以前是完全不可能的！</p>
+    </div>
+
+    <p>结合 NodeState 和其他 API（如 <a href="listeners.html">Listeners</a> 或 <a href="transforms.html">Transforms</a>），您可能无需进行太多 <a href="nodes.html#creating-custom-nodes">Node Customization</a> 就能塑造编辑器以满足您的需求。</p>
+
+    <p>即使在子类化节点时，使用 NodeState 而不是额外属性来存储节点数据可能更高效，并且可以避免在构造函数、updateFromJSON 和 exportJSON 中编写大量样板代码。</p>
+
+    <h2 id="usage">Usage <a href="#usage" class="hash-link">#</a></h2>
+
+    <h3 id="createstate">createState <a href="#createstate" class="hash-link">#</a></h3>
+
+    <p><code>createState</code> 创建一个 <code>StateConfig</code>，定义您的 NodeState 值的键和配置。键必须是本地唯一的，如果要在同一节点上使用，两个不同的 StateConfig 不能有相同的字符串键。</p>
+
+    <p>典型用法如下所示：</p>
+
+    <pre><code class="language-ts">const questionState = createState('question', {
+  parse: (v) => (typeof v === 'string' ? v : ''),
+});</code></pre>
+
+    <p>必需的 <code>parse</code> 函数有两个目的：</p>
+    <ul>
+      <li>它提供了一种类型安全和运行时安全的方式来解析序列化为 JSON 的值</li>
+      <li>当用 <code>undefined</code>（或任何无效值）调用时，它应返回某个默认值（可能是 <code>undefined</code> 或 <code>null</code> 或您选择的任何其他值）</li>
+    </ul>
+
+    <p>在这种情况下，问题必须是字符串，默认值为空字符串。</p>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>我们建议为您使用的数据类型构建小型可重用解析函数库，或者使用可以生成它们的库，如 <a href="https://zod.dev/">zod</a>、<a href="https://arktype.io/">ArkType</a>、<a href="https://effect.website/">Effect</a>、<a href="https://valibot.dev/">Valibot</a> 等，特别是在处理非原始数据类型时。</p>
+    </div>
+
+    <h3 id="getstate">$getState <a href="#getstate" class="hash-link">#</a></h3>
+
+    <p><code>$getState</code> 从给定节点获取 NodeState 值，如果该键从未在节点上设置，则返回默认值。</p>
+
+    <pre><code class="language-ts">const question = $getState(pollNode, questionState);</code></pre>
+
+    <p>另请参阅 <code>$getStateChange</code>，如果您需要一种高效的方法来确定同一节点的两个版本上的状态是否已更改（通常用于 updateDOM，但在更新监听器或变更监听器中可能有用）。</p>
+
+    <h3 id="setstate">$setState <a href="#setstate" class="hash-link">#</a></h3>
+
+    <p><code>$setState</code> 在给定节点上设置 NodeState 值。</p>
+
+    <pre><code class="language-ts">const question = $setState(
+  pollNode,
+  questionState,
+  'Are you planning to use NodeState?',
+);</code></pre>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>最后一个参数是 ValueOrUpdater，就像 React 的 useState setter。如果您使用更新器函数且值没有更改，节点及其 NodeState <em>不会</em>被标记为脏。</p>
+    </div>
+
+    <h2 id="serialization">Serialization <a href="#serialization" class="hash-link">#</a></h2>
+
+    <p>节点的 NodeState（如果有任何值设置为非默认值）会被序列化为 <code>NODE_STATE_KEY</code>（等于 <code>"$"</code>）下的记录。</p>
+
+    <pre><code class="language-json">{
+  "type": "poll",
+  "$": {
+    "question": "Are you planning to use NodeState?"
+  }
+}</code></pre>
+
+    <h2 id="efficiency">Efficiency <a href="#efficiency" class="hash-link">#</a></h2>
+
+    <p>NodeState 使用写时复制方案来管理每个节点的状态。如果没有任何状态更改，则 NodeState 实例将在该节点的多个版本之间共享。</p>
+
+    <div class="admonition-info">
+      <div class="admonition-info-title">ℹ️ 信息</div>
+      <p>在给定的协调周期中，第一次通过 <code>getWritable()</code> 将 Lexical 节点标记为脏时，将创建该节点的新实例。前一版本的所有属性都设置在新实例上。NodeState 作为单个属性存储，在 NodeState 本身被标记为可写之前，不会进行内部状态的复制。</p>
+    </div>
+
+    <p>序列化为 JSON 时，只有当值不等于默认值时，每个键才会被存储。这可以节省大量空间和带宽。</p>
+
+    <h2 id="capabilities">Capabilities <a href="#capabilities" class="hash-link">#</a></h2>
+
+    <p>当前：</p>
+    <ul>
+      <li>允许您定义并向任何节点添加状态</li>
+      <li>自动在节点的 JSON 中序列化该状态，支持版本控制和复制+粘贴</li>
+      <li>与协调器一起工作，具有不同状态的 TextNodes 不会被隐式合并</li>
+      <li>@lexical/yjs 支持，NodeState 将像任何其他属性一样自动同步</li>
+    </ul>
+
+    <p>未来：</p>
+    <ul>
+      <li>尚不支持与 Yjs 的直接集成，例如您不能将 Y.Map 存储为 NodeState 值</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/node-state.md" target="_blank">编辑此页</a> |
+      <a href="node-replacement.html">上一篇：Node Replacement</a> |
+      <a href="named-slots.html">下一篇：Named Slots</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

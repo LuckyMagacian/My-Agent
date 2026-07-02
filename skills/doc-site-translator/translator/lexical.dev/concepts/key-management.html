@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key Management | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+    th { background: #f6f8fa; font-weight: 600; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/key-management">Lexical 官方文档 Key Management 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/key-management">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Key Management
+  </nav>
+
+  <main>
+    <header>
+      <h1>Key Management</h1>
+    </header>
+
+    <p>Keys 是 Lexical 中的基本概念，用于实现高效的状态管理和节点跟踪。理解 keys 的工作方式对于构建可靠的编辑器实现至关重要。</p>
+
+    <h2 id="what-are-keys">What are Keys? <a href="#what-are-keys" class="hash-link">#</a></h2>
+
+    <p><code>__key</code> 属性是分配给 Lexical 编辑器中每个节点的唯一标识符。这些 keys：</p>
+    <ul>
+      <li>由 Lexical 自动生成</li>
+      <li>用于在编辑器状态中跟踪节点</li>
+      <li>对状态管理和更新至关重要</li>
+      <li>在节点的生命周期中不可变</li>
+    </ul>
+
+    <h2 id="when-to-use-key">When to Use <code>key</code>? <a href="#when-to-use-key" class="hash-link">#</a></h2>
+
+    <h3 id="correct-usage">✅ Correct Usage <a href="#correct-usage" class="hash-link">#</a></h3>
+
+    <p>Keys 应仅在两种特定情况下使用：</p>
+
+    <ul>
+      <li><strong>在节点构造函数中</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">class MyCustomNode extends ElementNode {
+  constructor(someData: string, key?: NodeKey) {
+    super(key); // Correctly passing key to parent constructor
+    this.__someData = someData;
+  }
+}</code></pre>
+
+    <ul>
+      <li><strong>在 Static Clone 方法中</strong></li>
+    </ul>
+
+    <h3 id="incorrect-usage">❌ Incorrect Usage <a href="#incorrect-usage" class="hash-link">#</a></h3>
+
+    <p>永远不要在这些情况下使用 keys：</p>
+
+    <pre><code class="language-ts">// ❌ Don't pass keys between different nodes
+const newNode = new MyCustomNode(existingNode.__key);
+
+// ❌ Don't manipulate keys directly
+node.__key = 'custom-key';</code></pre>
+
+    <h2 id="how-lexical-uses-keys">How Lexical Uses Keys <a href="#how-lexical-uses-keys" class="hash-link">#</a></h2>
+
+    <p>EditorState 维护一个 <code>NodeMap</code> 来跟踪所有节点。节点使用其内部指针中的 keys 相互引用：</p>
+
+    <pre><code class="language-ts">// Internal node structure (not for direct usage)
+{
+  __prev: null | NodeKey,
+  __next: null | NodeKey,
+  __parent: null | NodeKey,
+  // __first, __last and __size are only for ElementNode to track its children
+  __first: null | NodeKey,
+  __last: null | NodeKey,
+  __size: number,
+}</code></pre>
+
+    <h3 id="key-related-apis">Key-Related APIs <a href="#key-related-apis" class="hash-link">#</a></h3>
+
+    <ul>
+      <li><strong>Editor Methods</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">// Get node by key
+const node = editor.getElementByKey(key);
+const node = $getNodeByKey(key);
+
+// Get latest version of a node
+const latest = node.getLatest();
+
+// Get mutable version for updates
+const mutable = node.getWritable();</code></pre>
+
+    <h3 id="key-lifecycle">Key Lifecycle <a href="#key-lifecycle" class="hash-link">#</a></h3>
+
+    <p>NodeKeys 是短暂的，具有几个重要特征：</p>
+
+    <ul>
+      <li><strong>序列化</strong>
+        <ul>
+          <li>Keys 从不序列化</li>
+          <li>反序列化（从 JSON/HTML）时会生成新 keys</li>
+          <li>Keys 仅在其 EditorState 实例内有意义</li>
+        </ul>
+      </li>
+      <li><strong>唯一性</strong>
+        <ul>
+          <li>Keys 在 EditorState 内唯一</li>
+          <li>当前实现使用序列号用于调试</li>
+          <li>应被视为随机且不透明的值</li>
+          <li>从不逻辑上重用</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2 id="common-pitfalls">Common Pitfalls <a href="#common-pitfalls" class="hash-link">#</a></h2>
+
+    <ul>
+      <li><strong>Key Reuse</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">// ❌ Never do this
+function duplicateNode(node: LexicalNode) {
+  return new SameNodeType(data, node.__key);
+}</code></pre>
+
+    <ul>
+      <li><strong>Manual Key Assignment</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">// ❌ Never do this
+node.__key = generateCustomKey();</code></pre>
+
+    <ul>
+      <li><strong>Incorrect Constructor/Clone Implementation</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">// ❌ Never do this - missing key in constructor
+class MyCustomNode extends ElementNode {
+  constructor(someData: string) {
+    super(); // Missing key parameter
+    this.__someData = someData;
+  }
+}
+
+// ✅ Correct implementation
+class MyCustomNode extends ElementNode {
+  __someData: string;
+  constructor(someData: string, key?: NodeKey) {
+    super(key);
+    this.__someData = someData;
+  }
+
+  static clone(node: MyCustomNode): MyCustomNode {
+    return new MyCustomNode(node.__someData, node.__key);
+  }
+}</code></pre>
+
+    <h2 id="best-practices">Best Practices <a href="#best-practices" class="hash-link">#</a></h2>
+
+    <ul>
+      <li><strong>让 Lexical 处理 Keys</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">import {$applyNodeReplacement} from 'lexical';
+
+// Create node helper function
+export function $createMyCustomNode(data: string): MyCustomNode {
+  return $applyNodeReplacement(new MyCustomNode(data));
+}</code></pre>
+
+    <h2 id="common-questions">Common Questions <a href="#common-questions" class="hash-link">#</a></h2>
+
+    <p><strong>问：如何稍后引用节点？</strong></p>
+    <p>答：存储对节点的引用。按照惯例，所有节点方法将使用 <code>getLatest()</code> 或 <code>getWritable()</code>，这将在读取或写入其属性之前查找该节点的最新版本。</p>
+
+    <p><strong>问：如何确保节点唯一？</strong></p>
+    <p>答：让 Lexical 处理 key 生成和管理。专注于节点内容和结构。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/key-management.md" target="_blank">编辑此页</a> |
+      <a href="named-slots.html">上一篇：Named Slots</a> |
+      <a href="node-cloning.html">下一篇：Node Cloning</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

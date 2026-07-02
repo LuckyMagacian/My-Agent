@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React FAQ | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/react/faq">Lexical 官方文档 React FAQ 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/react/faq">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">React</a> » FAQ
+  </nav>
+
+  <main>
+    <header>
+      <h1>React FAQ</h1>
+    </header>
+
+    <h2 id="strictmode">
+      我的应用在 dev 模式下使用 StrictMode 时无法工作，怎么办？
+      <a href="#strictmode" class="hash-link">#</a>
+    </h2>
+
+    <p>当使用 React StrictMode 与 Lexical 时，请确保您的 React hooks 使用遵循 React 的约定。在 React 19 中，<code>useMemo</code> 调用在 StrictMode 重渲染之间被缓存。如果您的 <code>useEffect</code> 有副作用，请验证它们是否已经发生，并实现清理函数。</p>
+
+    <p><code>LexicalComposer</code> 的 <code>initialConfig</code> 仅在第一次渲染时被考虑一次。优先使用像 <code>useLexicalEditable</code> 这样的 hooks，而不是手动注册 listeners，特别是当它们的来源是 effect 时，因为 listener 调用可能会受到 StrictMode 渲染行为的影响。</p>
+
+    <h3 id="strictmode-solutions">
+      解决方案
+      <a href="#strictmode-solutions" class="hash-link">#</a>
+    </h3>
+
+    <ul>
+      <li>确保所有 effect 都有正确的清理函数</li>
+      <li>不要依赖多次渲染之间的状态持久性</li>
+      <li>使用 Lexical 提供的 hooks（如 <code>useLexicalEditable</code>）而不是手动注册</li>
+      <li>验证副作用在执行前是否已经发生</li>
+    </ul>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>StrictMode 会在开发模式下双重调用某些函数（包括 effects）以帮助发现副作用问题。这是预期行为，不应在生产环境中发生。</p>
+    </div>
+
+    <h2 id="hooks-rules">
+      React Hooks 使用规则
+      <a href="#hooks-rules" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 的 <code>$</code> 前缀函数与 React Hooks 有类似的功能：</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th><em>特性</em></th>
+          <th>React Hooks</th>
+          <th>Lexical $函数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>命名约定</td>
+          <td><code>useFunction</code></td>
+          <td><code>$function</code></td>
+        </tr>
+        <tr>
+          <td>所需上下文</td>
+          <td>只能在渲染时调用</td>
+          <td>只能在 update 或 read 时调用</td>
+        </tr>
+        <tr>
+          <td>可组合</td>
+          <td>Hooks 可以调用其他 Hooks</td>
+          <td>$函数可以调用其他 $函数</td>
+        </tr>
+        <tr>
+          <td>必须同步</td>
+          <td>✅</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td>其他规则</td>
+          <td>❌ 必须以相同顺序无条件调用</td>
+          <td>✅ 无此限制</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="editor-context">
+      如何在组件外部访问 Editor？
+      <a href="#editor-context" class="hash-link">#</a>
+    </h2>
+
+    <p>使用 <code>EditorRefPlugin</code> 可以在 <code>LexicalComposer</code> 外部访问 editor 实例。这对于需要在 React 树中位于 <code>LexicalComposer</code> 外部的按钮或其他 UI 组件非常有用，这些组件需要更新或读取 EditorState。</p>
+
+    <pre><code class="language-jsx">&lt;LexicalComposer initialConfig={initialConfig}&gt;
+  &lt;RichTextPlugin ... /&gt;
+  &lt;EditorRefPlugin
+    editorRef={(instance) => {
+      // 将 editor 实例存储到外部变量或 ref
+      myEditorRef.current = instance;
+    }}
+  /&gt;
+&lt;/LexicalComposer&gt;
+
+// 在其他组件中使用
+function ExternalToolbar() {
+  const handleClick = () => {
+    myEditorRef.current?.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
+  };
+  return &lt;button onClick={handleClick}&gt;Bold&lt;/button&gt;;
+}</code></pre>
+
+    <h2 id="lazy-loading">
+      如何延迟加载 Plugins？
+      <a href="#lazy-loading" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical React plugins 是 React 组件，这使得它们高度可组合。您可以使用 React 的 <code>lazy</code> 和 <code>Suspense</code> 延迟加载 plugins：</p>
+
+    <pre><code class="language-jsx">import {lazy, Suspense} from 'react';
+
+const HeavyPlugin = lazy(() => import('./HeavyPlugin'));
+
+function Editor() {
+  return (
+    &lt;LexicalComposer initialConfig={initialConfig}&gt;
+      &lt;RichTextPlugin ... /&gt;
+      &lt;Suspense fallback={null}&gt;
+        &lt;HeavyPlugin /&gt;
+      &lt;/Suspense&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <h2 id="re-renders">
+      如何避免不必要的重渲染？
+      <a href="#re-renders" class="hash-link">#</a>
+    </h2>
+
+    <p>当使用 Lexical 与 React 时，您可能会遇到不必要的重渲染问题。以下是一些优化策略：</p>
+
+    <ul>
+      <li>使用 <code>useMemo</code> 缓存传递给 plugins 的回调函数</li>
+      <li>避免在每次渲染时创建新的配置对象</li>
+      <li>使用 <code>React.memo</code> 包装频繁更新的组件</li>
+      <li>考虑使用 <code>useLexicalSubscription</code> 进行细粒度订阅</li>
+    </ul>
+
+    <h2 id="nested-composers">
+      如何处理嵌套的 LexicalComposer？
+      <a href="#nested-composers" class="hash-link">#</a>
+    </h2>
+
+    <p>当使用嵌套编辑器时，可以使用 <code>LexicalNestedComposer</code>。注意 <code>skipCollabChecks</code> 属性：如果未显式设置为 <code>true</code> 且 collaboration plugin 处于活动状态，嵌套编辑器的子组件将不会渲染，直到 collaboration 准备就绪。</p>
+
+    <pre><code class="language-jsx">&lt;LexicalNestedComposer
+  initialConfig={nestedConfig}
+  skipCollabChecks={true}  // 跳过协作准备检查
+&gt;
+  &lt;RichTextPlugin ... /&gt;
+&lt;/LexicalNestedComposer&gt;</code></pre>
+
+    <h2 id="without-jsx">
+      如何在不使用 JSX 的情况下使用 React Extensions？
+      <a href="#without-jsx" class="hash-link">#</a>
+    </h2>
+
+    <p><code>ReactPluginHostExtension</code> 允许将 React root 挂载到特定的 DOM 元素，使未使用 React 构建的应用能够利用依赖 React 的 plugins 和 extensions。这种集成不需要在应用中使用 JSX 或其他 React 基础设施（尽管它包含 React runtime）。</p>
+
+    <pre><code class="language-jsx">import {ReactPluginHostExtension} from '@lexical/react/ReactPluginHostExtension';
+import {mountReactPluginHost} from '@lexical/react/ReactPluginHostExtension';
+
+// 挂载 React host
+mountReactPluginHost(editor, container);
+
+// 然后可以挂载 React components
+mountReactPluginComponent(editor, {
+  component: MyPlugin,
+  props: {}
+});</code></pre>
+
+    <h2 id="next-steps">
+      相关资源
+      <a href="#next-steps" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="plugins.html">React Plugins</a> - 可用的内置 plugins</li>
+      <li><a href="create_plugin.html">创建 React Plugin</a> - 创建自定义 plugins</li>
+      <li><a href="../getting-started/react.html">Getting Started with React</a> - React 快速开始指南</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/react/faq.md" target="_blank">编辑此页</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

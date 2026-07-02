@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Transforms | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+    th { background: #f6f8fa; font-weight: 600; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .admonition-warning { background: #fff8e1; border-left: 4px solid #f5a623; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-warning-title { font-weight: 600; color: #f5a623; margin-bottom: 0.5rem; }
+    .admonition-info { background: #e7f5ff; border-left: 4px solid #0366d6; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-info-title { font-weight: 600; color: #0366d6; margin-bottom: 0.5rem; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/transforms">Lexical 官方文档 Node Transforms 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/transforms">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Node Transforms
+  </nav>
+
+  <main>
+    <header>
+      <h1>Node Transforms</h1>
+    </header>
+
+    <p>Transforms 是响应 EditorState 更改的最有效机制。</p>
+
+    <p>例如：</p>
+    <ul>
+      <li>用户输入一个字符，如果单词现在等于 "congrats"，您想要将单词变成蓝色。</li>
+      <li>我们程序化地向编辑器添加一个 <code>MentionNode</code>，<code>MentionNode</code> 立即在另一个 <code>MentionNode</code> 旁边（<code>nodeA nodeB</code>）。由于我们认为这使提及难以阅读，我们想要销毁/替换两个提及并将它们渲染为普通 TextNode。</li>
+    </ul>
+
+    <pre><code class="language-ts">const removeTransform = editor.registerNodeTransform(TextNode, (textNode) => {
+  if (textNode.getTextContent() === 'blue') {
+    textNode.setTextContent('green');
+  }
+});</code></pre>
+
+    <h2 id="syntax">Syntax <a href="#syntax" class="hash-link">#</a></h2>
+
+    <h2 id="lifecycle">Lifecycle <a href="#lifecycle" class="hash-link">#</a></h2>
+
+    <p>Transforms 在更改传播到 DOM 之前按顺序执行，多个 transforms 仍然只导致单个 DOM 协调（Lexical 生命周期中最昂贵的操作）。</p>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">⚠️ 警告</div>
+      <p>虽然可以通过 update listener 后跟 update 来实现相同或非常相似的结果，但这强烈不建议，因为它会触发额外的渲染（最昂贵的生命周期操作）。此外，每个周期创建一个全新的 <code>EditorState</code> 对象，如果处理不当可能会干扰像 HistoryPlugin（undo-redo）这样的插件。</p>
+    </div>
+
+    <h3 id="dirty-nodes">Dirty Nodes <a href="#dirty-nodes" class="hash-link">#</a></h3>
+
+    <p><em>Dirty Leaves</em>（任何不是 ElementNode 的 LexicalNode）和 <em>Dirty Elements</em> 分开跟踪以支持 transform 启发式方法。</p>
+
+    <p>内部上，脏节点有两种状态：</p>
+    <ul>
+      <li><strong>Intentionally Dirty</strong> 节点（叶或元素）调用了 <code>getWritable()</code> 或 <code>markDirty()</code>（别名）。维护 lexical 文档的双向链表树结构要求此 Intentionally Dirty 状态传播到直接兄弟，在某些情况下传播到父节点。</li>
+      <li><strong>Unintentionally Dirty</strong> Element 节点是脏节点的祖先，没有被显式标记为 Intentionally Dirty。只有元素可以是 Unintentionally Dirty，因为叶节点根据定义不能有子节点。</li>
+    </ul>
+
+    <p>协调器从 RootNode 开始工作（它是任何附着节点的祖先，因此每当任何附着节点脏时总是脏的）。Intentionally Dirty 节点调用其 createDOM 和/或 updateDOM。Dirty Elements 协调其所有子节点。因此，协调在没有脏节点的子树中的最高节点停止（除非它以标志运行以进行完全协调，将所有节点视为 Intentionally Dirty）。</li>
+
+    <div class="admonition-info">
+      <div class="admonition-info-title">ℹ️ 信息</div>
+      <p>transform 启发式方法依赖这些内部实现细节来找到不再需要 transforms 的固定点。</p>
+    </div>
+
+    <h3 id="transform-heuristic">Transform heuristic <a href="#transform-heuristic" class="hash-link">#</a></h3>
+
+    <ol>
+      <li>我们首先转换叶节点。如果 transforms 生成额外的脏节点，我们重复步骤 1 和 2。这背后的原因是标记叶节点为脏也会将其所有父元素标记为脏。</li>
+      <li>我们转换元素。如果元素 transforms 生成额外的脏节点，我们重复步骤 1 和 2。如果元素 transforms 只生成额外的脏元素，我们只重复步骤 2。</li>
+    </ol>
+
+    <p>节点在对其、其子节点或兄弟节点进行任何（或大多数）修改时将被标记为脏。</p>
+
+    <h2 id="preconditions">Preconditions <a href="#preconditions" class="hash-link">#</a></h2>
+
+    <p>Preconditions 对于防止 transforms 多次运行并最终导致无限循环至关重要。</p>
+
+    <p>Transforms 设计为在节点被修改（即 Intentionally Dirty）时运行。大多数情况下，transforms 只需要在更新后运行一次，但 transforms 的顺序性质可能产生顺序偏差。因此，transforms 反复运行，直到此特定类型的节点不再被任何 transforms 标记为 intentionally dirty。</p>
+
+    <p>因此，我们必须确保 transforms 不必要地将节点标记为脏。</p>
+
+    <pre><code class="language-ts">// When a TextNode changes (marked as dirty) make it bold
+editor.registerNodeTransform(TextNode, textNode => {
+  // Important: Check current format state
+  if (!textNode.hasFormat('bold')) {
+    textNode.toggleFormat('bold');
+  }
+});</code></pre>
+
+    <p>但很多时候，顺序不重要。下面的内容总是会以两个 transforms 的结果结束：</p>
+
+    <pre><code class="language-ts">// Plugin 1
+editor.registerNodeTransform(TextNode, textNode => {
+  // This transform runs twice but does nothing the first time because it doesn't meet the preconditions
+  if (textNode.getTextContent() === 'modified') {
+    textNode.setTextContent('re-modified');
+  }
+})
+
+// Plugin 2
+editor.registerNodeTransform(TextNode, textNode => {
+  // This transform runs only once
+  if (textNode.getTextContent() === 'original') {
+    textNode.setTextContent('modified');
+  }
+})
+
+// App
+editor.addListener('update', ({editorState}) => {
+  const text = editorState.read($textContent);
+  // text === 're-modified'
+});</code></pre>
+
+    <div class="admonition-info">
+      <div class="admonition-info-title">ℹ️ 信息</div>
+      <p>transform 启发式方法认为 <code>RootNode</code> 在任何节点脏时是 Intentionally Dirty，并确保此 transform 在所有其他 transforms 之后最后应用。这样，您可以将其视为"预更新" listener，在任何 DOM 协调发生之前发生。像任何其他 transform 一样，它可能在给定更新中被调用多次（特别是如果您的 RootNode transform 使任何节点脏）。</p>
+    </div>
+
+    <h2 id="transforms-on-parent-nodes">Transforms on parent nodes <a href="#transforms-on-parent-nodes" class="hash-link">#</a></h2>
+
+    <p>Transforms 对特定类型的节点非常具体。这适用于声明（<code>registerNodeTransform Klass</code>）和它在更新周期中触发的时间。</p>
+
+    <pre><code class="language-ts">// Won't trigger
+editor.registerNodeTransform(ParagraphNode, ..)
+
+// Will trigger as TextNode was marked dirty
+editor.registerNodeTransform(TextNode, ..)
+
+editor.update(() => {
+  const textNode = $getNodeByKey('3');
+  textNode.setTextContent('foo');
+});</code></pre>
+
+    <h2 id="examples">Examples <a href="#examples" class="hash-link">#</a></h2>
+
+    <ul>
+      <li><a href="https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/EmojisPlugin.tsx">Emojis</a></li>
+      <li><a href="https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/AutoLinkPlugin.tsx">AutoLink</a></li>
+      <li><a href="https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/HashtagPlugin.tsx">HashtagPlugin</a></li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/transforms.md" target="_blank">编辑此页</a> |
+      <a href="listeners.html">上一篇：Listeners</a> |
+      <a href="commands.html">下一篇：Commands</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

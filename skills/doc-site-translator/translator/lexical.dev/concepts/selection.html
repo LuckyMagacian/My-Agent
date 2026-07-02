@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selection | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #f5a623;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-warning-title {
+      font-weight: 600;
+      color: #f5a623;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/selection">Lexical 官方文档 Selection 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/selection">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Selection
+  </nav>
+
+  <main>
+    <header>
+      <h1>Selection</h1>
+    </header>
+
+    <h2 id="types-of-selection">
+      Selection 类型
+      <a href="#types-of-selection" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 的 Selection 是 <code>EditorState</code> 的一部分。这意味着对于每次更新或编辑器更改，Selection 始终与 <code>EditorState</code> 的节点树保持一致。</p>
+
+    <p>在 Lexical 中，有四种可能的 Selection 类型：</p>
+    <ul>
+      <li><code>RangeSelection</code></li>
+      <li><code>NodeSelection</code></li>
+      <li><code>TableSelection</code>（在 <code>@lexical/table</code> 中实现）</li>
+      <li><code>null</code></li>
+    </ul>
+
+    <p>可以实现自己的 Selection 类型来实现 <code>BaseSelection</code>，但这通常不建议。</p>
+
+    <h2 id="rangeselection">
+      RangeSelection
+      <a href="#rangeselection" class="hash-link">#</a>
+    </h2>
+
+    <p>这是最常见的 Selection 类型，是浏览器 DOM Selection 和 Range API 的规范化。<code>RangeSelection</code> 包含三个主要属性：</p>
+    <ul>
+      <li><code>anchor</code> 表示一个 <code>RangeSelection</code> 点</li>
+      <li><code>focus</code> 表示一个 <code>RangeSelection</code> 点</li>
+      <li><code>format</code> 数字位标志，表示任何活动的文本格式</li>
+    </ul>
+
+    <p><code>anchor</code> 和 <code>focus</code> 点都指向一个表示编辑器特定部分的对象。<code>RangeSelection</code> 点的主要属性是：</p>
+    <ul>
+      <li><code>key</code> 表示所选 Lexical 节点的 <code>NodeKey</code></li>
+      <li><code>offset</code> 表示在其所选 Lexical 节点内的位置。对于 <code>text</code> 类型，这是字符；对于 <code>element</code> 类型，这是 <code>ElementNode</code> 内的子索引</li>
+      <li><code>type</code> 表示 <code>element</code> 或 <code>text</code></li>
+    </ul>
+
+    <h2 id="nodeselection">
+      NodeSelection
+      <a href="#nodeselection" class="hash-link">#</a>
+    </h2>
+
+    <p>NodeSelection 表示多个任意节点的选择。例如，同时选择三个图片。</p>
+
+    <p><code>getNodes()</code> 返回一个包含所选 LexicalNodes 的数组。</p>
+
+    <h2 id="tableselection">
+      TableSelection
+      <a href="#tableselection" class="hash-link">#</a>
+    </h2>
+
+    <p>TableSelection 表示类似表格的网格选择。它存储选择发生的父节点的 key 以及起点和终点。<code>TableSelection</code> 包含三个主要属性：</p>
+    <ul>
+      <li><code>tableKey</code> 表示选择发生的父节点 key</li>
+      <li><code>anchor</code> 表示一个 <code>TableSelection</code> 点</li>
+      <li><code>focus</code> 表示一个 <code>TableSelection</code> 点</li>
+    </ul>
+
+    <p>例如，选择 row = 1 col = 1 到 row 2 col = 2 的表格可以存储为：</p>
+    <ul>
+      <li><code>tableKey = 2</code> 表格 key</li>
+      <li><code>anchor = 4</code> 表格单元格（key 可能变化）</li>
+      <li><code>focus = 10</code> 表格单元格（key 可能变化）</li>
+    </ul>
+
+    <p>注意 <code>anchor</code> 和 <code>focus</code> 点的工作方式与 <code>RangeSelection</code> 相同。</p>
+
+    <h2 id="null">
+      null
+      <a href="#null" class="hash-link">#</a>
+    </h2>
+
+    <p>这表示编辑器没有任何活动 Selection。这常见于编辑器失去焦点或 Selection 移动到页面上的另一个编辑器时。这也可能发生在尝试选择编辑器空间内的非可编辑组件时。</p>
+
+    <h2 id="working-with-selection">
+      使用 Selection
+      <a href="#working-with-selection" class="hash-link">#</a>
+    </h2>
+
+    <p>可以使用从 <code>lexical</code> 包导出的 <code>$getSelection()</code> 辅助函数找到 Selection。此函数可在 update、read 或 command listener 中使用。</p>
+
+    <pre><code class="language-js">import {$getSelection, SELECTION_CHANGE_COMMAND} from 'lexical';
+
+editor.update(() => {
+  const selection = $getSelection();
+});
+
+editorState.read(() => {
+  const selection = $getSelection();
+});
+
+// SELECTION_CHANGE_COMMAND 在 Lexical 编辑器内 Selection 更改时触发。
+editor.registerCommand(SELECTION_CHANGE_COMMAND, () => {
+  const selection = $getSelection();
+});</code></pre>
+
+    <p>在某些情况下，您可能想要创建新的 Selection 类型并将编辑器 Selection 设置为该类型。这只能在 update 或 command listener 中完成。</p>
+
+    <pre><code class="language-js">import {$setSelection, $createRangeSelection, $createNodeSelection} from 'lexical';
+
+editor.update(() => {
+  // 设置一个 range selection
+  const rangeSelection = $createRangeSelection();
+  $setSelection(rangeSelection);
+
+  // 您也可以通过调用 Lexical 节点上的某些 selection 方法
+  // 间接创建 range selection。
+  const someNode = $getNodeByKey(someKey);
+
+  // 在 element 节点上，这将创建一个类型为 "element" 的 RangeSelection，
+  // 引用与 element 内子节点相关的偏移量。
+  // 在 text 节点上，这将创建一个类型为 "text" 的 RangeSelection，
+  // 引用文本字符偏移量。
+  someNode.select();
+  someNode.selectPrevious();
+  someNode.selectNext();
+
+  // 您可以在任何节点上使用此方法。
+  someNode.selectStart();
+  someNode.selectEnd();
+
+  // 设置一个 node selection
+  const nodeSelection = $createNodeSelection();
+  // 向 selection 添加一个节点 key。
+  nodeSelection.add(someKey);
+  $setSelection(nodeSelection);
+
+  // 您也可以通过将其设置为 `null` 来清除 selection。
+  $setSelection(null);
+});</code></pre>
+
+    <h2 id="focus">
+      Focus
+      <a href="#focus" class="hash-link">#</a>
+    </h2>
+
+    <p>您可能会注意到，当您执行 <code>editor.update</code> 或 <code>editor.dispatchCommand</code> 时，如果有 selection 且编辑器是可编辑的，编辑器可以"抢夺焦点"。这是因为 Lexical selection 在协调期间被同步到 DOM selection，浏览器的焦点跟随其 DOM selection。</p>
+
+    <p>如果您想要在不更改 selection 的情况下对编辑器进行更新或派发命令，可以使用 <code>SKIP_DOM_SELECTION_TAG</code> update 标签（在 v0.22.0 中添加）：</p>
+
+    <pre><code class="language-js">// 从 editor.update 或 command listener 调用此方法
+$addUpdateTag(SKIP_DOM_SELECTION_TAG);</code></pre>
+
+    <p>如果您想要在 <code>dispatchCommand</code> 处理期间添加此标签，可以将其包装在 <code>editor.update</code> 中：</p>
+
+    <pre><code class="language-js">// 注意：如果您已经在 command listener 或 editor.update 中，
+//       *不要*嵌套第二个 editor.update！嵌套的 update 具有
+//       混乱的语义（dispatchCommand 将重新使用
+//       当前 update 而不嵌套）
+editor.update(() => {
+  $addUpdateTag(SKIP_DOM_SELECTION_TAG);
+  editor.dispatchCommand(/* … */);
+});</code></pre>
+
+    <p>如果您必须支持较旧版本的 Lexical，可以在 update 或 dispatch 期间将编辑器标记为不可编辑：</p>
+
+    <pre><code class="language-js">// 注意：此代码应该*在*您的 update 或 command listener 外部，例如
+//       直接在 DOM event listener 中
+const prevEditable = editor.isEditable();
+editor.setEditable(false);
+editor.update(
+  () => {
+    // 在此处运行您的 update 代码或 editor.dispatchCommand
+  },
+  {
+    onUpdate: () => {
+      editor.setEditable(prevEditable);
+    },
+  },
+);</code></pre>
+
+    <h2 id="reading-selection-across-a-shadow-boundary">
+      跨 Shadow Boundary 读取 Selection
+      <a href="#reading-selection-across-a-shadow-boundary" class="hash-link">#</a>
+    </h2>
+
+    <p>如果您的插件直接读取 DOM Selection —— 通过 <code>Selection.anchorNode</code>、<code>Selection.getRangeAt(0)</code> 或类似方式 —— 并且编辑器的 <code>contentEditable</code> 位于 <code>ShadowRoot</code> 内，浏览器会将这些读取重新定位到 shadow host。请参阅 <a href="shadow-dom.html">Shadow DOM 和 iframes</a> 了解 shadow-aware 的辅助函数（<code>getDOMSelectionPoints</code>、<code>getDOMSelectionRange</code> 等），它们返回未重新定位的边界点；在普通 light DOM 中它们会回退到标准读取，因此在实际将编辑器挂载到 shadow tree 之前无需做任何处理。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/selection.md" target="_blank">编辑此页</a> |
+      <a href="read-only.html">下一篇：Read Mode / Edit Mode</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>介绍 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/intro">Lexical 官方文档 Introduction 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/intro">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">介绍</a>
+  </nav>
+
+  <main>
+    <header>
+      <h1>介绍</h1>
+    </header>
+
+    <p>Lexical 是一个可扩展的 JavaScript Web 文本编辑器框架，强调可靠性、可访问性和性能。Lexical 旨在提供一流的开发者体验，让您可以轻松地原型设计和构建功能。结合高度可扩展的架构，Lexical 允许开发者创建独特的文本编辑体验，并可随着规模和功能需求的增长而扩展。</p>
+
+    <p>Lexical 通过附加到一个 <code>contentEditable</code> 元素来工作，然后您可以使用 Lexical 的声明式 API 来实现功能，而无需担心 DOM 的特定边缘情况。实际上，在大多数情况下，您几乎不需要与 DOM 直接交互（除非您构建自己的自定义节点）。</p>
+
+    <figure>
+      <img src="https://lexical.dev/img/docs/modular-design.drawio.svg" alt="模块化设计">
+      <figcaption>模块化架构允许对功能进行细粒度控制</figcaption>
+    </figure>
+
+    <p>Lexical 的核心包大小仅为 22KB（min+gzip），您只需为所需的功能付出代价。因此，Lexical 可以随着您的应用规模和需求增长而扩展。此外，在支持延迟加载的框架中，您可以将 Lexical 插件延迟到用户实际与编辑器交互时再加载——这可以极大地帮助提高性能。</p>
+
+    <h2 id="what-can-be-built-with-lexical">
+      可以用 Lexical 构建什么？
+      <a href="#what-can-be-built-with-lexical" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 让创建复杂的文本编辑体验变得容易，而使用浏览器内置工具实现这些体验通常会非常复杂。我们构建 Lexical 是为了让开发者能够快速行动，并创建能够适应特定需求的不同类型的文本体验。以下是您可以使用 Lexical 做的一些（但不是全部）示例：</p>
+
+    <ul>
+      <li>简单的纯文本编辑器，但其需求超出了 <code>&lt;textarea&gt;</code>，例如需要提及（mentions）、自定义表情符号、链接和话题标签等功能。</li>
+      <li>更复杂的富文本编辑器，可用于在博客、社交媒体和消息应用中发布内容。</li>
+      <li>功能完备的所见即所得（WYSIWYG）编辑器，可用于 CMS 或富内容编辑器。</li>
+      <li>实时协作文本编辑体验，结合了上述许多要点。</li>
+    </ul>
+
+    <p>您可以将 Lexical 视为一个文本编辑器 UI 框架。虽然 Lexical 目前仅可在 Web 上使用，但团队也在尝试为其他平台构建 Lexical 的原生版本。在 Meta，Lexical 每天为 Facebook、Workplace、Messenger、WhatsApp 和 Instagram 上数亿用户提供 Web 文本编辑体验。</p>
+
+    <h2 id="lexicals-design">
+      Lexical 的设计
+      <a href="#lexicals-design" class="hash-link">#</a>
+    </h2>
+
+    <figure>
+      <img src="https://lexical.dev/img/docs/core-conceptual-view.drawio.svg" alt="概念视图">
+    </figure>
+
+    <p>Lexical 的核心是一个无依赖的文本编辑器框架，允许开发者构建强大、简单或复杂的编辑器界面。Lexical 有几个值得探索的概念：</p>
+
+    <h3 id="editor-instances">
+      编辑器实例（Editor instances）
+      <a href="#editor-instances" class="hash-link">#</a>
+    </h3>
+
+    <p>编辑器实例是将所有内容连接在一起的核心。您可以将一个 <code>contenteditable</code> DOM 元素附加到编辑器实例，还可以注册监听器和命令。最重要的是，编辑器允许更新其 <code>EditorState</code>。您可以使用 <code>createEditor()</code> API 创建编辑器实例，但在使用框架绑定（如 <code>@lexical/react</code>）时通常无需担心，因为这已为您处理好了。</p>
+
+    <h3 id="editor-states">
+      编辑器状态（Editor States）
+      <a href="#editor-states" class="hash-link">#</a>
+    </h3>
+
+    <p>编辑器状态是表示您想在 DOM 上显示内容的基础数据模型。编辑器状态包含两部分：</p>
+
+    <ul>
+      <li>一个 Lexical 节点树（Node Tree）</li>
+      <li>一个 Lexical 选择对象（Selection object）</li>
+    </ul>
+
+    <p>编辑器状态一旦创建就不可变，要更新它，您必须通过 <code>editor.update(() => {...})</code>。但是，您也可以使用节点变换或命令处理器"钩入"现有的更新——它们作为现有更新工作流的一部分被调用，以防止更新的级联/瀑布效应。您可以使用 <code>editor.getEditorState()</code> 获取当前编辑器状态。</p>
+
+    <p>编辑器状态也可以完全序列化为 JSON，并可以使用 <code>editor.parseEditorState()</code> 轻松地序列化回编辑器。</p>
+
+    <h3 id="reading-and-updating-editor-state">
+      读取和更新编辑器状态
+      <a href="#reading-and-updating-editor-state" class="hash-link">#</a>
+    </h3>
+
+    <p>当您想要读取或更新 Lexical 节点树时，必须通过 <code>editor.update(() => {...})</code>。您也可以通过 <code>editor.read(mode, () => {...})</code> 或 <code>editor.getEditorState().read(() => {...})</code> 对编辑器状态进行只读操作。传递给更新或读取调用的闭包很重要，必须是同步的。这是您拥有活动编辑器状态完整"lexical"上下文的唯一地方，并提供对编辑器状态节点树的访问。我们提倡使用 <code>$</code> 前缀函数（如 <code>$getRoot()</code>）的约定来表明这些函数必须在此上下文中调用。尝试在读取或更新之外使用它们将触发运行时错误。</p>
+
+    <p>对于熟悉 React Hooks 的人，您可以将这些 $函数视为具有类似功能：</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th><em>特性</em></th>
+          <th>React Hooks</th>
+          <th>Lexical $函数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>命名约定</td>
+          <td><code>useFunction</code></td>
+          <td><code>$function</code></td>
+        </tr>
+        <tr>
+          <td>所需上下文</td>
+          <td>只能在渲染时调用</td>
+          <td>只能在更新或读取时调用</td>
+        </tr>
+        <tr>
+          <td>可组合</td>
+          <td>Hooks 可以调用其他 Hooks</td>
+          <td>$函数可以调用其他 $函数</td>
+        </tr>
+        <tr>
+          <td>必须同步</td>
+          <td>✅</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td>其他规则</td>
+          <td>❌ 必须以相同顺序无条件调用</td>
+          <td>✅ 无</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>节点变换和命令监听器在隐式的 <code>editor.update(() => {...})</code> 上下文中调用。</p>
+
+    <p>允许进行嵌套更新或嵌套读取，但更新绝不应嵌套在读取中。</p>
+
+    <p>强烈不建议使用嵌套更新，因为它们的执行方式非常不直观。当嵌套更新被调度时，它会立即返回且无效果，然后在父更新返回后的某个时间执行。</p>
+
+    <p>读取可以嵌套，也可以在更新内部调用（例如读取节点的先前版本），但您不应在更新内部调用 <code>editor.read(...)</code> 或 <code>editor.read('force-commit', ...)</code>，因为它会立即刷新更新，该更新中的任何额外代码可能会抛出错误。</p>
+
+    <p>所有 Lexical 节点都依赖于关联的编辑器状态。除少数例外，您只应在读取或更新调用中调用 Lexical 节点的方法和访问其属性（就像 <code>$</code> 函数）。Lexical 节点上的方法将首先尝试使用节点的唯一键从活动编辑器状态中定位节点的最新（可能是可写）版本。逻辑节点的所有版本都具有相同的键。这些键由编辑器管理，仅在运行时存在（不序列化），应被视为随机且不透明的（不要编写假设键具有硬编码值的测试）。</p>
+
+    <p>这样做是因为编辑器状态的节点树在协调后被递归冻结，以支持高效的时间旅行（撤销/重做和类似用例）。更新节点的方法首先调用 <code>node.getWritable()</code>，它将创建冻结节点的可写克隆。这通常意味着任何现有引用（如局部变量）将引用节点的旧版本，但让 Lexical 节点始终引用编辑器状态可以实现更简单且不易出错的数据模型。</p>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>如果您使用 <code>editor.read(() => { /* callback */ })</code> 或 <code>editor.read('force-commit', () => { /* callback */ })</code>，它将首先刷新任何待处理的更新，因此您将始终看到一致的状态。当您在 <code>editor.update</code> 或 <code>editor.read('pending', ...)</code> 时，您将始终处理待处理状态，其中节点变换和 DOM 协调可能尚未运行。<code>editor.read('latest', ...)</code> 或 <code>editor.getEditorState().read()</code> 将使用最新协调的 <code>EditorState</code>（在任何节点变换、DOM 协调等已运行后），任何待处理的 <code>editor.update</code> 更改将尚不可见。</p>
+    </div>
+
+    <h3 id="dom-reconciler">
+      DOM 协调器（DOM Reconciler）
+      <a href="#dom-reconciler" class="hash-link">#</a>
+    </h3>
+
+    <p>Lexical 有自己的 DOM 协调器，它接受一组编辑器状态（始终是"当前"和"待处理"）并对它们应用"差异"。然后使用此差异仅更新需要更改的 DOM 部分。您可以将其视为一种虚拟 DOM，但 Lexical 能够跳过大部分差异工作，因为它知道在给定更新中更改了什么。DOM 协调器采用性能优化，有利于内容可编辑的典型启发式方法——并能够自动确保 LTR 和 RTL 语言的一致性。</p>
+
+    <h3 id="listeners-node-transforms-and-commands">
+      监听器、节点变换和命令（Listeners, Node Transforms and Commands）
+      <a href="#listeners-node-transforms-and-commands" class="hash-link">#</a>
+    </h3>
+
+    <p>除了调用更新，Lexical 的大部分工作是通过监听器、节点变换和命令完成的。这些都源于编辑器并以 <code>register</code> 前缀。另一个重要特性是所有 register 方法都返回一个函数以便轻松取消订阅。例如，以下是如何监听 Lexical 编辑器的更新：</p>
+
+    <pre><code class="language-js">const unregisterListener = editor.registerUpdateListener(({editorState}) => {
+  // 更新已发生！
+  console.log(editorState);
+});
+
+// 确保稍后移除监听器！
+unregisterListener();</code></pre>
+
+    <p>命令是 Lexical 中将所有内容连接在一起的通信系统。可以使用 <code>createCommand()</code> 创建自定义命令，并使用 <code>editor.dispatchCommand(command, payload)</code> 将其派发到编辑器。Lexical 在触发按键和其他重要信号发生时在内部派发命令。也可以使用 <code>editor.registerCommand(command, handler, priority)</code> 处理命令，传入的命令按优先级通过所有处理程序传播，直到处理程序停止传播（类似于浏览器中的事件传播）。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/intro.md" target="_blank">编辑此页</a> |
+      <a href="getting-started/quick-start.html">下一篇：快速开始（Vanilla JS）</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设计文档 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+    .language-js, .language-ts, .language-tsx, .language-json {
+      display: block;
+    }
+    .token-line {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/design">Lexical 官方文档 设计文档 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/design">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">设计文档</a>
+  </nav>
+
+  <main>
+    <header><h1>设计文档</h1></header>
+<p>另见初始 PR <a href="https://github.com/facebook/lexical/pull/7706" target="_blank" rel="noopener noreferrer" class="">#7706</a></p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="guiding-principles">指导原则<a href="#guiding-principles" class="hash-link" aria-label="Direct link to Guiding principles" title="Direct link to Guiding principles" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-boilerplate">最小化样板代码<a href="#minimize-boilerplate" class="hash-link" aria-label="Direct link to Minimize boilerplate" title="Direct link to Minimize boilerplate" translate="no">​</a></h3>
+<p>在可能的情况下，应提供合理的默认值，并且必须能够覆盖它们。这就是为什么 <code>Extension</code> 有 <code>config</code> 属性来指定初始配置。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="full-backwards-compatibility">完全向后兼容<a href="#full-backwards-compatibility" class="hash-link" aria-label="Direct link to Full backwards compatibility" title="Direct link to Full backwards compatibility" translate="no">​</a></h3>
+<p>几乎所有你在编辑器或传统 React 插件中所做的事情都应该能够正常工作。升级到使用 <code>Extension</code> 应该是一个简单的改动。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-change-required-to-add-an-extension">最小化添加 Extension 所需的改动<a href="#minimize-change-required-to-add-an-extension" class="hash-link" aria-label="Direct link to Minimize change required to add an Extension" title="Direct link to Minimize change required to add an Extension" translate="no">​</a></h3>
+<p>理想情况下，添加一个扩展应该是两三行代码：</p>
+<ul>
+<li class="">导入它</li>
+<li class="">将其作为依赖添加（如有必要则添加配置）</li>
+<li class="">添加 UI 相关代码（仅在需要时，例如必须在 DOM 的特定位置渲染）</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="avoid-invalid-states">避免无效状态<a href="#avoid-invalid-states" class="hash-link" aria-label="Direct link to Avoid invalid states" title="Direct link to Avoid invalid states" translate="no">​</a></h3>
+<p>TypeScript 在这方面有很大帮助，但它只能和 API 设计一样好。例如，将 Extension 的工作流拆分为单独的 <code>Config</code>、<code>Init</code> 和 <code>Output</code> 类型是随着时间推移而演进的。在早期的原型中，<code>Config</code> 被重载来维护所有这些状态，但这需要更多的运行时支持和类型断言来检查状态是否已在该阶段正确初始化。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="try-to-avoid-undecipherable-type-errors">尽量避免难以理解的类型错误<a href="#try-to-avoid-undecipherable-type-errors" class="hash-link" aria-label="Direct link to Try to avoid undecipherable type errors" title="Direct link to Try to avoid undecipherable type errors" translate="no">​</a></h3>
+<p>从复杂的类型表达式中生成可读的错误消息能做的有限，因此 API 的设计在可能的情况下避免了这些问题。另见 <a href="https://github.com/microsoft/TypeScript/issues/23689" target="_blank" rel="noopener noreferrer" class="">microsoft/TypeScript#23689</a>。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="inspiration">灵感来源<a href="#inspiration" class="hash-link" aria-label="Direct link to Inspiration" title="Direct link to Inspiration" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="eslint-flat-plugins"><a href="https://eslint.org/docs/latest/extend/plugin-migration-flat-config" target="_blank" rel="noopener noreferrer" class="">ESLint Flat Plugins</a><a href="#eslint-flat-plugins" class="hash-link" aria-label="Direct link to eslint-flat-plugins" title="Direct link to eslint-flat-plugins" translate="no">​</a></h3>
+<p>这些插件与本项目有许多相同的约束，当然它们用于非常不同的目的。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="mdxeditor"><a href="https://mdxeditor.dev/" target="_blank" rel="noopener noreferrer" class="">MDXEditor</a><a href="#mdxeditor" class="hash-link" aria-label="Direct link to mdxeditor" title="Direct link to mdxeditor" translate="no">​</a></h3>
+<p>这个编辑器基于 Lexical，但基于第三方状态管理库提供了自己的插件机制。这些插件并没有真正公开任何类型安全的配置。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="payloadcmsrichtext-lexical"><a href="https://www.npmjs.com/package/@payloadcms/richtext-lexical" target="_blank" rel="noopener noreferrer" class="">@payloadcms/richtext-lexical</a><a href="#payloadcmsrichtext-lexical" class="hash-link" aria-label="Direct link to payloadcmsrichtext-lexical" title="Direct link to payloadcmsrichtext-lexical" translate="no">​</a></h3>
+<p>另一个基于 Lexical 的编辑器框架，用于 <a href="https://payloadcms.com/" target="_blank" rel="noopener noreferrer" class="">Payload</a> CMS 内部。它也没有真正公开类型安全的配置，但确实似乎有很多功能，并且在延迟加载和 SSR 方面设计得很好。功能在概念上类似于 Extensions。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="effect"><a href="https://effect.website/" target="_blank" rel="noopener noreferrer" class="">Effect</a><a href="#effect" class="hash-link" aria-label="Direct link to effect" title="Direct link to effect" translate="no">​</a></h3>
+<p>这个库几乎是类型安全的最高水平，专注于组合性和可用性。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="tighter-integration-with-lexicaleditor">与 LexicalEditor 的更紧密集成<a href="#tighter-integration-with-lexicaleditor" class="hash-link" aria-label="Direct link to Tighter integration with LexicalEditor" title="Direct link to Tighter integration with LexicalEditor" translate="no">​</a></h3>
+<p>这个包最初是作为完全可选的功能进行原型的，随着采用的增加，预计 Lexical 的更多部分将直接依赖它。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="intentional-trade-offs">有意为之的权衡<a href="#intentional-trade-offs" class="hash-link" aria-label="Direct link to Intentional trade-offs" title="Direct link to Intentional trade-offs" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="no-compile-time-support-for-dependency-resolution">不支持编译时的依赖解析<a href="#no-compile-time-support-for-dependency-resolution" class="hash-link" aria-label="Direct link to No compile-time support for dependency resolution" title="Direct link to No compile-time support for dependency resolution" translate="no">​</a></h3>
+<p>目前的理论是，这需要太多的 TypeScript 来携带图中存在的所有依赖项名称列表，并且可能会给 <code>LexicalExtension</code> 添加另一个类型参数。</p>
+<p>这阻碍的功能包括：</p>
+<ul>
+<li class="">检测 Extension 冲突的编译时支持。检测两个以相同名称定义的扩展（但不是相同的对象引用，因为依赖项可以共享！）在 TypeScript 中也是相当大的工程。这由构建器在运行时自动检测。</li>
+<li class="">没有默认值的必需配置的编译时支持。扩展可以在 <code>init</code> 或 <code>register</code> 中在运行时实现此功能。</li>
+<li class="">必需的 peer dependencies 的编译时支持。这种情况的一个用例是要求由 <code>LexicalExtensionComposer</code> 或 <code>ReactPluginHost</code> 提供的 <code>RectProviderExtension</code>。扩展可以在 <code>init</code> 或 <code>register</code> 中在运行时实现此功能。</li>
+</ul>
+<p>总的来说，所有这些都已经作为运行时错误出现，在构建编辑器时提供了足够的信息来快速追踪根本原因。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="known-missing-features">已知缺失的功能<a href="#known-missing-features" class="hash-link" aria-label="Direct link to Known Missing Features" title="Direct link to Known Missing Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="direct-support-for-devtools">直接支持开发者工具<a href="#direct-support-for-devtools" class="hash-link" aria-label="Direct link to Direct support for devtools" title="Direct link to Direct support for devtools" translate="no">​</a></h3>
+<p>这是一个 TODO，基础设施的设计考虑到了这一点。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="helpers-for-working-with-nested-editors">处理嵌套编辑器的辅助工具<a href="#helpers-for-working-with-nested-editors" class="hash-link" aria-label="Direct link to Helpers for working with nested editors" title="Direct link to Helpers for working with nested editors" translate="no">​</a></h3>
+<p>目前还不完全清楚嵌套 Extension 编辑器的所有使用场景是什么，这是一个 TODO。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="documented-patterns-for-rscssrheadless">RSC/SSR/Headless 的文档化模式<a href="#documented-patterns-for-rscssrheadless" class="hash-link" aria-label="Direct link to Documented patterns for RSC/SSR/Headless" title="Direct link to Documented patterns for RSC/SSR/Headless" translate="no">​</a></h3>
+<p>拥有一个用于声明 SSR 的已知 peer dependency 可能有助于指导未来的 Extension 开发。在许多情况下，存在一些具有 React 依赖的装饰器节点，你不希望（或不能）在 SSR 上下文中渲染它们。例如，RSC 无法在当前使用 <code>React.Context</code> 的任何地方得到支持，而这正是 Lexical 中当前使用 React 的所有地方。</p>
+<p>另一个选择是为 SSR 使用场景构建单独的入口点，这更像是一个 RSC 特定的策略，但我们可以鼓励人们即使在原生 JS 或其他定制的 SSR 使用场景中也使用这些导入条件。这种策略可能难以在同一个模块中同时支持"headless"和"non-headless"。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

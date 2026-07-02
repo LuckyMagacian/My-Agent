@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commands | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+    th { background: #f6f8fa; font-weight: 600; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .admonition-note { background: #e7f5ff; border-left: 4px solid #0366d6; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-note-title { font-weight: 600; color: #0366d6; margin-bottom: 0.5rem; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/commands">Lexical 官方文档 Commands 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/commands">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Commands
+  </nav>
+
+  <main>
+    <header>
+      <h1>Commands</h1>
+    </header>
+
+    <p>Commands 是 Lexical 的一个非常强大的功能，让您可以为像 <code>click</code> 或 <code>keyDown</code> 这样的事件注册 listeners，并在<em>任何地方</em>和<em>任何方式</em>上下文响应它们。</p>
+
+    <p>此模式对于构建 <code>toolbars</code> 或复杂的 <code>mentions</code> 和 <code>links</code> 插件非常有用，如 <code>TablePlugin</code>，它需要对 <code>keydown</code>、<code>copy</code> 等进行特殊处理。</p>
+
+    <p>当注册 <code>command</code> listener 时，您提供一个 <code>priority</code> 并可以返回 <code>true</code> 以将其标记为"已处理"，这会阻止其他 listeners 接收事件。如果命令没有被您显式处理，它可能会在 <code>RichTextPlugin</code> 或 <code>PlainTextPlugin</code> 中默认处理。</p>
+
+    <h2 id="custom-commands">Custom Commands <a href="#custom-commands" class="hash-link">#</a></h2>
+
+    <p>您可以在 <code>lexical</code> 包中查看所有现有 commands，但如果您需要自己的自定义 command 用于您自己的用例，请查看类型化的 <code>createCommand</code> 函数。</p>
+
+    <pre><code class="language-ts">const HELLO_WORLD_COMMAND: LexicalCommand&lt;string&gt; = createCommand('HELLO_WORLD');
+
+editor.registerCommand(
+  HELLO_WORLD_COMMAND,
+  (payload: string) => {
+    console.log(payload); // Hello World!
+    return false;
+  },
+  COMMAND_PRIORITY_EDITOR,
+);
+
+editor.dispatchCommand(HELLO_WORLD_COMMAND, 'Hello World!');</code></pre>
+
+    <h2 id="dispatching">Dispatching <a href="#dispatching" class="hash-link">#</a></h2>
+
+    <p>Commands 可以从任何您有访问 <code>editor</code> 的地方派发，如 Toolbar Button、事件 listener 或 Plugin，但大多数核心 commands 从 <code>event listeners</code> 派发。</p>
+
+    <p>调用 <code>dispatchCommand</code> 将隐式调用 <code>editor.update()</code> 以触发其 command listeners（如果它不是从 <code>editor.update</code> 内部调用的）。</p>
+
+    <pre><code class="language-ts">editor.dispatchCommand(command, payload);</code></pre>
+
+    <p><code>payload</code> 通过 <code>LexicalCommand</code> API 类型化，但它们通常是 DOM <code>Event</code> 用于从事件 listener 派发的 commands。</p>
+
+    <p>以下是来自 <code>lexical</code> 的一些真实示例：</p>
+
+    <pre><code class="language-ts">editor.dispatchCommand(KEY_ARROW_LEFT_COMMAND, event);
+// ...
+editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');</code></pre>
+
+    <p>以及来自我们 Playground 中 <code>ToolbarPlugin</code> 的另一个示例：</p>
+
+    <pre><code class="language-ts">const formatBulletList = () => {
+  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND);
+};</code></pre>
+
+    <p>这后来在 <code>ListPlugin</code> 中处理，将列表插入编辑器：</p>
+
+    <pre><code class="language-ts">editor.registerCommand(
+  INSERT_UNORDERED_LIST_COMMAND,
+  () => {
+    $insertList('ul');
+    return true;
+  },
+  COMMAND_PRIORITY_LOW,
+);</code></pre>
+
+    <h2 id="registering">Registering <a href="#registering" class="hash-link">#</a></h2>
+
+    <p>您可以从任何有访问 <code>editor</code> 对象的地方注册 command，但重要的是当不再需要时使用其 remove listener callback 清理 listener。</p>
+
+    <p>command listener 将始终从 <code>editor.update()</code> 中调用，因此您可以使用 dollar 函数。您不应该同步从 command listener 内部使用 <code>editor.update()</code>（并且<em>永远不要</em>调用 <code>editor.read()</code> 或 <code>editor.getEditorState()</code>）。如果需要在已经进行更新后读取先前状态，调用 <code>getLatest()</code> 或 <code>node.getPreviousState()</code> 是安全的。</p>
+
+    <pre><code class="language-ts">const removeListener = editor.registerCommand(
+  COMMAND,
+  (payload) => boolean, // Return true to stop propagation.
+  priority,
+);
+
+// ...
+removeListener(); // Cleans up the listener.</code></pre>
+
+    <p>一种用于轻松清理的常见模式是在 React <code>useEffect</code> 中返回一个 <code>registerCommand</code> 调用：</p>
+
+    <pre><code class="language-ts">useEffect(() => {
+  return editor.registerCommand(
+    TOGGLE_LINK_COMMAND,
+    (payload) => {
+      const url: string | null = payload;
+      setLink(url);
+      return true;
+    },
+    COMMAND_PRIORITY_EDITOR,
+  );
+}, [editor]);</code></pre>
+
+    <p>如上面和下面所见，<code>registerCommand</code> 的 callback 可以返回 <code>true</code> 以向其他 listeners 表示命令已被处理，传播将被停止。</p>
+
+    <p>以下是处理来自 <code>KeyboardPlugin</code> 的 <code>KEY_TAB_COMMAND</code> 的简化示例，用于派发 <code>INDENT_CONTENT_COMMAND</code> 或 <code>OUTDENT_CONTENT_COMMAND</code>：</p>
+
+    <pre><code class="language-ts">editor.registerCommand(
+  KEY_TAB_COMMAND,
+  (payload) => {
+    const event: KeyboardEvent = payload;
+    event.preventDefault();
+    return editor.dispatchCommand(
+      event.shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND,
+    );
+  },
+  COMMAND_PRIORITY_EDITOR,
+);</code></pre>
+
+    <p>注意同一个 <code>KEY_TAB_COMMAND</code> command 也由 <code>TablePlugin</code> 注册，它处理将焦点移动到 <code>TableNode</code> 内的下一个或上一个单元格，但优先级很高（<code>COMMAND_PRIORITY_HIGH</code>），因为此行为非常重要。</p>
+
+    <h3 id="priorities-and-ordering">Priorities and ordering <a href="#priorities-and-ordering" class="hash-link">#</a></h3>
+
+    <p>Command listeners 按以下顺序调用，直到 listener 返回 <code>true</code>：</p>
+    <ul>
+      <li>从优先级最高到最低（critical、high、normal、low、editor）</li>
+      <li>所有 <code>COMMAND_PRIORITY_CRITICAL</code> listeners，最近注册的先调用</li>
+      <li>所有 <code>COMMAND_PRIORITY_EDITOR</code> listeners，按注册顺序</li>
+    </ul>
+
+    <div class="admonition-note">
+      <div class="admonition-note-title">📝 注意</div>
+      <p>从 v0.44.0 开始，有新的 <code>COMMAND_PRIORITY_BEFORE_*</code> 优先级可用，这使得在不提高优先级的情况下更容易覆盖默认行为。最佳实践是使用尽可能低的优先级，所以大多数 commands 将用 <code>COMMAND_PRIORITY_EDITOR</code> 注册用于默认行为，然后覆盖该行为的 commands 可以用 <code>COMMAND_PRIORITY_BEFORE_EDITOR</code> 注册。更高的优先级主要用于能够观察但不处理事件以及支持早于 <code>COMMAND_PRIORITY_BEFORE_*</code> 可用的遗留代码。</p>
+      <p>现代 lexical 应用通常只需要 <code>COMMAND_PRIORITY_EDITOR</code> 优先级，因为最后注册先调用的顺序适合几乎所有用例。没有 BEFORE 的旧优先级可以被视为遗留，主要为兼容性提供。</p>
+    </div>
+
+    <p>以下是优先级的完整排序，从最低到最高：</p>
+    <ul>
+      <li><code>COMMAND_PRIORITY_EDITOR</code></li>
+      <li><code>COMMAND_PRIORITY_BEFORE_EDITOR</code></li>
+      <li><code>COMMAND_PRIORITY_LOW</code></li>
+      <li><code>COMMAND_PRIORITY_BEFORE_LOW</code></li>
+      <li><code>COMMAND_PRIORITY_NORMAL</code></li>
+      <li><code>COMMAND_PRIORITY_BEFORE_NORMAL</code></li>
+      <li><code>COMMAND_PRIORITY_HIGH</code></li>
+      <li><code>COMMAND_PRIORITY_BEFORE_HIGH</code></li>
+      <li><code>COMMAND_PRIORITY_CRITICAL</code></li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/commands.md" target="_blank">编辑此页</a> |
+      <a href="transforms.html">上一篇：Node Transforms</a> |
+      <a href="https://lexical.dev/docs/concepts/selection">下一篇：Selection</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

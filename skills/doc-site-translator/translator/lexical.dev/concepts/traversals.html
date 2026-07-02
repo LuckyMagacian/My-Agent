@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Traversals with NodeCaret | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #f5a623;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-warning-title {
+      font-weight: 600;
+      color: #f5a623;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/traversals">Lexical 官方文档 Node Traversals with NodeCaret 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/traversals">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Node Traversals with NodeCaret
+  </nav>
+
+  <main>
+    <header>
+      <h1>Node Traversals with NodeCaret</h1>
+    </header>
+
+    <p>NodeCaret 提供了一种统一且高效的方式来遍历文档树，使正确实现遍历并避免空节点和折叠 selection 的边缘情况变得更加容易。</p>
+
+    <p>这些新的低级函数都被设计为协同工作，作为一个功能齐全且相对轻量级的 API 在核心中使用，允许我们逐步解决一些边缘情况，然后简化和缩小代码。我们期望更高级的实用程序将在 @lexical/utils 或其他模块中开发和发布。当前开销在生产环境中应小于 3kB。</p>
+
+    <p>NodeCaret API 在 lexical v0.25.0 中引入。</p>
+
+    <h2 id="concepts">
+      概念
+      <a href="#concepts" class="hash-link">#</a>
+    </h2>
+
+    <p><code>NodeCaret</code> 的核心概念是，您可以通过使用 <code>origin</code> 节点、指向相邻节点（<code>next</code> 或 <code>previous</code>）的 <code>direction</code>，以及指定箭头是指向 sibling（<code>sibling</code>）还是 child（<code>child</code>）的 <code>type</code> 来表示文档中的任何特定点。</p>
+
+    <p>所有这些类型都有一个 <code>D</code> 类型参数，必须是 <code>CaretDirection</code>，因此您不会意外混淆 <code>next</code> 和 <code>previous</code> caret。许多类型还有一个 <code>T</code> 类型参数，编码 <code>origin</code> 节点的类型。</p>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">提示</div>
+      <p>Caret 的方法被设计为操作指定方向上附加到 <code>origin</code> 的节点，而不是 <code>origin</code> 本身。例如，此代码是无操作，因为它将附加一个节点到 <code>origin</code>，然后删除刚附加的节点。</p>
+    </div>
+
+    <pre><code class="language-js">// origin 不受影响（除了被标记为 dirty）
+caret.insert($createTextNode('no-op')).remove();</code></pre>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">警告</div>
+      <p>Caret 是不可变的，设计用于低级使用。Caret 不会尝试根据文档更改自动更新（这是使用 <code>RangeSelection</code> 时常见的 bug 来源）。预期会更改文档结构的函数和方法将始终返回可能的新 caret。</p>
+    </div>
+
+    <p>Caret 的 <code>origin</code> 是构造它的对象的精确版本，该 origin 上的所有访问器方法通常会调用 <code>origin.getLatest()</code>，因此操作将看到最新版本。</p>
+
+    <h2 id="nodecaret">
+      NodeCaret
+      <a href="#nodecaret" class="hash-link">#</a>
+    </h2>
+
+    <p><code>NodeCaret</code> 是任何 <code>SiblingCaret</code> 或任何 <code>ChildCaret</code>。</p>
+
+    <p>通常使用 <code>$getChildCaretOrSelf($getSiblingCaret(origin, direction))</code> 构造，当 origin 是 <code>ElementNode</code> 时返回 <code>ChildCaret</code>。</p>
+
+    <h2 id="siblingcaret">
+      SiblingCaret
+      <a href="#siblingcaret" class="hash-link">#</a>
+    </h2>
+
+    <p><code>SiblingCaret</code> 是指向 origin sibling 的 caret。</p>
+
+    <p>使用 <code>$getSiblingCaret(origin: LexicalNode, direction: CaretDirection)</code> 构造。</p>
+
+    <p><code>next</code> 方向指向右侧，<code>previous</code> 方向指向左侧。</p>
+
+    <table>
+      <thead>
+        <tr><th>方法</th><th>→ direction: 'next'</th><th>← direction: 'previous'</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>getParentAtCaret()</code></td><td><code>origin.getParent()</code></td><td><code>origin.getParent()</code></td></tr>
+        <tr><td><code>getNodeAtCaret()</code></td><td><code>origin.getNextSibling()</code></td><td><code>origin.getPreviousSibling()</code></td></tr>
+        <tr><td><code>insert(node)</code></td><td><code>origin.insertAfter(node)</code></td><td><code>origin.insertBefore(node)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="childcaret">
+      ChildCaret
+      <a href="#childcaret" class="hash-link">#</a>
+    </h2>
+
+    <p><code>ChildCaret</code> 是指向 origin 第一个或最后一个 child 的 caret。</p>
+
+    <p>使用 <code>$getChildCaret(origin: ElementNode, direction: CaretDirection)</code> 构造。</p>
+
+    <p><code>next</code> 方向指向第一个 child，<code>previous</code> 方向指向最后一个 child。</p>
+
+    <table>
+      <thead>
+        <tr><th>方法</th><th>↘ direction: 'next'</th><th>↙ direction: 'previous'</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>getParentAtCaret()</code></td><td><code>origin</code></td><td><code>origin</code></td></tr>
+        <tr><td><code>getNodeAtCaret()</code></td><td><code>origin.getFirstChild()</code></td><td><code>origin.getLastChild()</code></td></tr>
+        <tr><td><code>insert(node)</code></td><td><code>origin.splice(0, 0, node)</code></td><td><code>origin.append(node)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="caretrange">
+      CaretRange
+      <a href="#caretrange" class="hash-link">#</a>
+    </h2>
+
+    <p><code>CaretRange</code> 包含一对指向相同方向的 <code>PointCaret</code>。它在目的上等效于 <code>RangeSelection</code>，是您通常用于深度优先遍历的内容。</p>
+
+    <p>使用 <code>$getCaretRange(anchor, focus)</code>、<code>$caretRangeFromSelection(selection)</code> 或 <code>$extendCaretToRange(anchor)</code> 构造。</p>
+
+    <ul>
+      <li><code>anchor</code> 是范围的开始，通常是 selection 的起源，它被"锚定"在原位，因为当 selection 增长或缩小时，只有 <code>focus</code> 会移动。</li>
+      <li><code>focus</code> 是范围的结束，闪烁光标所在的位置，用户当前的焦点。</li>
+    </ul>
+
+    <p>Anchor 和 focus 必须指向相同方向。<code>anchor</code> 指向范围中的第一个节点，focus 指向不在范围中的第一个节点。</p>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">警告</div>
+      <p>如果您正在迭代 <code>CaretRange</code>，您必须单独考虑 <code>getTextSlices()</code>，它们不包括在迭代中。这样您就不必在每一步都考虑 <code>TextPointCaretSlice</code>。它们是只能出现在开始和/或结束的字面边缘情况，通常有特殊处理（例如分割而不是删除）。</p>
+    </div>
+
+    <h2 id="traversal-strategies">
+      遍历策略
+      <a href="#traversal-strategies" class="hash-link">#</a>
+    </h2>
+
+    <h3 id="adjacent-caret-traversals">Adjacent Caret Traversals</h3>
+
+    <p>使用 NodeCaret 进行遍历的最低级构建块是相邻 caret 遍历，由 NodeCaret 的方法直接支持：</p>
+
+    <ul>
+      <li><code>getAdjacentCaret()</code> - 获取指定方向上附加到 <code>origin</code> 的节点的 <code>SiblingCaret</code>。如果没有附加节点，返回 <code>null</code>。</li>
+      <li><code>getParentCaret(rootMode)</code> - 获取相同方向上 <code>origin</code> 父节点的 <code>SiblingCaret</code>。如果没有父节点，或根据 <code>rootMode</code> 父节点是 root，返回 <code>null</code>。<code>rootMode</code> 可以是 <code>'root'</code> 只为 <code>RootNode</code> 返回 <code>null</code>，或 <code>'shadowRoot'</code> 为 <code>RootNode</code> 或任何 <code>isShadowRoot()</code> 返回 true 的 <code>ElementNode</code> 父节点返回 <code>null</code>。</li>
+      <li><code>getChildCaret()</code> - 获取此 origin 的 <code>ChildCaret</code>，如果 origin 不是 <code>ElementNode</code> 则返回 <code>null</code>。如果 caret 已经是 <code>ChildCaret</code>，将返回 <code>this</code>。</li>
+    </ul>
+
+    <h3 id="depth-first-caret-traversals">Depth First Caret Traversals</h3>
+
+    <p>深度优先 caret 遍历的策略是使用相邻 caret 遍历，并在遇到 <code>ElementNode</code> origin 时立即使用 <code>ChildCaret</code>。此策略生成所有可能的 caret，但遍历中的每个 ElementNode 可能被 yield 一次或两次（进入时是 <code>ChildCaret</code>，离开时是 <code>SiblingCaret</code>）。允许您查看 <code>ElementNode</code> 是否部分包含在范围中是这个抽象存在的原因之一。</p>
+
+    <h2 id="terminology">
+      术语
+      <a href="#terminology" class="hash-link">#</a>
+    </h2>
+
+    <h3>Caret</h3>
+    <p>选择 Caret 这个术语是因为它是文本文档中特定点的简洁且具体的术语。Lexical 是"可扩展的文本编辑器框架"，因此文档中的导航使用与文本相关的术语是有意义的。大多数其他术语如 Cursor 或 Point 在 Lexical 中已有含义或不够具体。</p>
+
+    <h3>Origin</h3>
+    <p>Origin 是 NodeCaret 的参考节点。绝对坐标通过组合此 origin 节点和指向相邻节点所在位置（或可能在的位置）的"箭头"来确定。"箭头"由 caret 的 <code>direction</code> 和 <code>type</code> 确定。</p>
+
+    <h3>Direction</h3>
+    <p>选择 <code>'next'</code> 和 <code>'previous'</code> 作为方向主要是为了匹配 DOM 和 Lexical 中存在的现有方法如 <code>getNextSibling()</code>。使用其他词语如 <code>'left'</code> 和 <code>'right'</code> 会有歧义，因为文本方向可以是双向的，并且已经使用从左到右和从右到左的术语。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/traversals.md" target="_blank">编辑此页</a> |
+      <a href="updates.html">下一篇：Updates</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

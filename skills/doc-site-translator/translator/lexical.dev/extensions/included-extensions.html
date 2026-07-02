@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内置扩展 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+    .language-js, .language-ts, .language-tsx, .language-json {
+      display: block;
+    }
+    .token-line {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/included-extensions">Lexical 官方文档 内置扩展 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/included-extensions">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">内置扩展</a>
+  </nav>
+
+  <main>
+    <header><h1>内置扩展</h1></header>
+<p><a class="" href="/docs/api/modules/lexical_clipboard">@lexical/clipboard</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_clipboard#clipboarddomimportextension">ClipboardDOMImportExtension</a> - 通过 <code>DOMImportExtension</code> 管道路由 <code>text/html</code> 粘贴和拖放（实验性）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_clipboard#clipboardimportextension">ClipboardImportExtension</a> - 可配置的按 MIME 类型的剪贴板导入，用于粘贴和拖放（实验性）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_clipboard#getclipboarddataextension">GetClipboardDataExtension</a> - 可配置的选区序列化为剪贴板 MIME 类型，用于复制和拖动</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_code">@lexical/code</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_code#codeextension">CodeExtension</a> - CodeNode（代码块）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_code#codeindentextension">CodeIndentExtension</a> - CodeNode Tab 键缩进（代码块）</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_code-prism">@lexical/code-prism</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_code-prism#codeprismextension">CodePrismExtension</a> - 使用 Prism 为 CodeNode 提供语法高亮</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_code-shiki">@lexical/code-shiki</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_code-shiki#codeshikiextension">CodeShikiExtension</a> - 使用 Shiki 为 CodeNode 提供语法高亮</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_dragon">@lexical/dragon</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_dragon#dragonextension">DragonExtension</a> - Dragon（语音转文字）支持，默认包含在 <code>RichTextExtension</code> 和 <code>PlainTextExtension</code> 中</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_extension">@lexical/extension</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#autofocusextension">AutoFocusExtension</a> - 创建编辑器时自动聚焦（例如页面加载时）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#cleareditorextension">ClearEditorExtension</a> - <code>CLEAR_EDITOR_COMMAND</code> 的实现</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#clickafterlastblockextension">ClickAfterLastBlockExtension</a> - 在无法容纳点击的最后一个块（例如 DecoratorNode 或 TableNode）下方点击时插入段落</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#decoratortextextension">DecoratorTextExtension</a> - DecoratorTextNode 支持，设置 DOM 容器的格式和 CSS 类</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#editorstateextension">EditorStateExtension</a> - 提供 EditorState 作为 signal（替代 <code>registerUpdateListener</code>）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#horizontalruleextension">HorizontalRuleExtension</a> - HorizontalRuleNode（<code>&lt;hr&gt;</code> 标签）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#imeextension">IMEExtension</a> - 将 IME 组合状态集中为 signals</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#initialstateextension">InitialStateExtension</a> - 设置编辑器的初始状态（始终包含）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#nestededitorextension">NestedEditorExtension</a> - 将编辑器配置为父编辑器的嵌套编辑器（主题继承，可选的可编辑状态）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#nodeselectionextension">NodeSelectionExtension</a> - 跟踪选区，通常用于 DecoratorNodes</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#normalizeinlineelementsextension">NormalizeInlineElementsExtension</a> - 移除空的内联元素，默认包含在 <code>RichTextExtension</code> 和 <code>PlainTextExtension</code> 中</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#normalizetripleclickselectionextension">NormalizeTripleClickSelectionExtension</a> - 修正三击事件后的过度选择，默认包含在 <code>RichTextExtension</code> 和 <code>PlainTextExtension</code> 中</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#preventselectallextension">PreventSelectAllExtension</a> - 防止 input/textarea 元素内的全选（Ctrl/Cmd+A）选中编辑器内容，默认包含在 <code>SelectBlockExtension</code> 中</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#selectblockextension">SelectBlockExtension</a> - 全选（Ctrl/Cmd+A）首先选择最近的块元素，再次按下选择整个文档</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#selectionalwaysondisplayextension">SelectionAlwaysOnDisplayExtension</a> - 即使编辑器未聚焦也高亮显示选中的内容</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#tabindentationextension">TabIndentationExtension</a> - 更改 Tab 键行为，插入制表符和缩进，而不是原生地聚焦下一个字段</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_extension#watcheditableextension">WatchEditableExtension</a> - 将编辑器的可编辑状态公开为响应式 <code>Signal&lt;boolean&gt;</code></li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_hashtag">@lexical/hashtag</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_hashtag#hashtagextension">HashtagExtension</a> - HashtagNode</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_history">@lexical/history</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_history#historyextension">HistoryExtension</a> - 历史支持（撤销/重做）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_history#sharedhistoryextension">SharedHistoryExtension</a> - 父编辑器与其嵌套编辑器之间的历史共享</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_html">@lexical/html</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_html#coreimportextension">CoreImportExtension</a> - 核心节点的 DOM 导入规则，由提供节点的扩展隐式包含（实验性）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_html#domimportextension">DOMImportExtension</a> - 基于 Extension 的 <code>importDOM</code>/<code>DOMConversion</code> 替代方案，规则在编辑器构建时编译到调度器中（实验性）</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_html#domrenderextension">DOMRenderExtension</a> - 覆盖编辑器的 DOM 渲染和导出行为（实验性）</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_link">@lexical/link</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_link#autolinkextension">AutoLinkExtension</a> - AutoLinkNode，注意匹配器需要手动配置</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_link#clickablelinkextension">ClickableLinkExtension</a> - 在 lexical 选区和原生点击打开链接行为之间切换</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_link#linkextension">LinkExtension</a> - LinkNode（<code>&lt;a&gt;</code> 标签）</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_list">@lexical/list</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_list#listextension">ListExtension</a> - ListNode, ListItemNode</li>
+<li class=""><a class="" href="/docs/api/modules/lexical_list#checklistextension">CheckListExtension</a> - ListNode 和 ListItemNode 的清单支持</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_mark">@lexical/mark</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_mark#markextension">MarkExtension</a> - MarkNode</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_overflow">@lexical/overflow</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_overflow#overflowextension">OverflowExtension</a> - OverflowNode</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_plain-text">@lexical/plain-text</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_plain-text#plaintextextension">PlainTextExtension</a> - 纯文本编辑器，回车键默认创建 LineBreakNode（每个文档一个 ParagraphNode）</li>
+</ul>
+<p><code>@lexical/react</code></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_react_ReactExtension#reactextension">ReactExtension</a></li>
+<li class=""><a class="" href="/docs/api/modules/lexical_react_ReactPluginHostExtension#reactpluginhostextension">ReactPluginHostExtension</a></li>
+<li class=""><a class="" href="/docs/api/modules/lexical_react_ReactProviderExtension#reactproviderextension">ReactProviderExtension</a></li>
+<li class=""><a class="" href="/docs/api/modules/lexical_react_TreeViewExtension#treeviewextension">TreeViewExtension</a></li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_rich-text">@lexical/rich-text</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_rich-text#richtextextension">RichTextExtension</a> - 富文本编辑器（QuoteNode, HeadingNode），回车键默认创建 ParagraphNode（每个文档多个 ParagraphNode）。包含可配置的 <code>escapeFormatTriggers</code> 用于在文本节点边界处转义文本格式（例如代码）</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_table">@lexical/table</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_table#tableextension">TableExtension</a> - TableNode, TableRowNode, TableCellNode</li>
+</ul>
+<p><a class="" href="/docs/api/modules/lexical_tailwind">@lexical/tailwind</a></p>
+<ul>
+<li class=""><a class="" href="/docs/api/modules/lexical_tailwind#tailwindextension">TailwindExtension</a> - 使用 Tailwind 类的主题配置</li>
+</ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

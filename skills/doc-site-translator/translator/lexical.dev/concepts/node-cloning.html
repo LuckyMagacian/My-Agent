@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Cloning | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .admonition-warning { background: #fff8e1; border-left: 4px solid #f5a623; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-warning-title { font-weight: 600; color: #f5a623; margin-bottom: 0.5rem; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/node-cloning">Lexical 官方文档 Node Cloning 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/node-cloning">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Node Cloning
+  </nav>
+
+  <main>
+    <header>
+      <h1>Node Cloning</h1>
+    </header>
+
+    <p>理解如何正确克隆和修改节点对于使用 Lexical 至关重要。本指南解释不同的克隆机制以及何时使用每种机制。</p>
+
+    <h2 id="types-of-node-cloning">Types of Node Cloning <a href="#types-of-node-cloning" class="hash-link">#</a></h2>
+
+    <p>Lexical 提供了几种克隆节点的方法，每种都有不同的目的：</p>
+    <ul>
+      <li><code>static clone()</code> - 用于状态管理的内部 API</li>
+      <li><code>$copyNode()</code> - 用于创建新节点的公共 API</li>
+      <li><code>getWritable()</code> - 用于节点修改的公共 API</li>
+    </ul>
+
+    <h2 id="the-clone-method">The <code>clone</code> Method <a href="#the-clone-method" class="hash-link">#</a></h2>
+
+    <h3 id="what-is-clone">What is <code>clone</code>? <a href="#what-is-clone" class="hash-link">#</a></h3>
+
+    <p><code>static clone()</code> 方法是所有 Lexical 节点所需的静态方法，用于创建节点的下一个版本。然而，重要的是要理解这是 Lexical 状态管理系统使用的<strong>内部 API</strong>。</p>
+
+    <pre><code class="language-ts">class MyCustomNode extends ElementNode {
+  static clone(node: MyCustomNode): MyCustomNode {
+    // ✅ Correct implementation
+    return new MyCustomNode(node.__someData, node.__key);
+  }
+}</code></pre>
+
+    <h3 id="when-is-clone-used">When is <code>clone</code> Used? <a href="#when-is-clone-used" class="hash-link">#</a></h3>
+
+    <ul>
+      <li><strong>内部状态管理</strong>
+        <ul>
+          <li>由 Lexical 内部使用</li>
+          <li>编辑器状态更新系统的一部分</li>
+          <li>由 <code>getWritable()</code> 调用</li>
+        </ul>
+      </li>
+      <li><strong>节点修改</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">// Example of a node method implementation
+class MyCustomNode extends ElementNode {
+  setData(data: string): this {
+    const self = this.getWritable();
+    self.__data = data;
+    return self;
+  }
+}
+
+node.setSomeData("new data");</code></pre>
+
+    <h3 id="when-not-to-use-clone">When NOT to Use <code>clone</code>? <a href="#when-not-to-use-clone" class="hash-link">#</a></h3>
+
+    <p><strong>永远不要直接调用 <code>clone()</code></strong> - 使用 <code>$copyNode()</code> 或节点方法代替。</p>
+
+    <h2 id="using-copynode">Using <code>$copyNode</code> <a href="#using-copynode" class="hash-link">#</a></h2>
+
+    <h3 id="what-is-copynode">What is <code>$copyNode</code>? <a href="#what-is-copynode" class="hash-link">#</a></h3>
+
+    <p><code>$copyNode</code> 是用于创建带有新 key 的节点副本的公共 API。当您需要创建重复节点时使用此 API。</p>
+
+    <p>默认情况下，所有属性和 <code>NodeState</code> 将被复制到新节点，然后调用 <code>afterCloneFrom</code> 以允许节点可选地将某些属性（以及配置为 <code>equality</code> 的 NodeState）重置为默认值（例如 ListItemNode 的选中状态）。</p>
+
+    <pre><code class="language-ts">// ✅ Correct: Using $copyNode
+const copy = $copyNode(existingNode);</code></pre>
+
+    <h3 id="when-to-use-copynode">When to Use <code>$copyNode</code>? <a href="#when-to-use-copynode" class="hash-link">#</a></h3>
+
+    <ul>
+      <li><strong>创建重复项</strong> - 当您需要副本时使用 <code>$copyNode</code></li>
+    </ul>
+
+    <h2 id="using-getwritable">Using <code>getWritable</code> <a href="#using-getwritable" class="hash-link">#</a></h2>
+
+    <h3 id="what-is-getwritable">What is <code>getWritable</code>? <a href="#what-is-getwritable" class="hash-link">#</a></h3>
+
+    <p><code>getWritable</code> 是在节点方法实现中使用的内部 API，用于获取节点的可变版本。节点消费者应使用节点的公共方法代替。</p>
+
+    <pre><code class="language-ts">// ✅ Correct: Implementation of a node method
+class MyCustomNode extends ElementNode {
+  setData(data: string): this {
+    const self = this.getWritable();
+    self.__data = data;
+    return self;
+  }
+}
+
+// ✅ Correct: Using the node
+const node = new MyCustomNode();
+node.setData("new value");</code></pre>
+
+    <h2 id="common-patterns">Common Patterns <a href="#common-patterns" class="hash-link">#</a></h2>
+
+    <h3 id="modifying-nodes">Modifying Nodes <a href="#modifying-nodes" class="hash-link">#</a></h3>
+
+    <pre><code class="language-ts">// ✅ Use node methods
+node.setTextContent("new text");
+
+// ❌ Don't directly use getWritable outside of node methods
+const writable = node.getWritable();
+writable.__text = "new text";</code></pre>
+
+    <h3 id="copying-nodes">Copying Nodes <a href="#copying-nodes" class="hash-link">#</a></h3>
+
+    <pre><code class="language-ts">// ✅ Use $copyNode
+const copy = $copyNode(node);
+someParent.append(copy);</code></pre>
+
+    <h2 id="performance-considerations">Performance Considerations <a href="#performance-considerations" class="hash-link">#</a></h2>
+
+    <ul>
+      <li><strong>引用完整性</strong>
+        <ul>
+          <li><code>getWritable</code> 确保使用新克隆进行正确的 EditorState 更新</li>
+          <li>防止不会渲染的"孤立"节点</li>
+        </ul>
+      </li>
+      <li><strong>状态管理</strong></li>
+    </ul>
+
+    <pre><code class="language-ts">class MyCustomNode extends ElementNode {
+  setData(data: string): this {
+    const self = this.getWritable();
+    self.__data = data; // Properly tracked by editor
+    return self;
+  }
+}</code></pre>
+
+    <h2 id="common-questions">Common Questions <a href="#common-questions" class="hash-link">#</a></h2>
+
+    <p><strong>问：如何复制节点？</strong></p>
+    <p>答：使用 <code>$copyNode</code> 创建带有新 key 的新副本。</p>
+
+    <p><strong>问：何时应该使用 clone？</strong></p>
+    <p>答：永远不要直接使用。使用 <code>$copyNode</code> 或节点方法代替。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/node-cloning.md" target="_blank">编辑此页</a> |
+      <a href="key-management.html">上一篇：Key Management</a> |
+      <a href="listeners.html">下一篇：Listeners</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

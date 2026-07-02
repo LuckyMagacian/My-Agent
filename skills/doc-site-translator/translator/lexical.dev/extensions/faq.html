@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>常见问题 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+    .language-js, .language-ts, .language-tsx, .language-json {
+      display: block;
+    }
+    .token-line {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/faq">Lexical 官方文档 常见问题 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/faq">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">常见问题</a>
+  </nav>
+
+  <main>
+    <header><h1>常见问题</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="whats-the-compatibility-story">兼容性情况如何？<a href="#whats-the-compatibility-story" class="hash-link" aria-label="Direct link to What's the compatibility story?" title="Direct link to What's the compatibility story?" translate="no">​</a></h2>
+<p>所有传统 Plugins（React 组件）都与 Lexical Extensions 兼容！</p>
+<p>Lexical Extensions <em>仅</em>与使用 Lexical Extension API（<code>buildEditorFromExtensions</code>，或在内部使用它的抽象如 <code>LexicalExtensionComposer</code>）创建的编辑器兼容。</p>
+<p>详见 <a class="" href="/docs/extensions/migration">迁移指南</a> 获取更详细的示例！</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="why-is-it-called-an-extension-instead-of-a-plugin">为什么叫 Extension 而不是 Plugin？<a href="#why-is-it-called-an-extension-instead-of-a-plugin" class="hash-link" aria-label="Direct link to Why is it called an Extension instead of a Plugin?" title="Direct link to Why is it called an Extension instead of a Plugin?" translate="no">​</a></h2>
+<p>历史原因。历史上，Lexical 使用 Plugin 这个术语来指代一个向编辑器添加行为的 React 组件。将这个词转换为另一个含义会造成困惑。</p>
+<p>对于公共 API 来说，这也会是一个棘手的转换，因为理想的导出名称已经被占用，所以如果传统 Plugin 和新的 Extension 都叫 Plugin，它们就无法共存！</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="what-about-lazy-loading">懒加载怎么办？<a href="#what-about-lazy-loading" class="hash-link" aria-label="Direct link to What about lazy loading?" title="Direct link to What about lazy loading?" translate="no">​</a></h2>
+<p>懒加载不需要任何特殊支持！你用 extensions 实现的所有函数必须是同步的，但你的 <code>register</code> 或 <code>afterRegistration</code> 函数可以执行异步的 <code>import()</code>、网络调用等。你只需要确保你返回的 dispose 函数可以适当地管理清理工作。你还可以在 state 上使用 <code>getSignal()</code> 获取一个 AbortSignal，这可能比接入 dispose 函数更方便。</p>
+<p>这类似于你如何使用 <code>React.lazy</code> 来延迟加载实现直到它被使用。</p>
+<p>参见 extension-vanilla-tailwind 示例来演示如何做到这一点。
+<a href="https://stackblitz.com/github/facebook/lexical/tree/main/examples/extension-vanilla-tailwind?file=src%2Fmain.ts" target="_blank" rel="noopener noreferrer" class=""><img decoding="async" loading="lazy" src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" class="img_wXRb"></a></p>
+<div class="theme-admonition theme-admonition-note admonition_zN_H alert alert--secondary"><div class="admonitionHeading_ibya"><span class="admonitionIcon_RBDs"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_yA6e"><p>Extension 本身必须在创建编辑器之前同步导入。Lexical 需要预先获得所有编辑器配置（包括节点）。这与不使用 Lexical Extension 没有任何不同。Lexical 核心需要重大更改才能允许在运行时更改编辑器配置。</p></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="how-do-we-prevent-all-of-the-frameworks-from-being-loaded">我们如何防止加载所有框架？<a href="#how-do-we-prevent-all-of-the-frameworks-from-being-loaded" class="hash-link" aria-label="Direct link to How do we prevent all of the frameworks from being loaded?" title="Direct link to How do we prevent all of the frameworks from being loaded?" translate="no">​</a></h2>
+<p>原生 JS 和 React 在 Lexical 中有第一类支持。Lexical Builder 为这两个环境编写的 Extensions 提供了一条路径，可以加载到任何编辑器中，无论页面使用什么框架。</p>
+<p>当你依赖一个依赖 <code>ReactExtension</code> 的 Extension 时，如果 React provider 不存在（<code>LexicalExtensionComposer</code> 或 <code>ReactPluginHostExtension</code>），你会得到一个运行时错误。把它想象成一个未满足但必需的 peer dependency。这样你就不会困惑，如果你添加一个需要 React 的扩展但它从未正确渲染，因为 React 没有正确设置。</p>
+<p>其他框架可以使用 Lexical Builder 公开的功能以类似的方式提供自己的集成。目前不支持或计划支持在多个框架中使用 <code>DecoratorNode</code> 子类，因为我很确定你可以使用 mutation listeners 来达到同样的目的。也许 decorate 方法甚至可以在某个时候被废弃！</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="how-will-this-interact-with-lexical-dev-tools">这将如何与 Lexical Dev Tools 交互？<a href="#how-will-this-interact-with-lexical-dev-tools" class="hash-link" aria-label="Direct link to How will this interact with Lexical Dev Tools?" title="Direct link to How will this interact with Lexical Dev Tools?" translate="no">​</a></h2>
+<p>所有的 Builder 元数据都在运行时存在，并且存在于 LexicalEditor 实例上，使用一个已知符号以便开发者工具可以访问它。可以做很多事情，这里举几个例子：</p>
+<ul>
+<li class="">显示 Extension 树的图表</li>
+<li class="">追踪哪个配置来自哪个 Extension（例如哪个节点、哪个主题属性等）</li>
+<li class="">追踪哪些 commands/listeners/etc. 是由哪些 Extensions 注册的（需要编辑器插桩）</li>
+</ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

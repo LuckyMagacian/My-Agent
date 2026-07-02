@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/faq">Lexical 官方文档 FAQ 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/faq">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » FAQ
+  </nav>
+
+  <main>
+    <header>
+      <h1>FAQ</h1>
+    </header>
+
+    <h2 id="clear-editor">
+      如何清空编辑器内容？
+      <a href="#clear-editor" class="hash-link">#</a>
+    </h2>
+
+    <p>要清空 Lexical 编辑器的内容，请在 update callback 中调用 RootNode 的 <code>clear()</code> 方法：</p>
+
+    <pre><code class="language-jsx">import {$getRoot} from 'lexical';
+
+editor.update(() => {
+  const root = $getRoot();
+  root.clear();
+});</code></pre>
+
+    <h2 id="clone-method">
+      clone 方法应该直接使用吗？
+      <a href="#clone-method" class="hash-link">#</a>
+    </h2>
+
+    <p><code>clone</code> 方法不应该直接使用。相反，应该优先使用 <code>$copyNode()</code> 或 <code>getWritable()</code> 来复制节点。</p>
+
+    <pre><code class="language-jsx">// 推荐
+const writableNode = node.getWritable();
+const copiedNode = $copyNode(node);</code></pre>
+
+    <h2 id="reconciliation">
+      Reconciliation 什么时候发生？
+      <a href="#reconciliation" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 中的 reconciliation 使用 <code>queueMicrotask</code> 异步调度，确保来自单个逻辑事件的更新被批量处理。这比 <code>setTimeout(..., 0)</code> 提供了更高的即时性，比 <code>Promise.resolve().then(...)</code> 更少的开销。</p>
+
+    <p>如果需要强制同步 reconciliation，可以在 <code>editor.update</code> 中使用 <code>'discrete'</code> 选项：</p>
+
+    <pre><code class="language-jsx">editor.update(() => {
+  // 更新操作...
+}, { discrete: true });</code></pre>
+
+    <h2 id="read-method">
+      read() 方法是如何工作的？
+      <a href="#read-method" class="hash-link">#</a>
+    </h2>
+
+    <p><code>read()</code> 方法对编辑器状态执行只读操作，提供对编辑器上下文的访问而不允许变更。在 read 操作开始之前，任何待处理的更新都会被刷新。</p>
+
+    <pre><code class="language-jsx">editor.read(() => {
+  const root = $getRoot();
+  // 只读操作...
+});</code></pre>
+
+    <h2 id="set-editable">
+      如何控制编辑器的可编辑状态？
+      <a href="#set-editable" class="hash-link">#</a>
+    </h2>
+
+    <p><code>setEditable</code> 方法允许您控制编辑器的可编辑状态。当设置为 <code>false</code> 时，编辑器将停止监听底层 contenteditable 元素上的用户事件。</p>
+
+    <pre><code class="language-jsx">// 设为只读
+editor.setEditable(false);
+
+// 恢复可编辑
+editor.setEditable(true);</code></pre>
+
+    <h2 id="listeners">
+      有哪些可用的监听器？
+      <a href="#listeners" class="hash-link">#</a>
+    </h2>
+
+    <h3 id="text-content-listener">
+      registerTextContentListener
+      <a href="#text-content-listener" class="hash-link">#</a>
+    </h3>
+
+    <p>当 Lexical 将更新提交到 DOM 且编辑器的文本内容与之前状态相比发生变化时触发。如果文本内容在更新之间保持相同，则不会发送通知。返回一个清理函数以移除监听器。</p>
+
+    <pre><code class="language-jsx">const unregister = editor.registerTextContentListener((text) => {
+  console.log('文本内容已更改:', text);
+});
+
+// 稍后清理
+unregister();</code></pre>
+
+    <h3 id="editable-listener">
+      registerEditableListener
+      <a href="#editable-listener" class="hash-link">#</a>
+    </h3>
+
+    <p>每当编辑器的可编辑状态发生变化时调用。监听器可以选择性地返回一个函数，该函数将在下一个状态转换或清理之前被调用。</p>
+
+    <pre><code class="language-jsx">editor.registerEditableListener((editable) => {
+  console.log('编辑器可编辑状态:', editable);
+});</code></pre>
+
+    <h3 id="decorator-listener">
+      registerDecoratorListener
+      <a href="#decorator-listener" class="hash-link">#</a>
+    </h3>
+
+    <p>当编辑器的 decorator 对象发生变化时触发回调。这对于与外部 UI 框架集成非常有用，通过监视 DecoratorNode 键及其关联值的变化。</p>
+
+    <pre><code class="language-jsx">editor.registerDecoratorListener((decorators) => {
+  // 更新 decorator 渲染...
+});</code></pre>
+
+    <h3 id="root-listener">
+      registerRootListener
+      <a href="#root-listener" class="hash-link">#</a>
+    </h3>
+
+    <p>注册一个监听器以监听编辑器根 DOM 元素的变化。这主要用于将事件监听器附加到根元素。监听器在注册时和后续更新时执行。如果监听器返回一个函数，该函数将在下一个转换或清理之前被调用。</p>
+
+    <pre><code class="language-jsx">editor.registerRootListener((nextRoot, prevRoot) => {
+  if (prevRoot) {
+    // 清理旧的监听器
+  }
+  if (nextRoot) {
+    // 设置新的监听器
+  }
+});</code></pre>
+
+    <h2 id="linebreak-node">
+      LineBreakNode 是如何工作的？
+      <a href="#linebreak-node" class="hash-link">#</a>
+    </h2>
+
+    <p><code>LineBreakNode</code> 表示编辑器中的换行符。其 <code>createDOM</code> 方法必须返回单个 HTMLElement，<code>getTextContent</code> 方法返回换行符。</p>
+
+    <h2 id="transform-method">
+      transform() 方法是什么？
+      <a href="#transform-method" class="hash-link">#</a>
+    </h2>
+
+    <p><code>transform</code> 方法是一个实验性功能，用于在编辑器初始化期间在节点上注册要执行的函数。通常建议使用 <code>LexicalEditor.registerNodeTransform</code> API 代替。</p>
+
+    <h2 id="config-extension">
+      configExtension() 是如何工作的？
+      <a href="#config-extension" class="hash-link">#</a>
+    </h2>
+
+    <p><code>configExtension</code> 函数允许覆盖 Extension 的部分配置。当将 extensions 用作其他 extensions 的依赖项或从 extensions 构建编辑器时，这非常有用。配置在编辑器构建之前使用 <code>extension.mergeConfig</code> 或 <code>shallowMergeConfig</code> 合并。</p>
+
+    <pre><code class="language-jsx">const myExtension = configExtension(BaseExtension, {
+  // 覆盖配置选项
+  someOption: 'new value',
+});</code></pre>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>如需更多 FAQ，请参阅特定主题的 FAQ 页面：<a href="react/faq.html">React FAQ</a>、<a href="collaboration/faq.html">Collaboration FAQ</a> 和 <a href="extensions/faq.html">Extensions FAQ</a>。</p>
+    </div>
+
+    <h2 id="related-faqs">
+      相关 FAQ 页面
+      <a href="#related-faqs" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="react/faq.html">React FAQ</a> - React 集成常见问题</li>
+      <li><a href="collaboration/faq.html">Collaboration FAQ</a> - 协作功能常见问题</li>
+      <li><a href="extensions/faq.html">Extensions FAQ</a> - Extensions 常见问题</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/faq.md" target="_blank">编辑此页</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working with DOM Events | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/dom-events">Lexical 官方文档 Working with DOM Events 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/dom-events">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Working with DOM Events
+  </nav>
+
+  <main>
+    <header>
+      <h1>Working with DOM Events</h1>
+    </header>
+
+    <p>有时，在使用 Lexical 时，可能需要或有用的是将 DOM Event Listener 附加到 Lexical 控制的底层 DOM 节点。例如，您可能想在用户将鼠标悬停在特定节点上时显示弹出窗口，或在用户点击节点时打开模态框。这些用例（以及许多其他用例）都可以通过原生 DOM Event Listeners 完成。在 Lexical 控制的节点上监听 DOM Events 有三种主要方式：</p>
+
+    <h2 id="1-event-delegation">
+      1. Event Delegation
+      <a href="#1-event-delegation" class="hash-link">#</a>
+    </h2>
+
+    <p>在编辑器内处理事件的一种方法是在编辑器根元素（Lexical 附加到的 contentEditable）上设置 listener。您可以使用 <a href="listeners.html">Root Listener</a> 来完成此操作。</p>
+
+    <pre><code class="language-js">function myListener(event) {
+    // 您可能希望在此处过滤事件目标
+    // 以仅包含某些类型的 DOM 节点上的点击。
+    alert('Nice!');
+}
+
+const removeRootListener = editor.registerRootListener((rootElement) => {
+    // 将 listener 添加到当前根元素
+    rootElement.addEventListener('click', myListener);
+    // 从旧根元素移除 listener - 确保 myListener 的引用
+    // 是稳定的，这样移除才能工作并避免内存泄漏。
+    return () => rootElement.removeEventListener('click', myListener);
+});
+
+// 清理 listener - 如果您使用 React，从 useEffect 回调返回此函数。
+removeRootListener();</code></pre>
+
+    <p>这可能是处理某些用例的简单、高效方法，因为不需要单独将 listener 附加到每个 DOM 节点。</p>
+
+    <h2 id="2-directly-attach-handlers">
+      2. Directly Attach Handlers
+      <a href="#2-directly-attach-handlers" class="hash-link">#</a>
+    </h2>
+
+    <p>在某些情况下，将事件处理器直接附加到每个特定节点的底层 DOM 节点可能更好。使用这种方法，您通常不需要在处理器中过滤事件目标，这可以使操作更简单。这也将保证您的处理器不会为您不关心的事件运行。此方法通过 <a href="listeners.html">Mutation Listener</a> 实现。</p>
+
+    <pre><code class="language-js">const registeredElements: WeakSet&lt;HTMLElement&gt; = new WeakSet();
+const removeMutationListener = editor.registerMutationListener(nodeType, (mutations) => {
+    editor.getEditorState().read(() => {
+        for (const [key, mutation] of mutations) {
+            const element: null | HTMLElement = editor.getElementByKey(key);
+            if (
+                // Updated 可能是移动，因此可能意味着创建了新的 DOM 元素。
+                // 在这种情况下，我们也需要添加事件 listener。
+                (mutation === 'created' || mutation === 'updated') &&
+                element !== null &&
+                !registeredElements.has(element)
+            ) {
+                registeredElements.add(element);
+                element.addEventListener('click', (event: Event) => {
+                    alert('Nice!');
+                });
+            }
+        }
+    });
+});
+
+// 清理 listener - 如果您使用 React，从 useEffect 回调返回此函数。
+removeMutationListener();</code></pre>
+
+    <p>请注意，这里我们不需要担心清理，因为 Lexical 将取消引用底层 DOM 节点并允许 JavaScript 运行时垃圾回收器清理它们的 listener。</p>
+
+    <h2 id="3-use-nodeeventplugin">
+      3. Use NodeEventPlugin
+      <a href="#3-use-nodeeventplugin" class="hash-link">#</a>
+    </h2>
+
+    <p>如果您使用 React，我们将方法 #2 包装成了一个简单的 LexicalComposer plugin，您可以使用它来达到相同的效果，而无需担心细节：</p>
+
+    <pre><code class="language-jsx">&lt;LexicalComposer&gt;
+    &lt;NodeEventPlugin
+        nodeType={LinkNode}
+        eventType={'click'}
+        eventListener={(e: Event) => {
+            alert('Nice!');
+        }}
+    /&gt;
+&lt;/LexicalComposer&gt;</code></pre>
+
+    <p>如果编辑器位于 shadow root 或 iframe 内，请参阅 <a href="shadow-dom.html">Shadow DOM 和 iframes</a> 了解通过 shadow boundary 读取 <code>event.target</code> 的辅助函数 —— 浏览器将其重新定位到附加在 boundary 上方的 listener 的 shadow host，因此普通的 <code>event.target</code> 不会匹配编辑器内的节点。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/dom-events.md" target="_blank">编辑此页</a> |
+      <a href="shadow-dom.html">下一篇：Shadow DOM 和 iframes</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

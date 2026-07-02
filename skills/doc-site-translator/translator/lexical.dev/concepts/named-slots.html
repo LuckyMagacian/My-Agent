@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Named Slots | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .admonition-warning { background: #fff8e1; border-left: 4px solid #f5a623; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-warning-title { font-weight: 600; color: #f5a623; margin-bottom: 0.5rem; }
+    .admonition-note { background: #e7f5ff; border-left: 4px solid #0366d6; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    .admonition-note-title { font-weight: 600; color: #0366d6; margin-bottom: 0.5rem; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/named-slots">Lexical 官方文档 Named Slots 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/named-slots">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Named Slots
+  </nav>
+
+  <main>
+    <header>
+      <h1>Named Slots</h1>
+    </header>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">⚠️ 警告</div>
+      <p>Named slots 是实验性的。此处描述的 API 标记为 <code>@internal</code>，可能会在没有主要版本更新的情况下更改，序列化和协作格式应被视为不稳定，直到功能稳定。</p>
+    </div>
+
+    <p>Named slots 让单个宿主节点（ElementNode 或 DecoratorNode）在其自己的 EditorState 内拥有多个按名称寻址的隔离可编辑区域——Card 的 <code>title</code>、PullQuote 的 <code>quote</code> 和 <code>attribution</code>——在宿主自己的 EditorState 内部。</p>
+
+    <p>每个区域有自己的光标和格式，永远不会跨边界合并，<code>Backspace</code> 不会溢出到文档其余部分。</p>
+
+    <p>在 named slots 之前，通常的答案是每个区域使用一个嵌套编辑器：每个区域都有自己的 EditorState，因此在区域之间移动节点以及保持历史和协作同步都需要序列化和额外的处理。其他节点形状也不适合：普通 ElementNode 子节点共享一个未分割的链表（区域开头的 Backspace 会将其合并到前一个区域），而 DecoratorNode 是原子性的，因此 Lexical 无法在其内部拥有选区、协作或序列化。使用 named slots，编辑 slot 只是编辑一棵树。</p>
+
+    <div class="admonition-note">
+      <div class="admonition-note-title">📝 注意</div>
+      <p>Named slots 是 <a href="https://lexical.dev/docs/serialization/dom-render">DOM rendering documentation</a> 中 <code>$getSlotTargetElement</code> / <code>SlotComponent</code> 渲染概念的模型级泛化。每个 ElementNode 已经有一个<em>未命名</em>的子节点通道，<code>$getSlotTargetElement</code> 控制该通道的内容在节点的 DOM 中的附着位置。Named slots 是其旁边额外的、显式命名的通道——对称在于每个都渲染到宿主 DOM 中可控的位置——但它们还携带未命名通道没有的模型级语义：隔离（下面的虚拟 shadow root）、单独的 NodeKey map，以及自己的序列化和协作。</p>
+    </div>
+
+    <h2 id="the-model">The Model <a href="#the-model" class="hash-link">#</a></h2>
+
+    <p>宿主保持第二个子通道，一个 slot 名称到 NodeKey 的 <code>Map</code>，与其普通链表子节点分开。slot 值设置了其 slot 宿主指针和 <code>__prev/__next</code>，其中正好有一个非空：<code>getPreviousSibling/getNextSibling</code> 在 slot 边界停止，您只能通过 <code>$getSlotHost</code> 爬出。</p>
+
+    <p>slot 链接本身充当宿主和值之间的<strong>虚拟不可见 shadow root</strong>。隔离是结构性的而不是约定——意外的边界穿越会作为抛出的不变量出现，而不是静默损坏。</p>
+
+    <h2 id="hosts-and-values">Hosts and Values <a href="#hosts-and-values" class="hash-link">#</a></h2>
+
+    <p>任何 ElementNode 或 DecoratorNode 都可以托管 slots。ElementNode 宿主可以将 slots 与普通子节点混合（带有 <code>title</code> slot 加上正则正文段落的 Card）；DecoratorNode 宿主没有子节点通道，所以 slots 是其唯一的可编辑内容（否则是原子性的 PullQuote）。</p>
+
+    <p>slot 值是任何非内联 ElementNode 或 DecoratorNode。值的形状决定编辑模型：</p>
+
+    <ul>
+      <li><strong>裸块</strong>（例如 ParagraphNode）作为单行字段行为，在模型、JSON 或 DOM 中没有额外包装器：其虚拟范围正好容纳一个块，所以 Enter 是无操作（宿主可能将其映射为焦点移动），多块粘贴会像 <code>&lt;input&gt;</code> 清理其值那样扁平化为内联内容——剥离换行符，丢弃仅块的装饰器。</li>
+      <li><strong>Shadow-root 容器</strong>（<code>isShadowRoot()</code> 返回 <code>true</code> 的 ElementNode）作为多块区域行为，内部有正常的块编辑。</li>
+    </ul>
+
+    <h2 id="declaring-and-setting-slots">Declaring and Setting Slots <a href="#declaring-and-setting-slots" class="hash-link">#</a></h2>
+
+    <p>宿主类在 <code>$config()</code> 中声明其 slot 名称；值通过 <code>$setSlot</code> 附着：</p>
+
+    <pre><code class="language-ts">import {
+  $create,
+  $createParagraphNode,
+  $setSlot,
+  ElementNode,
+} from 'lexical';
+
+class CardNode extends ElementNode {
+  $config() {
+    return this.config('card', {extends: ElementNode, slots: ['title']});
+  }
+  createDOM(): HTMLElement {
+    return document.createElement('div');
+  }
+  updateDOM(): boolean {
+    return false;
+  }
+}
+
+function $createCardNode(): CardNode {
+  const card = $create(CardNode);
+  // Single-line title: the bare paragraph IS the slot value.
+  $setSlot(card, 'title', $createParagraphNode());
+  // Ordinary body child, edited like any other block.
+  return card.append($createParagraphNode());
+}</code></pre>
+
+    <h2 id="slot-order">Slot Order <a href="#slot-order" class="hash-link">#</a></h2>
+
+    <p>Slot 顺序是规范的且是派生的，从不存储。在 <code>$config()</code> 中声明的名称按声明顺序首先排序；未声明的名称在其后排序，按 UTF-16 代码单元字典序（普通 JavaScript 字符串比较，与语言环境无关）。<code>$setSlot</code> 在每次写入时重新规范化，所以文档在加载时规范化，并发协作添加在每个客户端上收敛到相同顺序。如果呈现顺序重要，请声明名称。</p>
+
+    <h2 id="rendering">Rendering <a href="#rendering" class="hash-link">#</a></h2>
+
+    <p>协调器始终同步渲染每个 slot 子树，但渲染到隐藏的占位符容器——可见性是宿主的显式决定。有三种方法来附着 slot：</p>
+
+    <ul>
+      <li><strong>同步在 lexical 内</strong>：为宿主的节点类注册 <code>$getSlotTargetElement</code> 覆盖（DOM 渲染覆盖，而不是节点方法——这是一个高级钩子）。</li>
+      <li><strong>命令式</strong>：<code>mountSlotContainer</code> 和 <code>unmountSlotContainer</code> 来自 <code>'lexical'</code> 是框架无关的原语（例如从 mutation listener，它在提交后触发）。</li>
+      <li><strong>从 React chrome</strong>：<code>useLexicalSlotRef</code> 钩子来自 <code>'@lexical/react/useLexicalSlotRef'</code> 包装命令式对并返回一个 ref，将 slot 的容器挂载到您的组件中。</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/named-slots.md" target="_blank">编辑此页</a> |
+      <a href="node-state.html">上一篇：NodeState</a> |
+      <a href="key-management.html">下一篇：Key Management</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

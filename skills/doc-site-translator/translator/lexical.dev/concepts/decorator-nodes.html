@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DecoratorNode | Lexical 中文文档</title>
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .error-banner {
+      background: #ffeef0;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #d73a49;
+    }
+    .error-banner-title {
+      font-weight: 600;
+      color: #d73a49;
+      margin-bottom: 0.5rem;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/decorator-nodes">Lexical 官方文档 DecoratorNode 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/decorator-nodes">原文</a> 为准。
+  </div>
+
+  <!-- 错误横幅 -->
+  <div class="error-banner">
+    <div class="error-banner-title">页面已移除或迁移</div>
+    <p><code>decorator-nodes</code> 页面已从 Lexical 官方文档中移除。该页面返回 404 错误，表明文档结构已发生变化。</p>
+    <p>此 HTML 文件仅作为翻译存档，内容基于 Lexical 历史版本。</p>
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » DecoratorNode
+  </nav>
+
+  <main>
+    <header>
+      <h1>DecoratorNode（装饰器节点）</h1>
+    </header>
+
+    <h2 id="overview">概述</h2>
+    <p>
+      <code>DecoratorNode</code> 是 Lexical 中一种特殊的节点类型，用于在编辑器中嵌入 React 组件或其他框架组件。
+      与普通节点不同，DecoratorNode 允许您在编辑器内容中渲染任意 UI 组件，同时保持与编辑器状态管理的一致性。
+    </p>
+
+    <h2 id="what-is-decorator-node">什么是 DecoratorNode？</h2>
+    <p>
+      在 Lexical 中，大多数节点（如 <code>TextNode</code>、<code>ParagraphNode</code>）直接渲染为 DOM 元素。
+      但有时我们需要在编辑器中嵌入更复杂的 UI，例如：
+    </p>
+    <ul>
+      <li>嵌入图片或视频播放器</li>
+      <li>嵌入表格组件</li>
+      <li>嵌入代码编辑器（如 Monaco Editor）</li>
+      <li>嵌入社交媒体预览卡片</li>
+      <li>嵌入日期选择器或表单控件</li>
+    </ul>
+    <p>
+      <code>DecoratorNode</code> 正是为这类需求设计的。它允许节点返回一个 React 组件（或其他框架组件），
+      由 Lexical 在对应位置渲染该组件，而不是直接渲染 DOM 元素。
+    </p>
+
+    <h2 id="creating-decorator-node">创建 DecoratorNode</h2>
+    <p>创建 <code>DecoratorNode</code> 需要继承 <code>DecoratorNode</code> 类并实现以下关键方法：</p>
+
+    <pre><code class="language-ts">import {$applyNodeReplacement} from 'lexical';
+import {DecoratorNode} from 'lexical';
+import {ReactNode} from 'react';
+
+class MyDecoratorNode extends DecoratorNode&lt;ReactNode&gt; {
+  // 节点的类型标识
+  static getType(): string {
+    return 'my-decorator';
+  }
+
+  // 克隆节点
+  static clone(node: MyDecoratorNode): MyDecoratorNode {
+    return new MyDecoratorNode(node.__key);
+  }
+
+  // 导入 JSON
+  static importJSON(serializedNode: any): MyDecoratorNode {
+    return $createMyDecoratorNode();
+  }
+
+  // 导出 JSON
+  exportJSON(): any {
+    return {
+      type: 'my-decorator',
+      version: 1,
+    };
+  }
+
+  // 返回要渲染的 React 组件
+  decorate(): ReactNode {
+    return &lt;div&gt;My Decorator Component&lt;/div&gt;;
+  }
+}
+
+// 创建节点的工厂函数
+function $createMyDecoratorNode(): MyDecoratorNode {
+  return $applyNodeReplacement(new MyDecoratorNode());
+}</code></pre>
+
+    <h2 id="key-methods">关键方法</h2>
+
+    <h3 id="decorate">decorate()</h3>
+    <p>
+      这是 <code>DecoratorNode</code> 最核心的方法。它返回一个 React 组件（或其他框架组件），
+      Lexical 会将该组件渲染在节点对应的位置。
+    </p>
+    <pre><code class="language-ts">decorate(): ReactNode {
+  return &lt;MyComponent data={this.__data} /&gt;;
+}</code></pre>
+
+    <h3 id="is-isolate">isIsolate()</h3>
+    <p>
+      返回 <code>true</code> 时，该节点会被视为隔离区域，用户无法通过键盘导航进入节点内部。
+      适用于嵌入整个独立 UI 组件的场景（如日期选择器）。
+    </p>
+    <pre><code class="language-ts">isIsolate(): boolean {
+  return true;
+}</code></pre>
+
+    <h3 id="is-inline">isInline()</h3>
+    <p>返回 <code>true</code> 时，节点会以内联元素形式渲染。</p>
+    <pre><code class="language-ts">isInline(): boolean {
+  return true;
+}</code></pre>
+
+    <h2 id="use-cases">使用场景</h2>
+
+    <h3 id="embedded-images">嵌入图片</h3>
+    <pre><code class="language-ts">class ImageNode extends DecoratorNode&lt;ReactNode&gt; {
+  __src: string;
+  __altText: string;
+
+  static getType(): string {
+    return 'image';
+  }
+
+  decorate(): ReactNode {
+    return (
+      &lt;img
+        src={this.__src}
+        alt={this.__altText}
+        style={{maxWidth: '100%'}}
+      /&gt;
+    );
+  }
+}</code></pre>
+
+    <h3 id="embedded-tables">嵌入表格</h3>
+    <pre><code class="language-ts">class TableNode extends DecoratorNode&lt;ReactNode&gt; {
+  __rows: string[][];
+
+  static getType(): string {
+    return 'table';
+  }
+
+  decorate(): ReactNode {
+    return (
+      &lt;table&gt;
+        {this.__rows.map((row, i) =&gt; (
+          &lt;tr key={i}&gt;
+            {row.map((cell, j) =&gt; (
+              &lt;td key={j}&gt;{cell}&lt;/td&gt;
+            ))}
+          &lt;/tr&gt;
+        ))}
+      &lt;/table&gt;
+    );
+  }
+}</code></pre>
+
+    <h3 id="embedded-equation">嵌入公式编辑器</h3>
+    <pre><code class="language-ts">class EquationNode extends DecoratorNode&lt;ReactNode&gt; {
+  __equation: string;
+
+  static getType(): string {
+    return 'equation';
+  }
+
+  decorate(): ReactNode {
+    return &lt;KatexRenderer equation={this.__equation} /&gt;;
+  }
+}</code></pre>
+
+    <h2 id="react-integration">与 React 集成</h2>
+    <p>
+      在 React 项目中使用 <code>DecoratorNode</code> 时，需要确保：
+    </p>
+    <ol>
+      <li>节点已注册到编辑器配置中</li>
+      <li>使用 <code>&lt;LexicalComposer&gt;</code> 提供编辑器上下文</li>
+      <li>decorate 方法返回的组件可以访问 React 上下文</li>
+    </ol>
+
+    <pre><code class="language-tsx">import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+
+const editorConfig = {
+  namespace: 'MyEditor',
+  theme: {},
+  onError: (error) => console.error(error),
+  nodes: [ImageNode, TableNode], // 注册 DecoratorNode
+};
+
+function Editor() {
+  return (
+    &lt;LexicalComposer initialConfig={editorConfig}&gt;
+      &lt;RichTextPlugin
+        contentEditable={&lt;ContentEditable /&gt;}
+        placeholder={&lt;div&gt;Enter some text...&lt;/div&gt;}
+      /&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <h2 id="limitations">限制与注意事项</h2>
+    <ul>
+      <li>
+        <strong>框架绑定</strong>：<code>DecoratorNode</code> 需要与特定框架（如 React）绑定使用。
+        如果需要在无框架环境使用，需要手动管理 DOM 渲染。
+      </li>
+      <li>
+        <strong>序列化</strong>：decorate 返回的组件不会被序列化，只有节点的数据模型会被保存。
+      </li>
+      <li>
+        <strong>选区处理</strong>：DecoratorNode 内部的选区独立于编辑器选区，需要特殊处理。
+      </li>
+      <li>
+        <strong>性能</strong>：复杂的装饰器组件可能影响编辑器性能，建议使用 <code>React.memo</code> 优化。
+      </li>
+    </ul>
+
+    <h2 id="related-resources">相关资源</h2>
+    <ul>
+      <li><a href="https://lexical.dev/docs/concepts/nodes">Nodes 概念文档</a></li>
+      <li><a href="https://lexical.dev/docs/packages/lexical-react">@lexical/react 包文档</a></li>
+      <li><a href="https://github.com/facebook/lexical/tree/main/examples">Lexical 示例代码</a></li>
+    </ul>
+
+    <h2 id="migration-note">迁移说明</h2>
+    <div class="error-banner">
+      <div class="error-banner-title">文档更新提示</div>
+      <p>
+        Lexical 文档已进行重构，<code>decorator-nodes</code> 页面已从官方文档中移除。
+        上述内容基于 Lexical 的历史文档和当前 API 整理而成。
+      </p>
+      <p>
+        如需获取最新的 DecoratorNode 用法，建议参考：
+      </p>
+      <ul>
+        <li><a href="https://lexical.dev/docs/api/modules/lexical#DecoratorNode">API 文档中的 DecoratorNode 类</a></li>
+        <li><a href="https://lexical.dev/docs/packages/lexical-react">@lexical/react 包文档</a></li>
+        <li>Lexical GitHub 仓库中的示例代码</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/decorator-nodes.md" target="_blank">编辑此页</a> |
+      <a href="nodes.html">下一篇：Nodes</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

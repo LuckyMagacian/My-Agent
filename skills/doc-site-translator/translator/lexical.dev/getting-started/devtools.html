@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Tools | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #333; }
+    h1 { font-size: 2rem; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h2 { font-size: 1.5rem; color: #2a2a2a; margin-top: 2em; margin-bottom: 0.75em; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    ul { margin: 1em 0; padding-left: 2em; }
+    li { margin: 0.5em 0; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .browser-list { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 1.5rem 0; }
+    .browser-item { display: flex; align-items: center; gap: 0.75rem; }
+    .browser-item img { width: 48px; height: 48px; }
+    .browser-links { display: flex; flex-direction: column; gap: 0.25rem; }
+    figure { margin: 2rem 0; text-align: center; }
+    figure img { max-width: 100%; height: auto; border: 1px solid #e1e4e8; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/getting-started/devtools">Lexical 官方文档 Developer Tools 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/getting-started/devtools">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../intro.html">介绍</a> » Developer Tools
+  </nav>
+
+  <main>
+    <header>
+      <h1>Lexical Developer Tools</h1>
+    </header>
+
+    <h2 id="extension">
+      浏览器扩展
+      <a href="#extension" class="hash-link">#</a>
+    </h2>
+
+    <p>调试使用 Lexical 构建的网站最简单的方法是安装 Lexical Developer Tools 浏览器扩展。它支持以下主流浏览器：</p>
+
+    <div class="browser-list">
+      <div class="browser-item">
+        <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/74.1.0/chrome/chrome.svg" alt="Chrome"/>
+        <div class="browser-links">
+          <a href="https://chromewebstore.google.com/detail/lexical-developer-tools/kgljmdocanfjckcgfpcpdoklodllfdpc" target="_blank">Chrome Web Store</a>
+        </div>
+      </div>
+      <div class="browser-item">
+        <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/74.1.0/edge/edge.svg" alt="Edge"/>
+        <div class="browser-links">
+          <a href="https://microsoftedge.microsoft.com/addons/detail/lexical-developer-tools/pclbkaofdgafcfhlnimcdhhkkhcabpcb" target="_blank">Edge Add-ons</a>
+        </div>
+      </div>
+      <div class="browser-item">
+        <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/74.1.0/firefox/firefox.svg" alt="Firefox"/>
+        <div class="browser-links">
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/lexical-developer-tools/" target="_blank">Firefox Add-ons</a>
+        </div>
+      </div>
+      <div class="browser-item">
+        <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/74.1.0/safari/safari.svg" alt="Safari"/>
+        <div class="browser-links">
+          <a href="https://apps.apple.com/us/app/lexical-developer-tools/id6502753400" target="_blank">Mac App Store</a>
+        </div>
+      </div>
+    </div>
+
+    <p>现在，如果您访问使用 Lexical 构建的网站（例如 <a href="https://playground.lexical.dev/" target="_blank">https://playground.lexical.dev/</a>），您将在浏览器的开发者工具窗口中看到 <em>Lexical</em> 面板。</p>
+
+    <figure>
+      <img src="/img/docs/devtools-demo.png" alt="Lexical Developer Tools 演示截图" width="460"/>
+    </figure>
+
+    <h2 id="extension-support">
+      扩展支持
+      <a href="#extension-support" class="hash-link">#</a>
+    </h2>
+
+    <p>如有需要支持或只是想交流，请通过 <a href="mailto:EPAM-lexical-support@epam.com">EPAM-lexical-support@epam.com</a> 或我们的 <a href="https://lexical.dev/community">社区渠道</a> 联系我们。</p>
+
+    <p><strong>法律信息</strong>：</p>
+    <ul>
+      <li><a href="https://opensource.facebook.com/legal/privacy/" target="_blank">Meta Open Source - 隐私政策</a></li>
+      <li><a href="https://opensource.facebook.com/legal/terms/" target="_blank">Meta Open Source - 使用条款</a></li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/getting-started/devtools.md" target="_blank">编辑此页</a> |
+      <a href="creating-plugin.html">上一篇：创建 Plugin</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

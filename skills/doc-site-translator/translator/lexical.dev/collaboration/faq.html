@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaboration FAQ | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-warning {
+      background: #fff5f5;
+      border-left: 4px solid #e53e3e;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-warning-title {
+      font-weight: 600;
+      color: #e53e3e;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/collaboration/faq">Lexical 官方文档 Collaboration FAQ 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/collaboration/faq">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » Collaboration » FAQ
+  </nav>
+
+  <main>
+    <header>
+      <h1>Collaboration FAQ</h1>
+    </header>
+
+    <h2 id="source-of-truth">
+      真相来源：Lexical State、Yjs 和应用数据库
+      <a href="#source-of-truth" class="hash-link">#</a>
+    </h2>
+
+    <p>建议将 Yjs model 视为 Lexical 协作的真相来源。虽然文档可以存储在数据库中以进行索引，但 Yjs model 对于没有互联网访问权限的客户端可靠地加入并与服务器同步至关重要。</p>
+
+    <p>或者，可以将数据库视为真相来源，这需要仔细管理 session ID 和客户端连接与断开时的内容同步。</p>
+
+    <h3 id="yjs-as-source">
+      Yjs 作为真相来源
+      <a href="#yjs-as-source" class="hash-link">#</a>
+    </h3>
+
+    <p>优点：</p>
+
+    <ul>
+      <li>离线客户端可以稍后可靠地同步</li>
+      <li>内置冲突解决机制</li>
+      <li>实时同步效率高</li>
+    </ul>
+
+    <p>缺点：</p>
+
+    <ul>
+      <li>需要持久化 Yjs 文档</li>
+      <li>数据库中的内容可能与 Yjs model 不同步</li>
+    </ul>
+
+    <h3 id="database-as-source">
+      数据库作为真相来源
+      <a href="#database-as-source" class="hash-link">#</a>
+    </h3>
+
+    <p>优点：</p>
+
+    <ul>
+      <li>集中控制内容</li>
+      <li>易于索引和搜索</li>
+      <li>与现有系统集成更简单</li>
+    </ul>
+
+    <p>缺点：</p>
+
+    <ul>
+      <li>需要仔细管理 session ID</li>
+      <li>客户端连接和断开时需要同步内容</li>
+      <li>离线场景更复杂</li>
+    </ul>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 推荐</div>
+      <p>对于大多数协作编辑场景，建议将 Yjs model 作为主要真相来源，同时可选地将内容持久化到数据库以进行索引和备份。</p>
+    </div>
+
+    <h2 id="sync-strategies">
+      同步策略
+      <a href="#sync-strategies" class="hash-link">#</a>
+    </h2>
+
+    <p>在协作编辑中，您需要考虑以下同步场景：</p>
+
+    <ol>
+      <li><strong>初始加载</strong> - 客户端首次连接时获取文档状态</li>
+      <li><strong>实时更新</strong> - 多个客户端同时编辑时的冲突解决</li>
+      <li><strong>离线重连</strong> - 客户端离线后重新连接的同步</li>
+      <li><strong>持久化</strong> - 将文档状态保存到服务器</li>
+    </ol>
+
+    <h2 id="connection-management">
+      连接管理
+      <a href="#connection-management" class="hash-link">#</a>
+    </h2>
+
+    <p>使用 <code>TOGGLE_CONNECT_COMMAND</code> 控制连接状态：</p>
+
+    <pre><code class="language-jsx">// 断开连接（例如用户离线时）
+editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, false);
+
+// 重新连接
+editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, true);</code></pre>
+
+    <p>使用 <code>CONNECTED_COMMAND</code> 监听连接状态变化：</p>
+
+    <pre><code class="language-jsx">editor.registerCommand(CONNECTED_COMMAND, (isConnected) => {
+  if (isConnected) {
+    console.log('已连接到协作服务器');
+  } else {
+    console.log('与协作服务器断开连接');
+  }
+  return false;
+}, 0);</code></pre>
+
+    <h2 id="conflict-resolution">
+      冲突解决
+      <a href="#conflict-resolution" class="hash-link">#</a>
+    </h2>
+
+    <p>Yjs 使用 CRDT（Conflict-free Replicated Data Types）自动处理冲突。当多个客户端同时编辑同一位置时，Yjs 会自动合并更改。Lexical 的 Yjs binding 确保这些合并后的更改正确反映在编辑器中。</p>
+
+    <h2 id="performance">
+      性能优化
+      <a href="#performance" class="hash-link">#</a>
+    </h2>
+
+    <p>对于大型文档或高频率编辑，考虑以下优化：</p>
+
+    <ul>
+      <li>使用 <code>excludedProperties</code> 排除不需要同步的属性</li>
+      <li>配置合适的撤销/重做 timeout</li>
+      <li>使用 debounce 控制保存频率</li>
+      <li>考虑使用 V2 binding（实验性）以提高性能</li>
+    </ul>
+
+    <h2 id="nested-editors">
+      嵌套编辑器与协作
+      <a href="#nested-editors" class="hash-link">#</a>
+    </h2>
+
+    <p>使用 <code>LexicalNestedComposer</code> 时，如果 collaboration plugin 处于活动状态且 <code>skipCollabChecks</code> 未设置为 <code>true</code>，嵌套编辑器的子组件将不会渲染，直到 collaboration 准备就绪。</p>
+
+    <pre><code class="language-jsx">&lt;LexicalNestedComposer
+  initialConfig={nestedConfig}
+  skipCollabChecks={true}  // 跳过协作准备检查
+&gt;
+  &lt;RichTextPlugin ... /&gt;
+&lt;/LexicalNestedComposer&gt;</code></pre>
+
+    <h2 id="providers">
+      Provider 选择
+      <a href="#providers" class="hash-link">#</a>
+    </h2>
+
+    <p>Yjs providers 处理客户端通信、awareness 管理和离线数据存储的复杂性。常用选项：</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>适用场景</th>
+          <th>特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>y-websocket</td>
+          <td>实时协作</td>
+          <td>简单易用，支持持久化</td>
+        </tr>
+        <tr>
+          <td>y-indexeddb</td>
+          <td>离线编辑</td>
+          <td>浏览器本地存储</td>
+        </tr>
+        <tr>
+          <td>WebrtcProvider</td>
+          <td>点对点协作</td>
+          <td>无需中心服务器</td>
+        </tr>
+        <tr>
+          <td>Hocuspocus</td>
+          <td>企业级应用</td>
+          <td>可扩展、支持钩子</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="awareness">
+      Awareness 功能
+      <a href="#awareness" class="hash-link">#</a>
+    </h2>
+
+    <p>Yjs awareness 用于跟踪协作用户的状态，包括：</p>
+
+    <ul>
+      <li>用户名称和光标颜色</li>
+      <li>当前光标位置和选区</li>
+      <li>用户是否在线</li>
+    </ul>
+
+    <p>Provider 的 <code>awareness</code> 属性提供访问这些信息：</p>
+
+    <pre><code class="language-jsx">provider.awareness.setLocalStateField('user', {
+  name: 'Alice',
+  color: '#FF0000',
+});
+
+provider.awareness.on('change', () => {
+  const states = provider.awareness.getStates();
+  // 更新用户列表...
+});</code></pre>
+
+    <h2 id="next-steps">
+      相关资源
+      <a href="#next-steps" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="react.html">Collaboration (React)</a> - React 协作设置指南</li>
+      <li><a href="../packages/lexical-yjs.html">@lexical/yjs</a> - Yjs binding 包文档</li>
+      <li><a href="https://docs.yjs.dev" target="_blank">Yjs 官方文档</a></li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/collaboration/faq.md" target="_blank">编辑此页</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

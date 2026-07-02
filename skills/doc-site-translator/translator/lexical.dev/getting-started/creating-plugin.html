@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建 Plugin | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #333; }
+    h1 { font-size: 2rem; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h2 { font-size: 1.5rem; color: #2a2a2a; margin-top: 2em; margin-bottom: 0.75em; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; margin-top: 1.5em; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    ul, ol { margin: 1em 0; padding-left: 2em; }
+    li { margin: 0.5em 0; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .admonition-tip { background: #f0fff4; border-left: 4px solid #38a169; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+    figure { margin: 2rem 0; text-align: center; }
+    figure img { max-width: 100%; height: auto; }
+    figcaption { margin-top: 0.5rem; color: #586069; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/getting-started/creating-plugin">Lexical 官方文档 Creating a Plugin 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/getting-started/creating-plugin">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../intro.html">介绍</a> » 创建 Plugin
+  </nav>
+
+  <main>
+    <header>
+      <h1>创建 Plugin</h1>
+    </header>
+
+    <p>本页面介绍 Lexical Plugin 的创建，独立于任何框架或库。对于还不熟悉 Lexical 的用户，建议先<a href="quick-start.md">查看 Quick Start (Vanilla JS) 页面</a>。</p>
+
+    <p>与许多其他框架不同，Lexical 没有为其 Plugin 定义任何特定的接口。Plugin 在最简单的形式下是一个接受 <code>LexicalEditor</code> 实例并返回清理函数的函数。通过访问 <code>LexicalEditor</code>，Plugin 可以通过 <a href="../concepts/commands.md">Commands</a>、<a href="../concepts/transforms.md">Transforms</a>、<a href="../concepts/nodes.mdx">Nodes</a> 或其他 API 来扩展编辑器。</p>
+
+    <p>在本指南中，我们将创建一个 Plugin，它将表情符号（<code>:)</code>、<code>:P</code> 等）替换为实际的 emoji（使用 <a href="../concepts/transforms.md">Node Transforms</a>），并通过创建我们自己的自定义 Node（扩展 <a href="../concepts/nodes.mdx#textnode">TextNode</a>）来使用自己的图形进行 emoji 渲染。</p>
+
+    <figure class="text--center">
+      <img src="/img/docs/lexical-emoji-plugin-design.drawio.svg" alt="概念视图"/>
+    </figure>
+
+    <h2 id="preconditions">
+      前置条件
+      <a href="#preconditions" class="hash-link">#</a>
+    </h2>
+
+    <p>我们假设您已经实现了（参见提供的代码中的 <code>findEmoji.ts</code>）一个函数，该函数允许您在文本中查找 emoji 短代码（表情符号）并返回它们的位置以及其他信息：</p>
+
+    <pre><code class="language-typescript">// findEmoji.ts
+export type EmojiMatch = Readonly<{position: number, shortcode: string, unifiedID: string}>;
+
+export default function findEmoji(text: string): EmojiMatch | null;</code></pre>
+
+    <h2 id="creating-own-lexicalnode">
+      创建自己的 <code>LexicalNode</code>
+      <a href="#creating-own-lexicalnode" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 作为框架提供两种方式来自定义其内容的外观：</p>
+    <ul>
+      <li>通过扩展以下基础 Node 之一：
+        <ul>
+          <li><a href="../concepts/nodes.mdx#elementnode"><code>ElementNode</code></a> – 用作其他 Node 的父级，可以是块级或内联。</li>
+          <li><a href="../concepts/nodes.mdx#textnode"><code>TextNode</code></a> – 包含文本的叶子类型 Node（<em>因此不能有子元素</em>）。</li>
+          <li><a href="../concepts/nodes.mdx#decoratornode"><code>DecoratorNode</code></a> – 用于在编辑器中插入任意视图（组件）。</li>
+        </ul>
+      </li>
+      <li>通过 <a href="../concepts/node-replacement.md">Node Replacement</a> – 如果您想增强内置 Node（如 <code>ParagraphNode</code>）的行为，这很有用。</li>
+    </ul>
+
+    <p>在我们的例子中，我们不期望 <code>EmojiNode</code> 有任何子 Node，也不打算插入任意组件，因此最好的选择是继续扩展 <a href="../concepts/nodes.mdx#textnode"><code>TextNode</code></a>。</p>
+
+    <pre><code class="language-typescript">export class EmojiNode extends TextNode {
+  __unifiedID: string;
+
+  static getType(): string {
+    return 'emoji';
+  }
+
+  static clone(node: EmojiNode): EmojiNode {
+    return new EmojiNode(node.__unifiedID, node.__key);
+  }
+
+  constructor(unifiedID: string, key?: NodeKey) {
+    const unicodeEmoji = /*...*/;
+    super(unicodeEmoji, key);
+
+    this.__unifiedID = unifiedID.toLowerCase();
+  }
+
+  /**
+  * DOM that will be rendered by browser within contenteditable
+  * This is what Lexical renders
+  */
+  createDOM(_config: EditorConfig): HTMLElement {
+    const dom = document.createElement('span');
+    dom.className = 'emoji-node';
+    dom.style.backgroundImage = `url('${BASE_EMOJI_URI}/${this.__unifiedID}.png')`;
+    dom.innerText = this.__text;
+
+    return dom;
+  }
+
+  static importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
+    return $createEmojiNode(serializedNode.unifiedID).updateFromJSON(serializedNode);
+  }
+
+  exportJSON(): SerializedEmojiNode {
+    return {
+      ...super.exportJSON(),
+      unifiedID: this.__unifiedID,
+    };
+  }
+}</code></pre>
+
+    <p>上面的示例展示了扩展 <a href="../concepts/nodes.mdx#textnode"><code>TextNode</code></a> 的自定义 Node 的绝对最小设置。让我们看看这里的关键要素：</p>
+
+    <ul>
+      <li><code>constructor(...)</code> + 类属性 – 允许我们在运行时在 Node 中存储自定义数据以及接受自定义参数。</li>
+      <li><code>getType()</code> 和 <code>clone(...)</code> – 这些方法允许 Lexical 正确识别 Node 类型，以及能够正确克隆它，因为我们可能想要自定义克隆行为。</li>
+      <li><code>importJSON(...)</code> 和 <code>exportJSON()</code> – 定义我们的数据如何序列化/反序列化到/从 Lexical 状态。在这里定义您的 Node 在状态中的表示。</li>
+      <li><code>createDOM(...)</code> – 定义 Lexical 将渲染的 DOM。</li>
+    </ul>
+
+    <h2 id="creating-node-transform">
+      创建 Node Transform
+      <a href="#creating-node-transform" class="hash-link">#</a>
+    </h2>
+
+    <p><a href="../concepts/transforms.md">Transforms</a> 允许高效响应 <code>EditorState</code> 的变化，以及用户输入。它们的高效来自于 Transform 在 DOM 协调（Lexical 生命周期中最昂贵的操作）之前执行。</p>
+
+    <p>此外，值得一提的是 <a href="../concepts/transforms.md">Lexical Node Transforms</a> 足够智能，让您无需考虑在 Transform 中所做的修改的任何副作用或与其他 Transform 监听器的相互依赖关系。经验法则是，在特定 Transform 中对 Node 所做的更改将触发其他 Transform 的重新运行，直到 <code>EditorState</code> 不再发生变化。在 <a href="../concepts/transforms.md#transform-heuristic">Transform heuristic</a> 中了解更多信息。</p>
+
+    <p>在我们的示例中，我们有一个简单的 Transform，执行以下业务逻辑：</p>
+    <ol>
+      <li>尝试转换 <code>TextNode</code>。它将在任何 <code>TextNode</code> 更改时运行。</li>
+      <li>检查 <code>TextNode</code> 中的文本是否包含 emoji 短代码（表情符号）。如果没有则跳过。</li>
+      <li>将 <code>TextNode</code> 拆分为 2 或 3 部分（取决于短代码在文本中的位置），以便目标 emoji 短代码拥有自己独立的 <code>TextNode</code>。</li>
+      <li>将 emoji 短代码 <code>TextNode</code> 替换为 <code>EmojiNode</code>。</li>
+    </ol>
+
+    <pre><code class="language-typescript">import {LexicalEditor, TextNode} from 'lexical';
+
+
+import {$createEmojiNode} from './EmojiNode';
+import findEmoji from './findEmoji';
+
+
+function textNodeTransform(node: TextNode): void {
+  if (!node.isSimpleText() || node.hasFormat('code')) {
+    return;
+  }
+
+  const text = node.getTextContent();
+
+  // Find only 1st occurrence as transform will be re-run anyway for the rest
+  // because newly inserted nodes are considered to be dirty
+  const emojiMatch = findEmoji(text);
+  if (emojiMatch === null) {
+    return;
+  }
+
+  let targetNode;
+  if (emojiMatch.position === 0) {
+    // First text chunk within string, splitting into 2 parts
+    [targetNode] = node.splitText(
+      emojiMatch.position + emojiMatch.shortcode.length,
+    );
+  } else {
+    // In the middle of a string
+    [, targetNode] = node.splitText(
+      emojiMatch.position,
+      emojiMatch.position + emojiMatch.shortcode.length,
+    );
+  }
+
+
+  const emojiNode = $createEmojiNode(emojiMatch.unifiedID);
+  targetNode.replace(emojiNode);
+}
+
+
+export function registerEmoji(editor: LexicalEditor): () => void {
+  // We don't use editor.registerUpdateListener here as alternative approach where we rely
+  // on update listener is highly discouraged as it triggers an additional render (the most expensive lifecycle operation).
+  return editor.registerNodeTransform(TextNode, textNodeTransform);
+}</code></pre>
+
+    <h2 id="putting-it-all-together">
+      整合在一起
+      <a href="#putting-it-all-together" class="hash-link">#</a>
+    </h2>
+
+    <p>最后，我们通过在编辑器配置中注册 <code>EmojiNode</code> 并执行 <code>registerEmoji(editor)</code> Plugin 启动函数来配置 Lexical 实例。为了简单起见，我们假设 Plugin 采用自己的 CSS 和静态资源分发方式（如果有的话），Lexical 不对此强制任何规则。</p>
+
+    <p>请参考 <a href="quick-start.md#putting-it-together">Quick Start (Vanilla JS) 示例</a> 来填补此伪代码中的空白。</p>
+
+    <pre><code class="language-typescript">import {createEditor} from 'lexical';
+import {mergeRegister} from '@lexical/utils';
+/* ... */
+
+import {EmojiNode} from './emoji-plugin/EmojiNode';
+import {registerEmoji} from './emoji-plugin/EmojiPlugin';
+
+const initialConfig = {
+  /* ... */
+  // Register our newly created node
+  nodes: [EmojiNode, /* ... */],
+};
+
+const editor = createEditor(config);
+
+const editorRef = document.getElementById('lexical-editor');
+editor.setRootElement(editorRef);
+
+// Registering Plugins
+mergeRegister(
+  /* ... */
+  registerEmoji(editor), // Our plugin
+);</code></pre>
+
+    <p style="background: #f6f8fa; padding: 1rem; border-radius: 6px; border-left: 4px solid #0366d6;">
+      💡 <strong>完整示例</strong>：请访问 <a href="https://stackblitz.com/github/facebook/lexical/tree/main/examples/vanilla-js-plugin?embed=1&file=src%2Femoji-plugin%2FEmojiPlugin.ts&terminalHeight=1&ctl=1" target="_blank">StackBlitz 上的完整示例</a> 查看可运行的代码。
+    </p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/getting-started/creating-plugin.md" target="_blank">编辑此页</a> |
+      <a href="supported-browsers.html">上一篇：支持的浏览器</a> |
+      <a href="devtools.html">下一篇：Developer Tools</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

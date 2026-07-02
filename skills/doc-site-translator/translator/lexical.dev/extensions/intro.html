@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lexical 扩展 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/intro">Lexical 官方文档 Lexical Extensions 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/intro">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="intro.html">Extensions</a> » <a href="#">Lexical 扩展</a>
+  </nav>
+
+  <main>
+    <header><h1>Lexical 扩展</h1></header>
+
+    <p>Extensions 是一种新的约定，用于以模块化和框架无关的方式向 Lexical 编辑器添加配置和行为。它比之前的 React 插件方案更易用且更强大，并且是框架无关的。</p>
+
+    <p>请参阅 <a href="included-extensions.html">内置扩展</a> 查看 Lexical 及其相关包中包含的扩展列表。</p>
+
+    <h2 id="use-case">
+      使用场景
+      <a href="#use-case" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical Extensions 允许在单一位置向编辑器添加复杂功能。如果你想要一个支持清单列表（check lists）的编辑器，只需将 <code>CheckListExtension</code> 添加到依赖中。所有相关的配置、注册以及对其他扩展的依赖都被封装在一起。Extensions 无论是否使用 React 都以相同方式工作，因此通常不需要单独的文档和导出来支持两者。</p>
+
+    <p>所有关于如何以及何时需要发生某些事情的复杂性都移到了 <code>buildEditorFromExtensions</code> 和扩展本身的定义中。</p>
+
+    <p>相比之下，在没有 Lexical Extensions 的情况下使用清单列表需要配置 <code>ListNode</code> 和 <code>ListItemNode</code>，并且需要分别注册 <code>ListPlugin</code> 和 <code>CheckListPlugin</code> 各恰好一次（如果不使用 React：则使用 <code>registerList</code> 和 <code>registerCheckList</code>）。</p>
+
+    <p>在没有 Lexical Extensions 的情况下自定义 Lexical 编辑器分两个阶段：</p>
+
+    <ul>
+      <li>构建编辑器之前的配置（注册节点、节点替换、主题等）</li>
+      <li>构建编辑器之后的注册（监听器、变换、命令、React 插件等）</li>
+    </ul>
+
+    <p>在许多情况下，向编辑器添加功能需要同时进行配置和注册。这通常发生在代码中非常不同的位置，甚至可能是不同的文件，并且没有传递依赖。你需要确保每个必需的配置和注册代码片段都在正确的位置恰好包含一次。当某些依赖配置或注册缺失（或运行两次！）时，最好的情况是运行时错误，但通常它会部分工作，这很难调试。</p>
+
+    <p>Extensions 的另一个引人注目的用例是从一个扩展向另一个扩展提供功能（例如与 yjs 协作），或者让一个扩展增强另一个扩展的能力（例如 markdown 导入/导出、向菜单或工具栏添加选项等）。这在旧版插件中非常笨拙且容易出错，因为没有既定的模式让它们相互依赖，而且用 React 提供此类功能需要严格的上下文提供者层级结构。任何扩展都可以提供输出，这相当于具有编辑器范围的扩展特定上下文。</p>
+
+    <h2 id="core-api-overview">
+      核心 API 概览
+      <a href="#core-api-overview" class="hash-link">#</a>
+    </h2>
+
+    <p>Extensions 的主要用例是从扩展集合构建编辑器。任何特定于编辑器的配置或行为都应作为扩展提供，使用 <a href="https://lexical.dev/docs/api/modules/lexical#defineextension">defineExtension</a> 或作为某些依赖配置的覆盖使用 <a href="https://lexical.dev/docs/api/modules/lexical#configextension">configExtension</a>。这通过以下方式完成：</p>
+
+    <ul>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical_extension#buildeditorfromextensions">buildEditorFromExtensions</a> - 不使用 React 时</li>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical_react_LexicalExtensionComposer">LexicalExtensionComposer</a> - 使用 React 时</li>
+    </ul>
+
+    <p>请参阅 <a href="defining-extensions.html">定义扩展</a> 获取 <code>defineExtension</code> 的详细指南。</p>
+
+    <p>以下函数包含在核心 <a href="https://lexical.dev/docs/api/modules/lexical">lexical</a> 模块中，以确保定义扩展是轻量级的，且不依赖于 <a href="https://lexical.dev/docs/api/modules/lexical_extension">@lexical/extension</a> 的运行时功能。这些函数主要用于类型推断，实现非常简单。</p>
+
+    <ul>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical#defineextension">defineExtension</a> - 定义扩展</li>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical#configextension">configExtension</a> - 为扩展提供配置覆盖</li>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical#declarepeerdependency">declarePeerDependency</a> - 通过名称声明对另一个扩展的间接依赖</li>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical#safecast">safeCast</a> - TypeScript 类型转换的便利工具，比 <code>as</code> 更安全。类似于使用带有声明类型的变量。</li>
+      <li><a href="https://lexical.dev/docs/api/modules/lexical#shallowmergeconfig">shallowMergeConfig</a> - 默认配置合并策略</li>
+    </ul>
+
+    <h2 id="advanced-features">
+      高级功能
+      <a href="#advanced-features" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="signals.html">Signals</a> - 可用于扩展在运行时更改其配置或行为，例如动态启用或禁用扩展。这也用于优化订阅和监听器的性能。</li>
+      <li><a href="peer-dependencies.html">Peer Dependencies</a> - 用于声明扩展之间的间接或可选依赖，可用于仅当某个其他扩展可用时才启用某些功能或配置。例如，Emoji 扩展可能为 EmojiNode 声明特定的 Markdown 序列化，但仅在 Markdown 扩展存在时才生效。</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/extensions/intro.md" target="_blank">编辑此页</a> |
+      <a href="defining-extensions.html">下一篇：定义扩展</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建 React Plugin | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-warning {
+      background: #fff5f5;
+      border-left: 4px solid #e53e3e;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-warning-title {
+      font-weight: 600;
+      color: #e53e3e;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/react/create_plugin">Lexical 官方文档 Creating a React Plugin 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/react/create_plugin">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">React</a> » Create Plugin
+  </nav>
+
+  <main>
+    <header>
+      <h1>创建 React Plugin</h1>
+    </header>
+
+    <p>要在 React 中创建自定义 Lexical plugin，您可以开发一个 React 组件并将其作为 <code>LexicalComposer</code> 组件的子组件包含。如果您的 plugin 引入了新节点，请确保这些节点已注册在 <code>initialConfig.nodes</code> 数组中。</p>
+
+    <h2 id="basic-plugin-structure">
+      基本 Plugin 结构
+      <a href="#basic-plugin-structure" class="hash-link">#</a>
+    </h2>
+
+    <p>Plugin 通过作为 <code>LexicalComposer</code> 组件的子组件渲染来集成，该组件提供了访问 editor 实例所需的 React Context。在 plugin 中注册的命令可以通过派发来触发，例如从按钮点击中派发。</p>
+
+    <p>以下是一个基本的 plugin 结构示例：</p>
+
+    <pre><code class="language-jsx">// MyLexicalPlugin.js
+
+export function MyLexicalPlugin(props) {
+  const [editor] = useLexicalComposerContext();
+  // ...plugin 逻辑
+}</code></pre>
+
+    <h2 id="accessing-editor-instance">
+      访问 Editor 实例
+      <a href="#accessing-editor-instance" class="hash-link">#</a>
+    </h2>
+
+    <p><code>LexicalComposer</code> 通过 React Context 提供对底层 <code>LexicalEditor</code> 实例的访问，您可以使用 <code>useLexicalComposerContext</code> hook 在 plugin 组件中访问它。这个 editor 实例允许您的 plugin 使用 Commands 和 Transforms 等 API 与 Lexical 交互。</p>
+
+    <pre><code class="language-jsx">import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+
+export function MyLexicalPlugin(props) {
+  const [editor] = useLexicalComposerContext();
+
+  // 使用 editor 实例...
+
+  return null;
+}</code></pre>
+
+    <h2 id="registering-commands">
+      注册命令
+      <a href="#registering-commands" class="hash-link">#</a>
+    </h2>
+
+    <p>一个常见的 plugin 模式涉及注册一个命令，当派发该命令时，执行特定操作，例如创建自定义节点并将其插入编辑器中。</p>
+
+    <pre><code class="language-jsx">import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {createCommand} from 'lexical';
+import {useEffect} from 'react';
+
+export const MY_CUSTOM_COMMAND = createCommand('MY_CUSTOM_COMMAND');
+
+export function MyLexicalPlugin() {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    // 注册命令处理器
+    const unregister = editor.registerCommand(
+      MY_CUSTOM_COMMAND,
+      (payload) => {
+        // 处理命令...
+        return true;
+      },
+      0
+    );
+
+    return unregister;
+  }, [editor]);
+
+  return null;
+}</code></pre>
+
+    <h2 id="custom-onchange-plugin">
+      自定义 OnChange Plugin 示例
+      <a href="#custom-onchange-plugin" class="hash-link">#</a>
+    </h2>
+
+    <p>以下示例展示了如何实现一个自定义 React plugin 来监听编辑器状态更新：</p>
+
+    <pre><code class="language-jsx">function MyOnChangePlugin({ onChange }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({editorState}) => {
+      onChange(editorState);
+    });
+  }, [editor, onChange]);
+
+  return null;
+}</code></pre>
+
+    <p>然后将其集成到编辑器中：</p>
+
+    <pre><code class="language-jsx">function Editor() {
+  const [editorState, setEditorState] = useState();
+
+  function onChange(editorState) {
+    setEditorState(editorState);
+  }
+
+  return (
+    &lt;LexicalComposer initialConfig={initialConfig}&gt;
+      &lt;RichTextPlugin
+        contentEditable={
+          &lt;ContentEditable
+            aria-placeholder={'Enter some text...'}
+            placeholder={&lt;div&gt;Enter some text...&lt;/div&gt;/&gt;
+        }
+        ErrorBoundary={LexicalErrorBoundary}
+      /&gt;
+      &lt;HistoryPlugin /&gt;
+      &lt;MyOnChangePlugin onChange={onChange}/&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <h2 id="plugin-with-custom-nodes">
+      带自定义节点的 Plugin
+      <a href="#plugin-with-custom-nodes" class="hash-link">#</a>
+    </h2>
+
+    <p>以下示例演示了创建自定义 <code>KeywordNode</code> 和 <code>KeywordsPlugin</code> 来检测和高亮编辑器中的特定关键词：</p>
+
+    <pre><code class="language-jsx">/**
+ * 使用方法:
+ * 1. 将 KeywordNode 添加到 initialConfig nodes 数组
+ *    如果忘记，您将收到错误
+ * 2. 将 &lt;KeywordPlugin /&gt; 作为 LexicalComposer 的子组件添加
+ *    如果忘记，它将静默不工作
+ * 3. 在某处为 '.keyword' 添加 CSS
+ */
+import type {EditorConfig, LexicalNode, SerializedTextNode} from 'lexical';
+import {$create, TextNode} from 'lexical';
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {useLexicalTextEntity} from '@lexical/react/useLexicalTextEntity';
+import {useCallback, useEffect} from 'react';
+
+export class KeywordNode extends TextNode {
+  $config() {
+    return this.config('keyword', {extends: TextNode});
+  }
+
+  createDOM(config: EditorConfig): HTMLElement {
+    const dom = super.createDOM(config);
+    dom.style.cursor = 'default';
+    dom.className = 'keyword';
+    return dom;
+  }
+
+  canInsertTextBefore(): boolean {
+    return false;
+  }
+
+  canInsertTextAfter(): boolean {
+    return false;
+  }
+
+  isTextEntity(): true {
+    return true;
+  }
+}
+
+export function $createKeywordNode(keyword: string): KeywordNode {
+  return $create(KeywordNode).setTextContent(keyword);
+}
+
+export function $isKeywordNode(node: LexicalNode | null | undefined): boolean {
+  return node instanceof KeywordNode;
+}
+
+const KEYWORDS_REGEX =
+  /(^|[^A-Za-z])(congrats|congratulations|mazel tov|mazal tov)($|[^A-Za-z])/i;
+
+export function KeywordsPlugin(): JSX.Element | null {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    if (!editor.hasNodes([KeywordNode])) {
+      throw new Error('KeywordsPlugin: KeywordNode not registered on editor');
+    }
+  }, [editor]);
+
+  const $convertToKeywordNode = useCallback(
+    (textNode: TextNode): KeywordNode => {
+      return $createKeywordNode(textNode.getTextContent());
+    },
+    [],
+  );
+
+  const getKeywordMatch = useCallback((text: string) => {
+    const matchArr = KEYWORDS_REGEX.exec(text);
+
+    if (matchArr === null) {
+      return null;
+    }
+
+    const hashtagLength = matchArr[2].length;
+    const startOffset = matchArr.index + matchArr[1].length;
+    const endOffset = startOffset + hashtagLength;
+    return {
+      end: endOffset,
+      start: startOffset,
+    };
+  }, []);
+
+  useLexicalTextEntity&lt;KeywordNode&gt;(
+    getKeywordMatch,
+    KeywordNode,
+    $convertToKeywordNode,
+  );
+
+  return null;
+}</code></pre>
+
+    <div class="admonition-warning">
+      <div class="admonition-warning-title">⚠️ 重要</div>
+      <p>至关重要的是，验证 plugin 使用的任何自定义节点是否已在编辑器配置中正确注册。如果节点未注册，plugin 可能会抛出错误或静默失败。</p>
+    </div>
+
+    <h2 id="registering-custom-nodes">
+      注册自定义节点
+      <a href="#registering-custom-nodes" class="hash-link">#</a>
+    </h2>
+
+    <p>当您的 plugin 引入新节点时，必须在 <code>LexicalComposer</code> 的初始配置中注册它们：</p>
+
+    <pre><code class="language-jsx">const initialConfig = {
+  namespace: 'MyEditor',
+  nodes: [KeywordNode], // 注册自定义节点
+  theme,
+  onError,
+};
+
+&lt;LexicalComposer initialConfig={initialConfig}&gt;
+  &lt;KeywordsPlugin /&gt;
+&lt;/LexicalComposer&gt;</code></pre>
+
+    <h2 id="legacy-plugins">
+      旧版 Plugins
+      <a href="#legacy-plugins" class="hash-link">#</a>
+    </h2>
+
+    <p>旧版 React plugins 可以通过将其作为 composer 的子组件渲染来按原样使用。为了更好的可重用性，考虑将其打包为 extension 或重构为 React 独立。</p>
+
+    <p>许多旧的 Lexical plugins 只是简单的 <code>useEffect</code> 包装器，不需要 React。这些可以使用 <code>defineExtension</code> 重构为 extensions，而不需要 React。</p>
+
+    <pre><code class="language-typescript">// 旧版 CheckListPlugin 示例
+export function CheckListPlugin(): null {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    return registerCheckList(editor);
+  }, [editor]);
+  return null;
+}</code></pre>
+
+    <h2 id="extension-decorators">
+      Extension Decorators
+      <a href="#extension-decorators" class="hash-link">#</a>
+    </h2>
+
+    <p>您可以将旧版 React plugin 打包为 extension decorator。这对于渲染不直接与编辑器内容交互的 React 组件非常有用，例如返回 <code>null</code> 或渲染 portals 的组件。</p>
+
+    <pre><code class="language-jsx">// 这正是您编写旧版 React plugin 的方式
+function LogEditorPlugin() {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => {
+    console.log(editor);
+  }, [editor]);
+  return null;
+}
+
+// 这是如何将 plugin 声明为 extension
+// 它依赖 React 并将此 plugin 渲染为 decorator
+export const LogEditorExtension = defineExtension({
+  name: "@example/LogEditor",
+  dependencies: [
+    configExtension(ReactExtension, {
+      decorators: [&lt;LogEditorPlugin /&gt;]
+    }),
+  ],
+});</code></pre>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>打包或重构的策略包括使用 Extension Decorators 和 Output Components，以及以 React Independence 为目标。</p>
+    </div>
+
+    <h2 id="next-steps">
+      下一步
+      <a href="#next-steps" class="hash-link">#</a>
+    </h2>
+
+    <ul>
+      <li><a href="plugins.html">React Plugins</a> - 了解可用的内置 plugins</li>
+      <li><a href="faq.html">React FAQ</a> - React 常见问题解答</li>
+    </ul>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/react/create_plugin.md" target="_blank">编辑此页</a> |
+      <a href="faq.html">下一篇：React FAQ</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

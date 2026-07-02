@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Replacement | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip-title {
+      font-weight: 600;
+      color: #38a169;
+      margin-bottom: 0.5rem;
+    }
+    .admonition-note {
+      background: #e7f5ff;
+      border-left: 4px solid #0366d6;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-note-title {
+      font-weight: 600;
+      color: #0366d6;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/node-replacement">Lexical 官方文档 Node Replacement 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/node-replacement">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Node Replacement
+  </nav>
+
+  <main>
+    <header>
+      <h1>Node Replacement</h1>
+    </header>
+
+    <p>Node Replacement 允许您将编辑器中给定节点的所有实例替换为子类的实例。</p>
+
+    <h2 id="use-case">
+      Use Case
+      <a href="#use-case" class="hash-link">#</a>
+    </h2>
+
+    <div class="admonition-note">
+      <div class="admonition-note-title">📝 注意</div>
+      <p>在本文档的早期版本中，"Node Replacement" 被称为 "Node Overrides"。我们更改了名称以匹配实现中使用的术语。</p>
+    </div>
+
+    <div class="admonition-tip">
+      <div class="admonition-tip-title">💡 提示</div>
+      <p>如果您的用例只需要向现有节点添加临时数据，您可以使用 <a href="node-state.html">NodeState</a> API 而不是子类化和节点替换。</p>
+    </div>
+
+    <p>一些最常用的 Lexical Nodes 由核心库拥有和维护。例如，ParagraphNode、HeadingNode、QuoteNode、List(Item)Node 等 - 这些都由 Lexical 包提供，这为某些编辑器功能提供了更简单的开箱即用体验，但也使得难以覆盖其行为。例如，如果您想更改 ListNode 的行为，通常会扩展该类并覆盖方法。但是，您如何告诉 Lexical 在 ListPlugin 中使用<em>您的</em> ListNode 子类而不是使用核心 ListNode？这就是 Node Replacement 可以帮助的地方。</p>
+
+    <p>Node Replacement 允许您将编辑器中给定节点的所有实例替换为不同节点类的实例。这可以通过 Editor config 中的 nodes 数组完成：</p>
+
+    <pre><code class="language-ts">const editorConfig = {
+    ...
+    nodes=[
+        // Don't forget to register your custom node separately!
+        CustomParagraphNode,
+        {
+            replace: ParagraphNode,
+            with: (node: ParagraphNode) => {
+                return $createCustomParagraphNode();
+            },
+            withKlass: CustomParagraphNode,
+        }
+    ]
+}</code></pre>
+
+    <p>在上面的代码片段中：</p>
+    <ul>
+      <li><code>replace</code>：指定要被替换的核心节点类型。</li>
+      <li><code>with</code>：定义一个转换函数，将原始节点的实例替换为自定义节点。</li>
+      <li><code>withKlass</code>：此选项确保与原始节点类型关联的行为与替换无缝协作。例如，当指定 withKlass 时，针对 ParagraphNode 的 node transforms 或 mutation listeners 也将应用于 CustomParagraphNode。如果没有此选项，自定义节点可能无法完全与编辑器的内置功能集成，导致意外行为。</li>
+    </ul>
+
+    <p>一旦完成此操作，Lexical 将把所有 ParagraphNode 实例替换为 CustomParagraphNode 实例。此功能的一个重要用例是覆盖核心节点的序列化行为。请查看下面的完整示例。</p>
+
+    <h2 id="node-replacement-example">
+      Node Replacement Example
+      <a href="#node-replacement-example" class="hash-link">#</a>
+    </h2>
+
+    <p>此示例演示使用 Node Replacement 将所有 <code>ParagraphNode</code> 替换为覆盖 <code>createDOM</code> 的 <code>CustomParagraphNode</code>。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/node-replacement.md" target="_blank">编辑此页</a> |
+      <a href="nodes.html">上一篇：Nodes</a> |
+      <a href="node-state.html">下一篇：NodeState</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

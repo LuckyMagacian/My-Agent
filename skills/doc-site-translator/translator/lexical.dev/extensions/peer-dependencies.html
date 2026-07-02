@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peer 依赖 | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+    .language-js, .language-ts, .language-tsx, .language-json {
+      display: block;
+    }
+    .token-line {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/peer-dependencies">Lexical 官方文档 Peer 依赖 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/peer-dependencies">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">Peer 依赖</a>
+  </nav>
+
+  <main>
+    <header><h1>Peer 依赖</h1></header>
+<p>Peer Dependencies 用于声明扩展之间的间接或可选依赖。这可用于仅在某个其他扩展可用时启用某些功能或配置，或用于避免依赖循环。扩展必须形成有向无环图，不能存在从一个扩展回到其自身的依赖路径。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="use-cases">使用场景<a href="#use-cases" class="hash-link" aria-label="Direct link to Use Cases" title="Direct link to Use Cases" translate="no">​</a></h2>
+<p>通常，<code>peerDependencies</code> 的预期使用场景是仅在某个其他扩展存在时提供功能。例如，你可能有一个需要特殊代码与 React 交互的扩展，但它也可以在没有 React 的情况下使用，因此你可以将 <code>ReactProviderExtension</code> 放在 <code>peerDependencies</code> 数组中。</p>
+<p>另一个例子是为提供某种自定义节点类型的扩展提供 Markdown 序列化或导入功能，但仅当该编辑器中存在 <code>MarkdownExtension</code> 时才提供。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

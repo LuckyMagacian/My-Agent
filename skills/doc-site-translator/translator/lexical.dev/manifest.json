@@ -1,0 +1,621 @@
+{
+  "source_url": "https://lexical.dev/docs/intro",
+  "domain": "lexical.dev",
+  "framework": "docusaurus",
+  "discovered_at": "2026-06-29T10:00:00Z",
+  "total_pages": 74,
+  "categories": {
+    "intro": 1,
+    "getting-started": 7,
+    "concepts": 21,
+    "serialization": 3,
+    "extensions": 10,
+    "packages": 31,
+    "react": 4,
+    "collaboration": 2,
+    "faq": 1
+  },
+  "pages": [
+    {
+      "url": "https://lexical.dev/docs/intro",
+      "path": "/docs/intro",
+      "title": "Introduction",
+      "title_zh": "介绍",
+      "category": "intro",
+      "depth": 0,
+      "status": "translated",
+      "output_file": "intro.html",
+      "translated_at": "2026-06-29T10:30:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/quick-start",
+      "path": "/docs/getting-started/quick-start",
+      "title": "Quick Start (Vanilla JS)",
+      "title_zh": "快速开始（Vanilla JS）",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "getting-started/quick-start.html",
+      "translated_at": "2026-06-30T10:00:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/react",
+      "path": "/docs/getting-started/react",
+      "title": "Quick Start (React)",
+      "title_zh": "Getting Started with React",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "getting-started/react.html",
+      "translated_at": "2026-06-30T10:05:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/theming",
+      "path": "/docs/getting-started/theming",
+      "title": "Theming",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/supported-browsers",
+      "path": "/docs/getting-started/supported-browsers",
+      "title": "Supported Browsers",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/creating-plugin",
+      "path": "/docs/getting-started/creating-plugin",
+      "title": "Creating a Plugin",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/getting-started/devtools",
+      "path": "/docs/getting-started/devtools",
+      "title": "DevTools",
+      "category": "getting-started",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/editor-state",
+      "path": "/docs/concepts/editor-state",
+      "title": "Editor State",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/nodes",
+      "path": "/docs/concepts/nodes",
+      "title": "Nodes",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/node-replacement",
+      "path": "/docs/concepts/node-replacement",
+      "title": "Node Replacement",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/node-state",
+      "path": "/docs/concepts/node-state",
+      "title": "Node State",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/named-slots",
+      "path": "/docs/concepts/named-slots",
+      "title": "Named Slots",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/key-management",
+      "path": "/docs/concepts/key-management",
+      "title": "Key Management",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/node-cloning",
+      "path": "/docs/concepts/node-cloning",
+      "title": "Node Cloning",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/listeners",
+      "path": "/docs/concepts/listeners",
+      "title": "Listeners",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/transforms",
+      "path": "/docs/concepts/transforms",
+      "title": "Transforms",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/commands",
+      "path": "/docs/concepts/commands",
+      "title": "Commands",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/selection",
+      "path": "/docs/concepts/selection",
+      "title": "Selection",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/read-only",
+      "path": "/docs/concepts/read-only",
+      "title": "Read Only",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/history",
+      "path": "/docs/concepts/history",
+      "title": "History",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/dom-events",
+      "path": "/docs/concepts/dom-events",
+      "title": "DOM Events",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/shadow-dom",
+      "path": "/docs/concepts/shadow-dom",
+      "title": "Shadow DOM",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/traversals",
+      "path": "/docs/concepts/traversals",
+      "title": "Traversals",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/concepts/updates",
+      "path": "/docs/concepts/updates",
+      "title": "Updates",
+      "category": "concepts",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/serialization/",
+      "path": "/docs/serialization/",
+      "title": "Serialization Overview",
+      "category": "serialization",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/serialization/dom-import",
+      "path": "/docs/serialization/dom-import",
+      "title": "DOM Import",
+      "category": "serialization",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/serialization/dom-render",
+      "path": "/docs/serialization/dom-render",
+      "title": "DOM Render",
+      "category": "serialization",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/intro",
+      "path": "/docs/extensions/intro",
+      "title": "Extensions Introduction",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/defining-extensions",
+      "path": "/docs/extensions/defining-extensions",
+      "title": "Defining Extensions",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/migration",
+      "path": "/docs/extensions/migration",
+      "title": "Migration",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/react",
+      "path": "/docs/extensions/react",
+      "title": "React Extensions",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/signals",
+      "path": "/docs/extensions/signals",
+      "title": "Signals",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/peer-dependencies",
+      "path": "/docs/extensions/peer-dependencies",
+      "title": "Peer Dependencies",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/included-extensions",
+      "path": "/docs/extensions/included-extensions",
+      "title": "Included Extensions",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/design",
+      "path": "/docs/extensions/design",
+      "title": "Extension Design",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/extensions/faq",
+      "path": "/docs/extensions/faq",
+      "title": "Extensions FAQ",
+      "category": "extensions",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical",
+      "path": "/docs/packages/lexical",
+      "title": "lexical",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-clipboard",
+      "path": "/docs/packages/lexical-clipboard",
+      "title": "lexical-clipboard",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-code-core",
+      "path": "/docs/packages/lexical-code-core",
+      "title": "lexical-code-core",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-code-prism",
+      "path": "/docs/packages/lexical-code-prism",
+      "title": "lexical-code-prism",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-code-shiki",
+      "path": "/docs/packages/lexical-code-shiki",
+      "title": "lexical-code-shiki",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-code",
+      "path": "/docs/packages/lexical-code",
+      "title": "lexical-code",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-devtools-core",
+      "path": "/docs/packages/lexical-devtools-core",
+      "title": "lexical-devtools-core",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-dragon",
+      "path": "/docs/packages/lexical-dragon",
+      "title": "lexical-dragon",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-eslint-plugin",
+      "path": "/docs/packages/lexical-eslint-plugin",
+      "title": "lexical-eslint-plugin",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-extension",
+      "path": "/docs/packages/lexical-extension",
+      "title": "lexical-extension",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-file",
+      "path": "/docs/packages/lexical-file",
+      "title": "lexical-file",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-hashtag",
+      "path": "/docs/packages/lexical-hashtag",
+      "title": "lexical-hashtag",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-headless",
+      "path": "/docs/packages/lexical-headless",
+      "title": "lexical-headless",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-history",
+      "path": "/docs/packages/lexical-history",
+      "title": "lexical-history",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-html",
+      "path": "/docs/packages/lexical-html",
+      "title": "lexical-html",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-internal",
+      "path": "/docs/packages/lexical-internal",
+      "title": "lexical-internal",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-link",
+      "path": "/docs/packages/lexical-link",
+      "title": "lexical-link",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-list",
+      "path": "/docs/packages/lexical-list",
+      "title": "lexical-list",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-mark",
+      "path": "/docs/packages/lexical-mark",
+      "title": "lexical-mark",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-markdown",
+      "path": "/docs/packages/lexical-markdown",
+      "title": "lexical-markdown",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-offset",
+      "path": "/docs/packages/lexical-offset",
+      "title": "lexical-offset",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-overflow",
+      "path": "/docs/packages/lexical-overflow",
+      "title": "lexical-overflow",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-plain-text",
+      "path": "/docs/packages/lexical-plain-text",
+      "title": "lexical-plain-text",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-react",
+      "path": "/docs/packages/lexical-react",
+      "title": "lexical-react",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-rich-text",
+      "path": "/docs/packages/lexical-rich-text",
+      "title": "lexical-rich-text",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-selection",
+      "path": "/docs/packages/lexical-selection",
+      "title": "lexical-selection",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-table",
+      "path": "/docs/packages/lexical-table",
+      "title": "lexical-table",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-tailwind",
+      "path": "/docs/packages/lexical-tailwind",
+      "title": "lexical-tailwind",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-text",
+      "path": "/docs/packages/lexical-text",
+      "title": "lexical-text",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-utils",
+      "path": "/docs/packages/lexical-utils",
+      "title": "lexical-utils",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-yjs",
+      "path": "/docs/packages/lexical-yjs",
+      "title": "lexical-yjs",
+      "category": "packages",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/react/",
+      "path": "/docs/react/",
+      "title": "React Overview",
+      "category": "react",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/react/plugins",
+      "path": "/docs/react/plugins",
+      "title": "React Plugins",
+      "category": "react",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/react/create_plugin",
+      "path": "/docs/react/create_plugin",
+      "title": "Create React Plugin",
+      "category": "react",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/react/faq",
+      "path": "/docs/react/faq",
+      "title": "React FAQ",
+      "category": "react",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/collaboration/react",
+      "path": "/docs/collaboration/react",
+      "title": "Collaboration React",
+      "category": "collaboration",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/collaboration/faq",
+      "path": "/docs/collaboration/faq",
+      "title": "Collaboration FAQ",
+      "category": "collaboration",
+      "depth": 1,
+      "status": "pending"
+    },
+    {
+      "url": "https://lexical.dev/docs/faq",
+      "path": "/docs/faq",
+      "title": "FAQ",
+      "category": "faq",
+      "depth": 1,
+      "status": "pending"
+    }
+  ]
+}

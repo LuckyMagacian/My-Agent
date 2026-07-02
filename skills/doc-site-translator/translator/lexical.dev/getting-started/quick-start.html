@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>快速开始（Vanilla JS） | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #333; }
+    h1 { font-size: 2rem; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; margin-top: 1.5em; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    ul { margin: 1em 0; padding-left: 2em; }
+    li { margin: 0.5em 0; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; border-radius: 6px; border-left: 4px solid #ffc107; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/getting-started/quick-start">Lexical 官方文档 Quick Start (Vanilla JS) 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/getting-started/quick-start">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../intro.html">介绍</a> » 快速开始（Vanilla JS）
+  </nav>
+
+  <main>
+    <header>
+      <h1>快速开始（Vanilla JS）</h1>
+    </header>
+
+    <p>本节介绍如何独立于任何框架或库使用 Lexical。如果您打算在 React 应用中使用 Lexical，建议<a href="react.html">查看 Getting Started with React 页面</a>。</p>
+
+    <h3 id="creating-an-editor-and-using-it">
+      创建编辑器并使用它
+      <a href="#creating-an-editor-and-using-it" class="hash-link">#</a>
+    </h3>
+
+    <p>使用 Lexical 时，通常会使用单个编辑器实例。编辑器实例可以被视为负责将 <code>EditorState</code> 与 DOM 连接起来的组件。编辑器也是您可以注册自定义节点、添加监听器和变换的地方。</p>
+
+    <p>编辑器实例可以从 <code>lexical</code> 包创建，并接受一个可选的配置对象，用于设置主题和其他选项：</p>
+
+    <pre><code class="language-js">import {createEditor} from 'lexical';
+
+const config = {
+  namespace: 'MyEditor',
+  theme: {
+    ...
+  },
+  onError: console.error
+};
+
+const editor = createEditor(config);</code></pre>
+
+    <p>一旦您有了编辑器实例，当准备好时，您可以将编辑器实例与文档中的 content editable <code>&lt;div&gt;</code> 元素关联起来：</p>
+
+    <pre><code class="language-js">const contentEditableElement = document.getElementById('editor');
+
+editor.setRootElement(contentEditableElement);</code></pre>
+
+    <p>如果您想从元素中清除编辑器实例，可以传递 <code>null</code>。或者，如果需要，您可以切换到另一个元素，只需将替代元素引用传递给 <code>setRootElement()</code>。</p>
+
+    <h3 id="working-with-editor-states">
+      使用编辑器状态
+      <a href="#working-with-editor-states" class="hash-link">#</a>
+    </h3>
+
+    <p>在 Lexical 中，真实来源不是 DOM，而是 Lexical 维护并与编辑器实例关联的底层状态模型。您可以通过调用 <code>editor.getEditorState()</code> 从编辑器获取最新的编辑器状态。</p>
+
+    <p>编辑器状态可以序列化为 JSON，编辑器实例提供了一个有用的方法来反序列化字符串化的编辑器状态。</p>
+
+    <pre><code class="language-js">const stringifiedEditorState = JSON.stringify(editor.getEditorState().toJSON());
+
+const newEditorState = editor.parseEditorState(stringifiedEditorState);</code></pre>
+
+    <h3 id="updating-an-editor-state">
+      更新编辑器状态
+      <a href="#updating-an-editor-state" class="hash-link">#</a>
+    </h3>
+
+    <p>虽然使用 <code>@lexical/rich-text</code> 或 <code>@lexical/plain-text</code> 辅助包时可能不需要，但对于程序化内容修改以及自定义编辑器微调仍然相关。</p>
+
+    <p>有几种更新编辑器实例的方法：</p>
+
+    <ul>
+      <li>使用 <code>editor.update()</code> 触发更新</li>
+      <li>通过 <code>editor.setEditorState()</code> 设置编辑器状态</li>
+      <li>通过 <code>editor.registerNodeTransform()</code> 作为现有更新的一部分应用更改</li>
+      <li>使用命令监听器，通过 <code>editor.registerCommand(EXAMPLE_COMMAND, () => {...}, priority)</code></li>
+    </ul>
+
+    <p>更新编辑器最常用的方法是使用 <code>editor.update()</code>。调用此函数需要传入一个函数，该函数将提供访问底层编辑器状态的权限以进行修改。当开始新的更新时，当前编辑器状态会被克隆并用作起点。从技术角度来看，这意味着 Lexical 在更新期间利用了一种称为双缓冲的技术。有一个编辑器状态表示屏幕上当前的内容，另一个进行中的编辑器状态表示未来的更改。</p>
+
+    <p>创建更新通常是一个异步过程，允许 Lexical 将多个更新批量合并到一个更新中——提高性能。当 Lexical 准备将更新提交到 DOM 时，更新中的底层更改和变化将形成一个新的不可变编辑器状态。调用 <code>editor.getEditorState()</code> 将返回基于更新更改的最新编辑器状态。</p>
+
+    <p>以下是如何更新编辑器实例的示例：</p>
+
+    <pre><code class="language-js">import {$getRoot, $getSelection, $createParagraphNode, $createTextNode} from 'lexical';
+
+// 在 `editor.update` 内部，您可以使用特殊的 $ 前缀辅助函数。
+// 这些函数不能在闭包外部使用，如果尝试会出错。
+// （如果您熟悉 React，可以想象这有点像在 React 函数组件外部使用 hook）。
+
+editor.update(() => {
+  // 从 EditorState 获取 RootNode
+  const root = $getRoot();
+
+  // 从 EditorState 获取 selection
+  const selection = $getSelection();
+
+  // 创建新的 ParagraphNode
+  const paragraphNode = $createParagraphNode();
+
+  // 创建新的 TextNode
+  const textNode = $createTextNode('Hello world');
+
+  // 将文本节点附加到段落
+  paragraphNode.append(textNode);
+
+  // 最后，将段落附加到根节点
+  root.append(paragraphNode);
+});</code></pre>
+
+    <p><strong>请注意，核心库（'lexical' 包）不会监听任何命令或对用户事件做出响应来执行编辑器状态更新。</strong> 为了在编辑器中看到文本和其他内容，您需要注册<a href="https://lexical.dev/docs/concepts/commands#editorregistercommand">命令监听器</a>并在回调中更新编辑器。Lexical 提供了一些辅助包，可以轻松地为<a href="https://lexical.dev/docs/packages/lexical-plain-text">纯文本</a>或<a href="https://lexical.dev/docs/packages/lexical-rich-text">富文本</a>体验绑定许多基本命令。</p>
+
+    <p>如果您想知道编辑器何时更新以便对更改做出反应，可以向编辑器添加更新监听器，如下所示：</p>
+
+    <pre><code class="language-js">editor.registerUpdateListener(({editorState}) => {
+  // 最新的 EditorState 可以作为 `editorState` 找到。
+  // 要读取 EditorState 的内容，请使用以下 API：
+
+  editorState.read(() => {
+    // 就像 editor.update()，.read() 需要一个闭包，您可以在其中使用
+    // $ 前缀的辅助函数。
+  });
+});</code></pre>
+
+    <h3 id="putting-it-together">
+      组合在一起
+      <a href="#putting-it-together" class="hash-link">#</a>
+    </h3>
+
+    <p>这里我们有一个最简单的 Lexical 设置，使用富文本配置（<code>@lexical/rich-text</code>），并启用了历史记录（<code>@lexical/history</code>）和无障碍访问（<code>@lexical/dragon</code>）功能。</p>
+
+    <p style="background: #f6f8fa; padding: 1rem; border-radius: 6px; border-left: 4px solid #0366d6;">
+      💡 <strong>完整示例</strong>：请访问 <a href="https://stackblitz.com/github/facebook/lexical/tree/main/examples/vanilla-js?embed=1&file=src%2Fmain.ts&terminalHeight=0&ctl=1" target="_blank">StackBlitz 上的 Lexical Vanilla JS 示例</a> 查看完整的可运行示例。
+    </p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/getting-started/quick-start.md" target="_blank">编辑此页</a> |
+      <a href="../intro.html">上一篇：介绍</a> |
+      <a href="react.html">下一篇：Getting Started with React</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

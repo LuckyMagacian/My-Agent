@@ -1,0 +1,185 @@
+{
+  "source_url": "https://lexical.dev/docs/packages",
+  "domain": "lexical.dev",
+  "framework": "docusaurus",
+  "discovered_at": "2026-07-01T10:00:00Z",
+  "total_pages": 16,
+  "pages": [
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-internal",
+      "path": "/docs/packages/lexical-internal",
+      "title_en": "@lexical/internal",
+      "title_zh": "@lexical/internal",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-internal.html",
+      "translated_at": "2026-07-01T10:05:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-link",
+      "path": "/docs/packages/lexical-link",
+      "title_en": "@lexical/link",
+      "title_zh": "@lexical/link",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-link.html",
+      "translated_at": "2026-07-01T10:10:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-list",
+      "path": "/docs/packages/lexical-list",
+      "title_en": "@lexical/list",
+      "title_zh": "@lexical/list",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-list.html",
+      "translated_at": "2026-07-01T10:15:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-mark",
+      "path": "/docs/packages/lexical-mark",
+      "title_en": "@lexical/mark",
+      "title_zh": "@lexical/mark",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-mark.html",
+      "translated_at": "2026-07-01T10:20:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-markdown",
+      "path": "/docs/packages/lexical-markdown",
+      "title_en": "@lexical/markdown",
+      "title_zh": "@lexical/markdown",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-markdown.html",
+      "translated_at": "2026-07-01T10:25:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-offset",
+      "path": "/docs/packages/lexical-offset",
+      "title_en": "@lexical/offset",
+      "title_zh": "@lexical/offset",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-offset.html",
+      "translated_at": "2026-07-01T10:30:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-overflow",
+      "path": "/docs/packages/lexical-overflow",
+      "title_en": "@lexical/overflow",
+      "title_zh": "@lexical/overflow",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-overflow.html",
+      "translated_at": "2026-07-01T10:35:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-plain-text",
+      "path": "/docs/packages/lexical-plain-text",
+      "title_en": "@lexical/plain-text",
+      "title_zh": "@lexical/plain-text",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-plain-text.html",
+      "translated_at": "2026-07-01T10:40:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-react",
+      "path": "/docs/packages/lexical-react",
+      "title_en": "@lexical/react",
+      "title_zh": "@lexical/react",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-react.html",
+      "translated_at": "2026-07-01T10:45:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-rich-text",
+      "path": "/docs/packages/lexical-rich-text",
+      "title_en": "@lexical/rich-text",
+      "title_zh": "@lexical/rich-text",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-rich-text.html",
+      "translated_at": "2026-07-01T10:50:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-selection",
+      "path": "/docs/packages/lexical-selection",
+      "title_en": "@lexical/selection",
+      "title_zh": "@lexical/selection",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-selection.html",
+      "translated_at": "2026-07-01T10:55:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-table",
+      "path": "/docs/packages/lexical-table",
+      "title_en": "@lexical/table",
+      "title_zh": "@lexical/table",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-table.html",
+      "translated_at": "2026-07-01T11:00:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-tailwind",
+      "path": "/docs/packages/lexical-tailwind",
+      "title_en": "@lexical/tailwind",
+      "title_zh": "@lexical/tailwind",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-tailwind.html",
+      "translated_at": "2026-07-01T11:05:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-text",
+      "path": "/docs/packages/lexical-text",
+      "title_en": "@lexical/text",
+      "title_zh": "@lexical/text",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-text.html",
+      "translated_at": "2026-07-01T11:10:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-utils",
+      "path": "/docs/packages/lexical-utils",
+      "title_en": "@lexical/utils",
+      "title_zh": "@lexical/utils",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-utils.html",
+      "translated_at": "2026-07-01T11:15:00Z"
+    },
+    {
+      "url": "https://lexical.dev/docs/packages/lexical-yjs",
+      "path": "/docs/packages/lexical-yjs",
+      "title_en": "@lexical/yjs",
+      "title_zh": "@lexical/yjs",
+      "category": "packages",
+      "depth": 1,
+      "status": "translated",
+      "output_file": "lexical-yjs.html",
+      "translated_at": "2026-07-01T11:20:00Z"
+    }
+  ]
+}

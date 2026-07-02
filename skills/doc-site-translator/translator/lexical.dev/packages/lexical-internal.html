@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@lexical/internal | Lexical</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #333; }
+    .translation-banner { background: #fff3cd; padding: 8px 16px; margin-bottom: 1rem; font-size: 14px; border-radius: 4px; }
+    blockquote { background: #fff8e1; border-left: 4px solid #ffa000; padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 4px; }
+    code { font-family: 'SF Mono', Consolas, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; }
+    h1 { margin-top: 0; }
+    nav.pagination-nav { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; }
+    nav.pagination-nav a { color: #0366d6; text-decoration: none; }
+    nav.pagination-nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/packages/lexical-internal">原文</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/packages/lexical-internal">原文</a> 为准。
+  </div>
+
+  <main>
+    <header>
+      <h1><code>@lexical/internal</code></h1>
+    </header>
+
+    <blockquote>
+      <p><strong>[警告]</strong></p>
+      <p>此包包含 Lexical 各包之间共享的<strong>内部</strong>工具：<code>invariant</code>/<code>devInvariant</code>、开发/生产环境错误和警告消息格式化、<code>warnOnlyOnce</code>，以及 <code>LEXICAL_VERSION</code> 常量。这些工具与构建转换绑定，并被内联到其他每个包中，而不是作为运行时依赖项发布。因此它仅被发布以便模块能够通过正常的包解析进行解析——包括在开发时针对链接检出使用的 <code>source</code> 导出条件。</p>
+      <p>它<strong>不是</strong>公共 API。请从 <code>lexical</code> 和 <code>@lexical/*</code> 功能包导入。此处的内容不遵循 semver，任何导出都可能随时更改或消失，恕不通知。</p>
+    </blockquote>
+  </main>
+
+  <nav class="pagination-nav">
+    <a href="lexical-html.html">
+      <div>上一个</div>
+      <div>@lexical/html</div>
+    </a>
+    <a href="lexical-link.html">
+      <div>下一个</div>
+      <div>@lexical/link</div>
+    </a>
+  </nav>
+</body>
+</html>

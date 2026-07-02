@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Updates | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    ul {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/updates">Lexical 官方文档 Updates 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/updates">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Updates
+  </nav>
+
+  <main>
+    <header>
+      <h1>Updates</h1>
+    </header>
+
+    <p>Lexical 中的 Updates 是修改编辑器状态的同步操作（嵌套 update 场景除外，这应该被弃用）。协调过程（DOM 更新）出于性能原因被批量处理。这种 DOM 更新的批处理意味着我们可以避免不必要的重新渲染并优化渲染过程。</p>
+
+    <h2 id="update-tags">
+      Update Tags
+      <a href="#update-tags" class="hash-link">#</a>
+    </h2>
+
+    <p>Update tags 是可以附加到 update 以指示其类型或目的的字符串标识符。它们可用于控制 update 如何被处理、合并或由 listener 处理。单个 update 可以使用多个 tag。</p>
+
+    <p>您可以通过两种方式添加 tag：</p>
+
+    <p>在 <code>editor.update()</code> 中使用 <code>tag</code> 选项：</p>
+
+    <pre><code class="language-js">import {HISTORY_PUSH_TAG, PASTE_TAG} from 'lexical';
+
+editor.update(() => {
+  // Your update code
+}, {
+  tag: HISTORY_PUSH_TAG // Single tag
+});
+
+editor.update(() => {
+  // Your update code
+}, {
+  tag: [HISTORY_PUSH_TAG, PASTE_TAG] // Multiple tags
+});</code></pre>
+
+    <p>在 update 中使用 <code>$addUpdateTag()</code> 函数：</p>
+
+    <pre><code class="language-js">import {HISTORY_PUSH_TAG} from 'lexical';
+
+editor.update(() => {
+  $addUpdateTag(HISTORY_PUSH_TAG);
+  // Your update code
+});</code></pre>
+
+    <p>您可以使用 <code>$hasUpdateTag()</code> 检查 tag 是否存在：</p>
+
+    <pre><code class="language-js">import {HISTORIC_TAG} from 'lexical';
+
+editor.update(() => {
+  $addUpdateTag(HISTORIC_TAG);
+  console.log($hasUpdateTag(HISTORIC_TAG)); // true
+});</code></pre>
+
+    <p>注意：虽然 update tag 可以使用 <code>$hasUpdateTag()</code> 在同一 update 中检查，但它们通常通过各自 payload 中的 <code>tags</code> 和 <code>updateTags</code> 属性在 update 和 mutation listener 中访问。以下是更常见的使用模式：</p>
+
+    <pre><code class="language-js">import {HISTORIC_TAG} from 'lexical';
+
+editor.registerUpdateListener(({tags}) => {
+  if (tags.has(HISTORIC_TAG)) {
+    // Handle updates with historic tag
+  }
+});
+
+editor.registerMutationListener(MyNode, (mutatedNodes, { updateTags }) => {
+  // updateTags contains tags from the current update
+  if (updateTags.has(HISTORIC_TAG)) {
+    // Handle mutations with historic tag
+  }
+});</code></pre>
+
+    <h2 id="common-update-tags">
+      常用 Update Tags
+      <a href="#common-update-tags" class="hash-link">#</a>
+    </h2>
+
+    <p>Lexical 提供了几个作为常量导出的内置 update tags：</p>
+
+    <ul>
+      <li><code>HISTORIC_TAG</code>: 表示 update 与历史操作（undo/redo）相关</li>
+      <li><code>HISTORY_PUSH_TAG</code>: 强制创建新的历史条目</li>
+      <li><code>HISTORY_MERGE_TAG</code>: 将当前 update 与上一个历史条目合并</li>
+      <li><code>PASTE_TAG</code>: 表示 update 与粘贴操作相关。<code>@lexical/history</code> 将此视为历史边界，因此粘贴获得自己的撤销条目</li>
+      <li><code>CUT_TAG</code>: 表示 update 与剪切操作相关。<code>@lexical/history</code> 将此视为历史边界，因此剪切获得自己的撤销条目</li>
+      <li><code>COLLABORATION_TAG</code>: 表示 update 与协作编辑相关</li>
+      <li><code>SKIP_COLLAB_TAG</code>: 表示 update 应跳过协作同步</li>
+      <li><code>SKIP_SCROLL_INTO_VIEW_TAG</code>: 防止将 selection 滚动到视图中</li>
+      <li><code>SKIP_DOM_SELECTION_TAG</code>: 防止更新 DOM selection（对于不应影响 focus 的 update 很有用）</li>
+    </ul>
+
+    <h2 id="tag-validation">
+      Tag 验证
+      <a href="#tag-validation" class="hash-link">#</a>
+    </h2>
+
+    <p>为了防止拼写错误并在使用 update tags 时确保类型安全，Lexical 为所有内置 tag 导出常量。建议始终使用这些常量而不是字符串字面量：</p>
+
+    <pre><code class="language-js">import {
+  HISTORIC_TAG,
+  HISTORY_PUSH_TAG,
+  COLLABORATION_TAG,
+} from 'lexical';
+
+editor.update(() => {
+  // Using constants ensures type safety and prevents typos
+  $addUpdateTag(HISTORIC_TAG);
+
+  // These constants can be used in update options
+  editor.update(() => {
+    // Your update code
+  }, {
+    tag: HISTORY_PUSH_TAG
+  });
+
+  // And in listener checks
+  editor.registerUpdateListener(({tags}) => {
+    if (tags.has(COLLABORATION_TAG)) {
+      // Handle collaborative updates
+    }
+  });
+});</code></pre>
+
+    <h2 id="custom-tags">
+      自定义 Tags
+      <a href="#custom-tags" class="hash-link">#</a>
+    </h2>
+
+    <p>虽然 Lexical 提供常用 tag 作为常量，但您也可以定义自己的常量用于自定义 tag，以保持一致性和类型安全：</p>
+
+    <pre><code class="language-js">// Define your custom tags as constants
+const MY_FEATURE_TAG = 'my-custom-feature';
+const MY_UPDATE_TAG = 'my-custom-update';
+
+editor.update(() => {
+  $addUpdateTag(MY_FEATURE_TAG);
+}, {
+  tag: MY_UPDATE_TAG
+});
+
+// Listen for updates with specific tags
+editor.registerUpdateListener(({tags}) => {
+  if (tags.has(MY_FEATURE_TAG)) {
+    // Handle updates from your custom feature
+  }
+});</code></pre>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/updates.md" target="_blank">编辑此页</a> |
+      <a href="https://lexical.dev/docs/serialization/">下一篇：Serialization & Deserialization</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started with React | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #333; }
+    h1 { font-size: 2rem; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; margin-top: 1.5em; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    ul { margin: 1em 0; padding-left: 2em; }
+    li { margin: 0.5em 0; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .admonition-tip { background: #f0fff4; border-left: 4px solid #38a169; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/getting-started/react">Lexical 官方文档 Getting Started with React 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/getting-started/react">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../intro.html">介绍</a> » Getting Started with React
+  </nav>
+
+  <main>
+    <header>
+      <h1>Getting Started with React</h1>
+    </header>
+
+    <h3 id="video-tutorials">
+      视频教程
+      <a href="#video-tutorials" class="hash-link">#</a>
+    </h3>
+
+    <p>有关在 React 中使用 Lexical 设置基本编辑器的详细演练，请查看以下视频：</p>
+
+    <ul>
+      <li><a href="https://www.youtube.com/watch?v=qIqxvk2qcmo" target="_blank">Getting Started with Lexical & React</a></li>
+      <li><a href="https://www.youtube.com/watch?v=pIBUFYd9zJY" target="_blank">Themes, Nodes, and Rich Text</a></li>
+      <li><a href="https://www.youtube.com/watch?v=5sRh_WXw0WI" target="_blank">Headings, Lists, Toolbar</a></li>
+      <li><a href="https://www.youtube.com/watch?v=abZNazybzvs" target="_blank">Creating Nodes and Plugins</a></li>
+    </ul>
+
+    <p>请注意，其中一些视频可能部分过时，因为我们不会像文本文档那样频繁更新它们。</p>
+
+    <h3 id="creating-basic-rich-text-editor">
+      创建基本富文本编辑器
+      <a href="#creating-basic-rich-text-editor" class="hash-link">#</a>
+    </h3>
+
+    <p>为了简化 Lexical 与 React 的集成，我们提供了 <code>@lexical/react</code> 包，它将 Lexical API 封装在 React 组件中，这样编辑器本身以及所有插件都可以使用 JSX 轻松组合。此外，如果需要，您可以延迟加载插件，这样在真正使用它们之前不会付出代价。</p>
+
+    <p>首先，安装 <code>lexical</code> 和 <code>@lexical/react</code>：</p>
+
+    <pre><code class="language-bash">npm install --save lexical @lexical/react</code></pre>
+
+    <p>以下是使用 <code>lexical</code> 和 <code>@lexical/react</code> 的基本富文本编辑器示例。</p>
+
+    <pre><code class="language-jsx">import {$getRoot, $getSelection} from 'lexical';
+import {useEffect} from 'react';
+
+import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
+import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {ContentEditable} from '@lexical/react/LexicalContentEditable';
+import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
+import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
+
+const theme = {
+  // Theme styling goes here
+  //...
+};
+
+// Catch any errors that occur during Lexical updates and log them
+// or throw them as needed. If you don't throw them, Lexical will
+// try to recover gracefully without losing user data.
+function onError(error) {
+  console.error(error);
+}
+
+function Editor() {
+  const initialConfig = {
+    namespace: 'MyEditor',
+    theme,
+    onError,
+  };
+
+  return (
+    &lt;LexicalComposer initialConfig={initialConfig}&gt;
+      &lt;RichTextPlugin
+        contentEditable={
+          &lt;ContentEditable
+            aria-placeholder={'Enter some text...'}
+            placeholder={&lt;div&gt;Enter some text...&lt;/div&gt;}
+          /&gt;
+        }
+        ErrorBoundary={LexicalErrorBoundary}
+      /&gt;
+      &lt;HistoryPlugin /&gt;
+      &lt;AutoFocusPlugin /&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <h3 id="adding-ui-to-control-text-formatting">
+      添加 UI 控制文本格式
+      <a href="#adding-ui-to-control-text-formatting" class="hash-link">#</a>
+    </h3>
+
+    <p>Lexical 本身不提供任何类型的 UI，因为它不是一个现成的编辑器，而是一个用于创建自己的编辑器的框架。下面您可以看到上一章集成的示例，现在包含 2 个新插件：</p>
+
+    <ul>
+      <li><strong>ToolbarPlugin</strong> - 渲染 UI 控制文本格式</li>
+      <li><strong>TreeViewPlugin</strong> - 在编辑器下方渲染调试视图，以便我们可以实时查看其状态</li>
+    </ul>
+
+    <p>然而，没有 CSS 就无法创建任何 UI，Lexical 也不例外。请注意 <code>ExampleTheme.ts</code> 以及它在此示例中的使用方式，相应的样式定义在 <code>styles.css</code> 中。</p>
+
+    <p style="background: #f6f8fa; padding: 1rem; border-radius: 6px; border-left: 4px solid #0366d6;">
+      💡 <strong>完整示例</strong>：请访问 <a href="https://stackblitz.com/github/facebook/lexical/tree/main/examples/react-rich?embed=1&file=src%2FApp.tsx&terminalHeight=0&ctl=1" target="_blank">StackBlitz 上的 Lexical React Rich 示例</a> 查看完整的可运行示例。
+    </p>
+
+    <h3 id="saving-lexical-state">
+      保存 Lexical 状态
+      <a href="#saving-lexical-state" class="hash-link">#</a>
+    </h3>
+
+    <div class="admonition-tip">
+      <p>💡 <strong>提示</strong>：虽然我们在这里尝试编写自己的插件进行演示，但在实际项目中最好选择 <a href="https://lexical.dev/docs/react/plugins#lexicalonchangeplugin" target="_blank">LexicalOnChangePlugin</a>。</p>
+    </div>
+
+    <p>现在我们在 React 中有一个简单的编辑器，接下来可能要做的是访问编辑器的内容，例如将其保存到数据库中。我们可以通过<a href="https://lexical.dev/docs/concepts/listeners#registerupdatelistener" target="_blank">更新监听器</a>来实现，该监听器会在每次编辑器状态更改时执行并提供最新状态。在 React 中，我们通常使用插件系统来设置这样的监听器，因为它通过 React Context 为我们提供了对 LexicalEditor 实例的轻松访问。因此，让我们编写自己的插件，在编辑器更新时通知我们。</p>
+
+    <pre><code class="language-jsx">// When the editor changes, you can get notified via the
+// OnChangePlugin!
+function MyOnChangePlugin({ onChange }) {
+  // Access the editor through the LexicalComposerContext
+  const [editor] = useLexicalComposerContext();
+  // Wrap our listener in useEffect to handle the teardown and avoid stale references.
+  useEffect(() => {
+    // most listeners return a teardown function that can be called to clean them up.
+    return editor.registerUpdateListener(({editorState}) => {
+      // call onChange here to pass the latest state up to the parent.
+      onChange(editorState);
+    });
+  }, [editor, onChange]);
+  return null;
+}</code></pre>
+
+    <p>现在，我们可以在编辑器中实现这一点，并将 EditorState 保存在 React 状态变量中：</p>
+
+    <pre><code class="language-jsx">function Editor() {
+  // ...
+
+  const [editorState, setEditorState] = useState();
+  function onChange(editorState) {
+    setEditorState(editorState);
+  }
+
+  return (
+    &lt;LexicalComposer initialConfig={initialConfig}&gt;
+      {/*...*/}
+      &lt;MyOnChangePlugin onChange={onChange}/&gt;
+    &lt;/LexicalComposer&gt;
+  );
+}</code></pre>
+
+    <p>好的，现在我们将 EditorState 对象保存在 React 状态变量中，但我们无法将 JavaScript 对象保存到数据库——那么我们如何持久化状态以便稍后加载？我们需要将其序列化为存储格式。为此目的（以及其他目的），Lexical 提供了几种序列化 API，可将 EditorState 转换为可通过网络发送并保存到数据库的字符串。基于我们之前的示例，我们可以这样做：</p>
+
+    <pre><code class="language-jsx">function onChange(editorState) {
+  // Call toJSON on the EditorState object, which produces a serialization safe string
+  const editorStateJSON = editorState.toJSON();
+  // However, we still have a JavaScript object, so we need to convert it to an actual string with JSON.stringify
+  setEditorState(JSON.stringify(editorStateJSON));
+}</code></pre>
+
+    <p>从那里，连接提交按钮或其他 UI 触发器很容易，它将从 React 状态变量中获取状态并将其发送到服务器以存储在数据库中。</p>
+
+    <p><strong>重要提示</strong>：Lexical 通常设计为非受控的，因此避免尝试将 EditorState 传递回 Editor.setEditorState 或类似的东西。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/getting-started/react.md" target="_blank">编辑此页</a> |
+      <a href="quick-start.html">上一篇：Quick Start (Vanilla JS)</a> |
+      <a href="theming.html">下一篇：Theming</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

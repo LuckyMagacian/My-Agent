@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signals | Lexical 中文文档</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    /* Docusaurus 风格适配 */
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figcaption {
+      font-size: 0.9em;
+      color: #586069;
+      margin-top: 0.5rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .admonition {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+    }
+    .admonition-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+    }
+    .admonition-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .admonition-caution {
+      background: #fff3e0;
+      border-left: 4px solid #ff5722;
+    }
+    .admonitionHeading {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    .hash-link:hover {
+      opacity: 1;
+    }
+    .language-js, .language-ts, .language-tsx, .language-json {
+      display: block;
+    }
+    .token-line {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/extensions/signals">Lexical 官方文档 Signals 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/extensions/signals">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">Signals</a>
+  </nav>
+
+  <main>
+    <header><h1>Signals</h1></header>
+<p>Lexical Extensions 使用 signals 作为响应式接口，你可以用它与扩展之间以及扩展内部进行通信。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="motivation">动机<a href="#motivation" class="hash-link" aria-label="Direct link to Motivation" title="Direct link to Motivation" translate="no">​</a></h2>
+<p>在最底层，Lexical 各部分之间的通信是通过回调完成的，例如 <code>registerCommand</code>、<code>registerUpdateListener</code>、<code>registerMutationListener</code> 以及 DOM 的 <code>addEventListener</code>。</p>
+<p>这些回调的行为以及在某些情况下是否注册，取决于扩展的本地状态，这些状态也可能是可变的，因此需要使用类似的回调机制进行 naïve 实现。对于传统的 React 插件，这个机制是 <code>useEffect</code>，它非常粗粒度，在使用其他框架或不使用框架时并没有真正可移植的等效方案。</p>
+<p>最初的原型主要也是基于回调的，但当你需要基于多个回调或配置值的"结果"进行工作时，这很快变得非常难以处理。Signals 是解决这个问题的一个更通用的方案。甚至有一个 <a href="https://github.com/tc39/proposal-signals" target="_blank" rel="noopener noreferrer" class="">TC39 Signals Proposal</a> 来将此基础设施添加到 JavaScript 标准中。</p>
+<p>Signals 还可以通过 <code>batch</code> 等原语减少冗余回调来进行优化，或者通过 <code>peek</code> 检查当前值而不添加任何订阅。基本上，同一个 Signal 可以像 React State 一样使用（当你想要在值随时间变化时运行代码），也可以像 React Ref 一样使用（当你只需要知道当前值时，这在事件处理程序中很典型）。</p>
+<p>Signals 还不需要你管理依赖数组或使用编译器，订阅和依赖是在运行时根据使用情况推断的。这意味着某个 effect 订阅的 signal 集合可以在不违反任何规则或不产生任何警告的情况下发生变化。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="implementation">实现<a href="#implementation" class="hash-link" aria-label="Direct link to Implementation" title="Direct link to Implementation" translate="no">​</a></h2>
+<p>由于 Signals 尚未标准化，而且 <a href="https://github.com/proposal-signals/signal-polyfill" target="_blank" rel="noopener noreferrer" class="">signal-polyfill</a> 还没有准备好用于生产环境，因此决定利用 <a href="https://github.com/preactjs/signals" target="_blank" rel="noopener noreferrer" class="">@preact/signals-core</a>。这个实现没有依赖、经过优化且测试充分。</p>
+<p>为了未来的兼容性，我们<em>不建议</em>你直接使用 <code>@preact/signals-core</code>，而是使用从 <a href="https://lexical.dev/docs/api/modules/lexical_extension" target="_blank" rel="noopener noreferrer" class="">@lexical/extension</a> 重新导出的版本。</p>
+<p>在初始发布时，这些重新导出包括：</p>
+<div class="language-ts codeBlockContainer_tCvS theme-code-block" style="--prism-color: #393A34; --prism-background-color: #f6f8fa;"><div class="codeBlockContent_Svw1"><pre tabindex="0" class="prism-code language-ts codeBlock_aFMf thin-scrollbar" style="color: rgb(57, 58, 52); background-color: rgb(246, 248, 250);"><code class="codeBlockLines_mm4y"><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token keyword" style="color: rgb(0, 0, 159);">export</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  batch</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  computed</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  effect</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token keyword" style="color: rgb(0, 0, 159);">type</span><span class="token plain"> </span><span class="token class-name">ReadonlySignal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token keyword" style="color: rgb(0, 0, 159);">type</span><span class="token plain"> </span><span class="token class-name">Signal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  signal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token keyword" style="color: rgb(0, 0, 159);">type</span><span class="token plain"> </span><span class="token class-name">SignalOptions</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  untracked</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain"></span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">from</span><span class="token plain"> </span><span class="token string" style="color: rgb(227, 17, 108);">'@preact/signals-core'</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><br></div></code></pre><div class="buttonGroup_MQmt"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_K5gK" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_oqm1"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_N0zQ"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="usage">用法<a href="#usage" class="hash-link" aria-label="Direct link to Usage" title="Direct link to Usage" translate="no">​</a></h2>
+<p>关于 signal 原语如何工作的详细示例，你可以阅读 <a href="https://preactjs.com/guide/v10/signals/" target="_blank" rel="noopener noreferrer" class="">Preact Signals</a> 文档。</p>
+<p>Lexical 提供以下高层 signal 函数来更容易地构建扩展：</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="namedsignals">namedSignals<a href="#namedsignals" class="hash-link" aria-label="Direct link to namedSignals" title="Direct link to namedSignals" translate="no">​</a></h3>
+<p><a class="" href="/docs/api/modules/lexical_extension#namedsignals">namedSignals</a> 是一个便捷函数，用于从配置对象的每个属性输出独立的 signals。</p>
+<div class="language-ts codeBlockContainer_tCvS theme-code-block" style="--prism-color: #393A34; --prism-background-color: #f6f8fa;"><div class="codeBlockContent_Svw1"><pre tabindex="0" class="prism-code language-ts codeBlock_aFMf thin-scrollbar" style="color: rgb(57, 58, 52); background-color: rgb(246, 248, 250);"><code class="codeBlockLines_mm4y"><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token keyword" style="color: rgb(0, 0, 159);">export</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">interface</span><span class="token plain"> </span><span class="token class-name">TabIndentationConfig</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  disabled</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token builtin">boolean</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  maxIndent</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">null</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">|</span><span class="token plain"> </span><span class="token builtin">number</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain"></span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain" style="display: inline-block;"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain"></span><span class="token keyword" style="color: rgb(0, 0, 159);">export</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">const</span><span class="token plain"> TabIndentationExtension </span><span class="token operator" style="color: rgb(57, 58, 52);">=</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">defineExtension</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token function" style="color: rgb(215, 58, 73);">build</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> config</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> state</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token keyword" style="color: rgb(0, 0, 159);">return</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">namedSignals</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">config</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  config</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token generic-function function" style="color: rgb(215, 58, 73);">safeCast</span><span class="token generic-function generic class-name operator" style="color: rgb(57, 58, 52);">&lt;</span><span class="token generic-function generic class-name">TabIndentationConfig</span><span class="token generic-function generic class-name operator" style="color: rgb(57, 58, 52);">&gt;</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain">disabled</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token boolean" style="color: rgb(54, 172, 170);">false</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> maxIndent</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">null</span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  name</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token string" style="color: rgb(227, 17, 108);">'@lexical/extension/TabIndentation'</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token function" style="color: rgb(215, 58, 73);">register</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> config</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> state</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token keyword" style="color: rgb(0, 0, 159);">const</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain">disabled</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> maxIndent</span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">=</span><span class="token plain"> state</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token function" style="color: rgb(215, 58, 73);">getOutput</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token keyword" style="color: rgb(0, 0, 159);">return</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">effect</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">=&gt;</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">      </span><span class="token keyword" style="color: rgb(0, 0, 159);">if</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token operator" style="color: rgb(57, 58, 52);">!</span><span class="token plain">disabled</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token plain">value</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        </span><span class="token comment" style="color: rgb(153, 153, 136); font-style: italic;">// This register function's implementation uses peek on the maxIndent</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        </span><span class="token comment" style="color: rgb(153, 153, 136); font-style: italic;">// signal to get its current value when needed, no need to re-register</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        </span><span class="token comment" style="color: rgb(153, 153, 136); font-style: italic;">// every time this value changes.</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        </span><span class="token keyword" style="color: rgb(0, 0, 159);">return</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">registerTabIndentation</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> maxIndent</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">      </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain"></span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><br></div></code></pre><div class="buttonGroup_MQmt"><button type="button" aria-label="Toggle word wrap" title="Toggle word wrap" class="clean-btn"><svg viewBox="0 0 24 24" class="wordWrapButtonIcon_LvJi" aria-hidden="true"><path fill="currentColor" d="M4 19h6v-2H4v2zM20 5H4v2h16V5zm-3 6H4v2h13.25c1.1 0 2 .9 2 2s-.9 2-2 2H15v-2l-3 3l3 3v-2h2c2.21 0 4-1.79 4-4s-1.79-4-4-4z"></path></svg></button><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_K5gK" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_oqm1"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_N0zQ"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="watchedsignal">watchedSignal<a href="#watchedsignal" class="hash-link" aria-label="Direct link to watchedSignal" title="Direct link to watchedSignal" translate="no">​</a></h3>
+<p><a class="" href="/docs/api/modules/lexical_extension#watchedsignal">watchedSignal</a> 等同于 React 的 <a href="https://react.dev/reference/react/useSyncExternalStore" target="_blank" rel="noopener noreferrer" class="">useSyncExternalStore</a></p>
+<div class="language-ts codeBlockContainer_tCvS theme-code-block" style="--prism-color: #393A34; --prism-background-color: #f6f8fa;"><div class="codeBlockContent_Svw1"><pre tabindex="0" class="prism-code language-ts codeBlock_aFMf thin-scrollbar" style="color: rgb(57, 58, 52); background-color: rgb(246, 248, 250);"><code class="codeBlockLines_mm4y"><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token keyword" style="color: rgb(0, 0, 159);">export</span><span class="token plain"> </span><span class="token keyword" style="color: rgb(0, 0, 159);">const</span><span class="token plain"> EditorStateExtension </span><span class="token operator" style="color: rgb(57, 58, 52);">=</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">defineExtension</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token function" style="color: rgb(215, 58, 73);">build</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> config</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"> state</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token keyword" style="color: rgb(0, 0, 159);">return</span><span class="token plain"> </span><span class="token function" style="color: rgb(215, 58, 73);">watchedSignal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">      </span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">=&gt;</span><span class="token plain"> editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token function" style="color: rgb(215, 58, 73);">getEditorState</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">      </span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">editorStateSignal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">=&gt;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        editor</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token function" style="color: rgb(215, 58, 73);">registerUpdateListener</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token punctuation" style="color: rgb(57, 58, 52);">(</span><span class="token plain">payload</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token plain"> </span><span class="token operator" style="color: rgb(57, 58, 52);">=&gt;</span><span class="token plain"> </span><span class="token punctuation" style="color: rgb(57, 58, 52);">{</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">          editorStateSignal</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token plain">value </span><span class="token operator" style="color: rgb(57, 58, 52);">=</span><span class="token plain"> payload</span><span class="token punctuation" style="color: rgb(57, 58, 52);">.</span><span class="token plain">editorState</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">        </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">    </span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  </span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain">  name</span><span class="token operator" style="color: rgb(57, 58, 52);">:</span><span class="token plain"> </span><span class="token string" style="color: rgb(227, 17, 108);">'@lexical/extension/EditorState'</span><span class="token punctuation" style="color: rgb(57, 58, 52);">,</span><span class="token plain"></span><br></div><div class="token-line" style="color: rgb(57, 58, 52);"><span class="token plain"></span><span class="token punctuation" style="color: rgb(57, 58, 52);">}</span><span class="token punctuation" style="color: rgb(57, 58, 52);">)</span><span class="token punctuation" style="color: rgb(57, 58, 52);">;</span><br></div></code></pre><div class="buttonGroup_MQmt"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_K5gK" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_oqm1"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_N0zQ"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+  </main>
+
+  <footer>
+    <hr>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

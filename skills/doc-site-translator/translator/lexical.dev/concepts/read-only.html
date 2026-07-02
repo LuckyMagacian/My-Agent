@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Read Mode / Edit Mode | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+    .hash-link {
+      color: #0366d6;
+      opacity: 0.5;
+      margin-left: 0.25rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/read-only">Lexical 官方文档 Read Mode / Edit Mode 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/read-only">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Read Mode / Edit Mode
+  </nav>
+
+  <main>
+    <header>
+      <h1>Read Mode / Edit Mode</h1>
+    </header>
+
+    <p>Lexical 支持两种模式：</p>
+    <ul>
+      <li>Read mode（只读模式）</li>
+      <li>Edit mode（编辑模式）</li>
+    </ul>
+
+    <p>Lexical 的默认行为是编辑模式，或者更准确地说，不是只读模式。在底层，主要实现细节是根据模式将 <code>contentEditable</code> 设置为 <code>"false"</code> 或 <code>"true"</code>。特定插件也可以监听模式更改，允许它们根据模式自定义 UI 的部分。</p>
+
+    <h2 id="setting-the-mode">
+      设置模式
+      <a href="#setting-the-mode" class="hash-link">#</a>
+    </h2>
+
+    <p>要设置模式，可以在创建编辑器时完成：</p>
+
+    <pre><code class="language-js">const editor = createEditor({
+  editable: true,
+  ...
+})</code></pre>
+
+    <p>如果您使用 <code>@lexical/react</code>，可以在传递给 <code>&lt;LexicalComposer&gt;</code> 的 <code>initialConfig</code> 中完成：</p>
+
+    <pre><code class="language-jsx">&lt;LexicalComposer initialConfig={{editable: true}}&gt;
+  ...
+&lt;/LexicalComposer&gt;</code></pre>
+
+    <p>编辑器创建后，可以命令式地更改模式：</p>
+
+    <pre><code class="language-js">editor.setEditable(true);</code></pre>
+
+    <h2 id="reading-the-mode">
+      读取模式
+      <a href="#reading-the-mode" class="hash-link">#</a>
+    </h2>
+
+    <p>要查找编辑器的当前模式，可以使用：</p>
+
+    <pre><code class="language-js">const isEditable = editor.isEditable(); // 返回 true 或 false</code></pre>
+
+    <p>您也可以在编辑器的只读模式更改时收到通知：</p>
+
+    <pre><code class="language-js">const removeEditableListener = editor.registerEditableListener(
+  (isEditable) => {
+    // 编辑器的模式在这里传入！
+    console.log(isEditable);
+  },
+);
+
+// 不再需要时不要忘记取消注册 listener！
+removeEditableListener();</code></pre>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/read-only.md" target="_blank">编辑此页</a> |
+      <a href="history.html">下一篇：useHistory</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>

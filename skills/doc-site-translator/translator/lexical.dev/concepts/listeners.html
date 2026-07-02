@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listeners | Lexical 中文文档</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace; background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; border-radius: 6px; border: 1px solid #e1e4e8; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+    th { background: #f6f8fa; font-weight: 600; }
+    .translation-banner { background: #fff3cd; padding: 12px 20px; margin-bottom: 1.5rem; font-size: 14px; border-radius: 6px; border-left: 4px solid #ffc107; }
+    .translation-banner a { color: #0366d6; font-weight: 500; }
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="translation-banner">
+    这是 <a href="https://lexical.dev/docs/concepts/listeners">Lexical 官方文档 Listeners 页面</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://lexical.dev/docs/concepts/listeners">原文</a> 为准。
+  </div>
+
+  <nav aria-label="面包屑导航">
+    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Listeners
+  </nav>
+
+  <main>
+    <header>
+      <h1>Listeners</h1>
+    </header>
+
+    <p>Listeners 是一种机制，让 Editor 实例在发生特定操作时通知用户。所有 listeners 都遵循响应式模式，您可以在将来发生某事时执行操作。所有 listeners 也返回一个函数，可以轻松取消注册 listener。以下是 Lexical 当前支持的不同 listeners：</p>
+
+    <h2 id="update-listener">Update Listener <a href="#update-listener" class="hash-link">#</a></h2>
+
+    <p>当 Lexical 将更新提交到 DOM 时收到通知。</p>
+
+    <pre><code class="language-ts">const removeUpdateListener = editor.registerUpdateListener(({editorState}) => {
+  // The latest EditorState can be found as `editorState`.
+  // To read the contents of the EditorState, use the following API:
+  editorState.read(() => {
+    // Just like editor.update(), .read() expects a closure where you can use
+    // the $ prefixed helper functions.
+  });
+});
+
+// Do not forget to unregister the listener when no longer needed!
+removeUpdateListener();</code></pre>
+
+    <p>update listener 回调接收一个包含以下属性的单个参数：</p>
+    <ul>
+      <li><code>editorState</code> - 最新更新的 Editor State</li>
+      <li><code>prevEditorState</code> - 之前的 Editor State</li>
+      <li><code>updateTags</code> - 传递给更新的所有标签的 Set</li>
+    </ul>
+
+    <p>需要注意的一点是"瀑布式"更新。这是您可能在 update listener 内部调度更新，如下所示：</p>
+
+    <pre><code class="language-ts">editor.registerUpdateListener(({editorState}) => {
+  // Read the editorState and maybe get some value.
+  editorState.read(() => {
+    // ...
+  });
+  // Then schedule another update.
+  editor.update(() => {
+    // ...
+  });
+});</code></pre>
+
+    <p>这种模式的问题在于它意味着我们最终做了两次 DOM 更新，而我们可能可以在单个 DOM 更新中完成。这可能会影响性能，这在文本编辑器中很重要。为了避免这种情况，我们建议查看 <a href="transforms.html">Node Transforms</a>，它允许您监听节点更改并在同一给定更新中转换它们，这意味着没有瀑布式！</p>
+
+    <h2 id="text-content-listener">Text Content Listener <a href="#text-content-listener" class="hash-link">#</a></h2>
+
+    <p>当 Lexical 将更新提交到 DOM 且编辑器的文本内容从编辑器的先前状态发生变化时收到通知。如果更新之间的文本内容相同，listeners 将不会收到通知。</p>
+
+    <pre><code class="language-ts">const removeTextContentListener = editor.registerTextContentListener(
+  (textContent) => {
+    // The latest text content of the editor!
+    console.log(textContent);
+  },
+);
+
+// Do not forget to unregister the listener when no longer needed!
+removeTextContentListener();</code></pre>
+
+    <h2 id="mutation-listener">Mutation Listener <a href="#mutation-listener" class="hash-link">#</a></h2>
+
+    <p>当特定类型的 Lexical 节点发生变更时收到通知。变更有三种状态：</p>
+    <ul>
+      <li><code>'created'</code></li>
+      <li><code>'destroyed'</code></li>
+      <li><code>'updated'</code></li>
+    </ul>
+
+    <p>Mutation listeners 非适合跟踪特定类型节点的生命周期。它们可用于处理与特定类型节点相关的外部 UI 状态和 UI 功能。</p>
+
+    <p>如果任何现有节点在 DOM 中，并且 skipInitialization 不为 true，listener 将立即被调用，updateTag 为 'registerMutationListener'，其中所有节点都有 'created' NodeMutation。这可以通过 skipInitialization 选项控制（其默认值以前为 true 以向后兼容 <=0.16.1，但在 0.21.0 中已更改为 false）。</p>
+
+    <pre><code class="language-ts">const removeMutationListener = editor.registerMutationListener(
+  MyCustomNode,
+  (mutatedNodes, { updateTags, dirtyLeaves, prevEditorState }) => {
+    // mutatedNodes is a Map where each key is the NodeKey, and the value is the state of mutation.
+    for (let [nodeKey, mutation] of mutatedNodes) {
+      console.log(nodeKey, mutation)
+    }
+  },
+  {skipInitialization: false}
+);
+
+// Do not forget to unregister the listener when no longer needed!
+removeMutationListener();</code></pre>
+
+    <h2 id="editable-listener">Editable Listener <a href="#editable-listener" class="hash-link">#</a></h2>
+
+    <p>当编辑器的模式发生更改时收到通知。编辑器的模式可以通过 <code>editor.setEditable()</code> 更改。</p>
+
+    <pre><code class="language-ts">const removeEditableListener = editor.registerEditableListener(
+  (editable) => {
+    // The editor's mode is passed in!
+    console.log(editable);
+  },
+);
+
+// Do not forget to unregister the listener when no longer needed!
+removeEditableListener();</code></pre>
+
+    <h2 id="decorator-listener">Decorator Listener <a href="#decorator-listener" class="hash-link">#</a></h2>
+
+    <p>当编辑器的 decorator 对象发生更改时收到通知。decorator 对象包含所有 <code>DecoratorNode</code> keys -> 其装饰值。这主要用于外部 UI 框架。</p>
+
+    <pre><code class="language-ts">const removeDecoratorListener = editor.registerDecoratorListener(
+  (decorators) => {
+    // The editor's decorators object is passed in!
+    console.log(decorators);
+  },
+);
+
+// Do not forget to unregister the listener when no longer needed!
+removeDecoratorListener();</code></pre>
+
+    <h2 id="root-listener">Root Listener <a href="#root-listener" class="hash-link">#</a></h2>
+
+    <p>当编辑器的根 DOM 元素（Lexical 附着的 content editable）发生更改时收到通知。这主要用于将事件 listeners 附着到根元素。root listener 函数在注册时立即执行，然后在任何后续更新时执行。</p>
+  </main>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/listeners.md" target="_blank">编辑此页</a> |
+      <a href="node-cloning.html">上一篇：Node Cloning</a> |
+      <a href="transforms.html">下一篇：Node Transforms</a>
+    </p>
+    <p style="color: #586069; font-size: 0.85em;">
+      版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+    </p>
+  </footer>
+</body>
+</html>
