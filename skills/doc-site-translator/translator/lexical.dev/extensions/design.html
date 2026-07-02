@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>设计文档 | Lexical 中文文档</title>
-  <link rel="stylesheet" href="assets/styles.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>设计文档 | Lexical 中文文档</title>
+<link href="assets/styles.css" rel="stylesheet"/>
+<style>
     /* Docusaurus 风格适配 */
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
@@ -131,49 +132,466 @@
     }
   </style>
 </head>
-<body>
-  <!-- 翻译横幅 -->
-  <div class="translation-banner">
+<body style=" padding-left: 300px;"><nav aria-label="Docs sidebar" class="menu thin-scrollbar">
+<style>
+  /* 侧边栏样式 */
+  .menu {
+    background: #fff;
+    border-right: 1px solid #e1e4e8;
+    padding: 1rem 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .menu__list-item {
+    margin: 0;
+  }
+  .menu__link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #24292e;
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .menu__link:hover {
+    background: #f6f8fa;
+    color: #0366d6;
+  }
+  .menu__link--active {
+    background: #f6f8fa;
+    border-left-color: #0366d6;
+    color: #0366d6;
+    font-weight: 600;
+  }
+  .menu__link--sublist {
+    font-weight: 600;
+    padding-left: 1rem;
+  }
+  .menu__list-item-collapsible {
+    cursor: pointer;
+  }
+  .categoryLinkLabel, .linkLabel {
+    display: block;
+  }
+  .theme-doc-sidebar-item-category > .menu__list {
+    padding-left: 1rem;
+    display: block;
+  }
+  .theme-doc-sidebar-item-category.menu__list-item--collapsed > .menu__list {
+    display: none;
+  }
+  .menu__list-item--collapsed .menu__link--sublist::after {
+    content: ' ▸';
+  }
+  .menu__list-item--expanded .menu__link--sublist::after {
+    content: ' ▾';
+  }
+</style>
+<ul class="theme-doc-sidebar-menu menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../intro.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="getting-started">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">快速开始</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/quick-start.html"><span class="linkLabel">快速开始 (Vanilla JS)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/react.html"><span class="linkLabel">React 快速开始</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/theming.html"><span class="linkLabel">主题</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/supported-browsers.html"><span class="linkLabel">支持的浏览器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/creating-plugin.html"><span class="linkLabel">创建插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/devtools.html"><span class="linkLabel">开发者工具</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="concepts">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">概念</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/editor-state.html"><span class="linkLabel">编辑器状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/nodes.html"><span class="linkLabel">节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-replacement.html"><span class="linkLabel">节点替换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-state.html"><span class="linkLabel">节点状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/named-slots.html"><span class="linkLabel">命名插槽</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/key-management.html"><span class="linkLabel">键管理</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-cloning.html"><span class="linkLabel">节点克隆</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/listeners.html"><span class="linkLabel">监听器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/transforms.html"><span class="linkLabel">节点变换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/commands.html"><span class="linkLabel">命令</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/selection.html"><span class="linkLabel">选择</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/read-only.html"><span class="linkLabel">只读模式 / 编辑模式</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/history.html"><span class="linkLabel">useHistory</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/dom-events.html"><span class="linkLabel">处理 DOM 事件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/keyboard-accessibility.html"><span class="linkLabel">键盘无障碍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/shadow-dom.html"><span class="linkLabel">Shadow DOM 和 iframe</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/traversals.html"><span class="linkLabel">使用 NodeCaret 遍历节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/updates.html"><span class="linkLabel">更新</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="serialization">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">序列化</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/index.html"><span class="linkLabel">序列化与反序列化</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-import.html"><span class="linkLabel">DOM 导入扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-render.html"><span class="linkLabel">DOM 渲染扩展</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="extensions">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">扩展</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/intro.html"><span class="linkLabel">Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/defining-extensions.html"><span class="linkLabel">定义扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/migration.html"><span class="linkLabel">迁移指南</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/react.html"><span class="linkLabel">React 和 Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/signals.html"><span class="linkLabel">信号</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/peer-dependencies.html"><span class="linkLabel">对等依赖</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/included-extensions.html"><span class="linkLabel">内置扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/design.html"><span class="linkLabel">设计文档</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="packages">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">包</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical.html"><span class="linkLabel">lexical (核心)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-a11y.html"><span class="linkLabel">@lexical/a11y</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-clipboard.html"><span class="linkLabel">@lexical/clipboard</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-core.html"><span class="linkLabel">@lexical/code-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-prism.html"><span class="linkLabel">@lexical/code-prism</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-shiki.html"><span class="linkLabel">@lexical/code-shiki</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code.html"><span class="linkLabel">@lexical/code</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-devtools-core.html"><span class="linkLabel">@lexical/devtools-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-dragon.html"><span class="linkLabel">@lexical/dragon</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-eslint-plugin.html"><span class="linkLabel">@lexical/eslint-plugin</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-extension.html"><span class="linkLabel">@lexical/extension</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-file.html"><span class="linkLabel">@lexical/file</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-hashtag.html"><span class="linkLabel">@lexical/hashtag</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-headless.html"><span class="linkLabel">@lexical/headless</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-history.html"><span class="linkLabel">@lexical/history</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-html.html"><span class="linkLabel">@lexical/html</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-internal.html"><span class="linkLabel">@lexical/internal</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-link.html"><span class="linkLabel">@lexical/link</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-list.html"><span class="linkLabel">@lexical/list</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-mark.html"><span class="linkLabel">@lexical/mark</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-markdown.html"><span class="linkLabel">@lexical/markdown</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-offset.html"><span class="linkLabel">@lexical/offset</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-overflow.html"><span class="linkLabel">@lexical/overflow</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-plain-text.html"><span class="linkLabel">@lexical/plain-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-react.html"><span class="linkLabel">@lexical/react</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-rich-text.html"><span class="linkLabel">@lexical/rich-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-selection.html"><span class="linkLabel">@lexical/selection</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-table.html"><span class="linkLabel">@lexical/table</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-tailwind.html"><span class="linkLabel">@lexical/tailwind</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-text.html"><span class="linkLabel">@lexical/text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-utils.html"><span class="linkLabel">@lexical/utils</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-yjs.html"><span class="linkLabel">@lexical/yjs</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="react">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">React</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/index.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/plugins.html"><span class="linkLabel">Lexical 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/create_plugin.html"><span class="linkLabel">创建 React 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/faq.html"><span class="linkLabel">React FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="collaboration">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">协作</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/react.html"><span class="linkLabel">React</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/faq.html"><span class="linkLabel">协作 FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</nav>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 从 localStorage 恢复展开状态
+  const savedState = localStorage.getItem('sidebar_expanded_state');
+  if (savedState) {
+    const expandedCategories = JSON.parse(savedState);
+    expandedCategories.forEach(category => {
+      const item = document.querySelector(`.theme-doc-sidebar-item-category[data-category="${category}"]`);
+      if (item) {
+        item.classList.remove('menu__list-item--expanded');
+        item.classList.add('menu__list-item--expanded');
+      }
+    });
+  }
+
+  // 为折叠菜单添加交互
+  const collapsibles = document.querySelectorAll('.menu__list-item-collapsible');
+  collapsibles.forEach(collapsible => {
+    collapsible.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parent = this.parentElement;
+      parent.classList.toggle('menu__list-item--expanded');
+      parent.classList.toggle('menu__list-item--expanded');
+
+      // 保存展开状态到 localStorage
+      saveExpandedState();
+    });
+  });
+
+  // 高亮当前页面
+  const currentPath = window.location.pathname.split('/').pop();
+  const activeLink = document.querySelector(`a[href$="${currentPath}"]`);
+  if (activeLink) {
+    activeLink.classList.add('menu__link--active');
+    // 确保父分类展开
+    let parent = activeLink.closest('.theme-doc-sidebar-item-category');
+    while (parent) {
+      parent.classList.remove('menu__list-item--expanded');
+      parent.classList.add('menu__list-item--expanded');
+      parent = parent.parentElement.closest('.theme-doc-sidebar-item-category');
+    }
+
+    // 保存展开状态
+    saveExpandedState();
+  }
+
+  // 保存展开状态的函数
+  function saveExpandedState() {
+    const expandedCategories = [];
+    document.querySelectorAll('.theme-doc-sidebar-item-category.menu__list-item--expanded').forEach(item => {
+      const category = item.getAttribute('data-category');
+      if (category) {
+        expandedCategories.push(category);
+      }
+    });
+    localStorage.setItem('sidebar_expanded_state', JSON.stringify(expandedCategories));
+  }
+});
+</script>
+
+<!-- 翻译横幅 -->
+<div class="translation-banner">
     这是 <a href="https://lexical.dev/docs/extensions/design">Lexical 官方文档 设计文档 页面</a> 的中文翻译版本。
     如有疑问，请以 <a href="https://lexical.dev/docs/extensions/design">原文</a> 为准。
   </div>
-
-  <nav aria-label="面包屑导航">
-    <a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">设计文档</a>
-  </nav>
-
-  <main>
-    <header><h1>设计文档</h1></header>
-<p>另见初始 PR <a href="https://github.com/facebook/lexical/pull/7706" target="_blank" rel="noopener noreferrer" class="">#7706</a></p>
-<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="guiding-principles">指导原则<a href="#guiding-principles" class="hash-link" aria-label="Direct link to Guiding principles" title="Direct link to Guiding principles" translate="no">​</a></h2>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-boilerplate">最小化样板代码<a href="#minimize-boilerplate" class="hash-link" aria-label="Direct link to Minimize boilerplate" title="Direct link to Minimize boilerplate" translate="no">​</a></h3>
+<nav aria-label="面包屑导航">
+<a href="https://lexical.dev/">首页</a> » <a href="../index.html">Extensions</a> » <a href="#">设计文档</a>
+</nav>
+<main>
+<header><h1>设计文档</h1></header>
+<p>另见初始 PR <a class="" href="https://github.com/facebook/lexical/pull/7706" rel="noopener noreferrer" target="_blank">#7706</a></p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="guiding-principles">指导原则<a aria-label="Direct link to Guiding principles" class="hash-link" href="#guiding-principles" title="Direct link to Guiding principles" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-boilerplate">最小化样板代码<a aria-label="Direct link to Minimize boilerplate" class="hash-link" href="#minimize-boilerplate" title="Direct link to Minimize boilerplate" translate="no">​</a></h3>
 <p>在可能的情况下，应提供合理的默认值，并且必须能够覆盖它们。这就是为什么 <code>Extension</code> 有 <code>config</code> 属性来指定初始配置。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="full-backwards-compatibility">完全向后兼容<a href="#full-backwards-compatibility" class="hash-link" aria-label="Direct link to Full backwards compatibility" title="Direct link to Full backwards compatibility" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="full-backwards-compatibility">完全向后兼容<a aria-label="Direct link to Full backwards compatibility" class="hash-link" href="#full-backwards-compatibility" title="Direct link to Full backwards compatibility" translate="no">​</a></h3>
 <p>几乎所有你在编辑器或传统 React 插件中所做的事情都应该能够正常工作。升级到使用 <code>Extension</code> 应该是一个简单的改动。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-change-required-to-add-an-extension">最小化添加 Extension 所需的改动<a href="#minimize-change-required-to-add-an-extension" class="hash-link" aria-label="Direct link to Minimize change required to add an Extension" title="Direct link to Minimize change required to add an Extension" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="minimize-change-required-to-add-an-extension">最小化添加 Extension 所需的改动<a aria-label="Direct link to Minimize change required to add an Extension" class="hash-link" href="#minimize-change-required-to-add-an-extension" title="Direct link to Minimize change required to add an Extension" translate="no">​</a></h3>
 <p>理想情况下，添加一个扩展应该是两三行代码：</p>
 <ul>
 <li class="">导入它</li>
 <li class="">将其作为依赖添加（如有必要则添加配置）</li>
 <li class="">添加 UI 相关代码（仅在需要时，例如必须在 DOM 的特定位置渲染）</li>
 </ul>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="avoid-invalid-states">避免无效状态<a href="#avoid-invalid-states" class="hash-link" aria-label="Direct link to Avoid invalid states" title="Direct link to Avoid invalid states" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="avoid-invalid-states">避免无效状态<a aria-label="Direct link to Avoid invalid states" class="hash-link" href="#avoid-invalid-states" title="Direct link to Avoid invalid states" translate="no">​</a></h3>
 <p>TypeScript 在这方面有很大帮助，但它只能和 API 设计一样好。例如，将 Extension 的工作流拆分为单独的 <code>Config</code>、<code>Init</code> 和 <code>Output</code> 类型是随着时间推移而演进的。在早期的原型中，<code>Config</code> 被重载来维护所有这些状态，但这需要更多的运行时支持和类型断言来检查状态是否已在该阶段正确初始化。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="try-to-avoid-undecipherable-type-errors">尽量避免难以理解的类型错误<a href="#try-to-avoid-undecipherable-type-errors" class="hash-link" aria-label="Direct link to Try to avoid undecipherable type errors" title="Direct link to Try to avoid undecipherable type errors" translate="no">​</a></h3>
-<p>从复杂的类型表达式中生成可读的错误消息能做的有限，因此 API 的设计在可能的情况下避免了这些问题。另见 <a href="https://github.com/microsoft/TypeScript/issues/23689" target="_blank" rel="noopener noreferrer" class="">microsoft/TypeScript#23689</a>。</p>
-<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="inspiration">灵感来源<a href="#inspiration" class="hash-link" aria-label="Direct link to Inspiration" title="Direct link to Inspiration" translate="no">​</a></h2>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="eslint-flat-plugins"><a href="https://eslint.org/docs/latest/extend/plugin-migration-flat-config" target="_blank" rel="noopener noreferrer" class="">ESLint Flat Plugins</a><a href="#eslint-flat-plugins" class="hash-link" aria-label="Direct link to eslint-flat-plugins" title="Direct link to eslint-flat-plugins" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="try-to-avoid-undecipherable-type-errors">尽量避免难以理解的类型错误<a aria-label="Direct link to Try to avoid undecipherable type errors" class="hash-link" href="#try-to-avoid-undecipherable-type-errors" title="Direct link to Try to avoid undecipherable type errors" translate="no">​</a></h3>
+<p>从复杂的类型表达式中生成可读的错误消息能做的有限，因此 API 的设计在可能的情况下避免了这些问题。另见 <a class="" href="https://github.com/microsoft/TypeScript/issues/23689" rel="noopener noreferrer" target="_blank">microsoft/TypeScript#23689</a>。</p>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="inspiration">灵感来源<a aria-label="Direct link to Inspiration" class="hash-link" href="#inspiration" title="Direct link to Inspiration" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="eslint-flat-plugins"><a class="" href="https://eslint.org/docs/latest/extend/plugin-migration-flat-config" rel="noopener noreferrer" target="_blank">ESLint Flat Plugins</a><a aria-label="Direct link to eslint-flat-plugins" class="hash-link" href="#eslint-flat-plugins" title="Direct link to eslint-flat-plugins" translate="no">​</a></h3>
 <p>这些插件与本项目有许多相同的约束，当然它们用于非常不同的目的。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="mdxeditor"><a href="https://mdxeditor.dev/" target="_blank" rel="noopener noreferrer" class="">MDXEditor</a><a href="#mdxeditor" class="hash-link" aria-label="Direct link to mdxeditor" title="Direct link to mdxeditor" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="mdxeditor"><a class="" href="https://mdxeditor.dev/" rel="noopener noreferrer" target="_blank">MDXEditor</a><a aria-label="Direct link to mdxeditor" class="hash-link" href="#mdxeditor" title="Direct link to mdxeditor" translate="no">​</a></h3>
 <p>这个编辑器基于 Lexical，但基于第三方状态管理库提供了自己的插件机制。这些插件并没有真正公开任何类型安全的配置。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="payloadcmsrichtext-lexical"><a href="https://www.npmjs.com/package/@payloadcms/richtext-lexical" target="_blank" rel="noopener noreferrer" class="">@payloadcms/richtext-lexical</a><a href="#payloadcmsrichtext-lexical" class="hash-link" aria-label="Direct link to payloadcmsrichtext-lexical" title="Direct link to payloadcmsrichtext-lexical" translate="no">​</a></h3>
-<p>另一个基于 Lexical 的编辑器框架，用于 <a href="https://payloadcms.com/" target="_blank" rel="noopener noreferrer" class="">Payload</a> CMS 内部。它也没有真正公开类型安全的配置，但确实似乎有很多功能，并且在延迟加载和 SSR 方面设计得很好。功能在概念上类似于 Extensions。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="effect"><a href="https://effect.website/" target="_blank" rel="noopener noreferrer" class="">Effect</a><a href="#effect" class="hash-link" aria-label="Direct link to effect" title="Direct link to effect" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="payloadcmsrichtext-lexical"><a class="" href="https://www.npmjs.com/package/@payloadcms/richtext-lexical" rel="noopener noreferrer" target="_blank">@payloadcms/richtext-lexical</a><a aria-label="Direct link to payloadcmsrichtext-lexical" class="hash-link" href="#payloadcmsrichtext-lexical" title="Direct link to payloadcmsrichtext-lexical" translate="no">​</a></h3>
+<p>另一个基于 Lexical 的编辑器框架，用于 <a class="" href="https://payloadcms.com/" rel="noopener noreferrer" target="_blank">Payload</a> CMS 内部。它也没有真正公开类型安全的配置，但确实似乎有很多功能，并且在延迟加载和 SSR 方面设计得很好。功能在概念上类似于 Extensions。</p>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="effect"><a class="" href="https://effect.website/" rel="noopener noreferrer" target="_blank">Effect</a><a aria-label="Direct link to effect" class="hash-link" href="#effect" title="Direct link to effect" translate="no">​</a></h3>
 <p>这个库几乎是类型安全的最高水平，专注于组合性和可用性。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="tighter-integration-with-lexicaleditor">与 LexicalEditor 的更紧密集成<a href="#tighter-integration-with-lexicaleditor" class="hash-link" aria-label="Direct link to Tighter integration with LexicalEditor" title="Direct link to Tighter integration with LexicalEditor" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="tighter-integration-with-lexicaleditor">与 LexicalEditor 的更紧密集成<a aria-label="Direct link to Tighter integration with LexicalEditor" class="hash-link" href="#tighter-integration-with-lexicaleditor" title="Direct link to Tighter integration with LexicalEditor" translate="no">​</a></h3>
 <p>这个包最初是作为完全可选的功能进行原型的，随着采用的增加，预计 Lexical 的更多部分将直接依赖它。</p>
-<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="intentional-trade-offs">有意为之的权衡<a href="#intentional-trade-offs" class="hash-link" aria-label="Direct link to Intentional trade-offs" title="Direct link to Intentional trade-offs" translate="no">​</a></h2>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="no-compile-time-support-for-dependency-resolution">不支持编译时的依赖解析<a href="#no-compile-time-support-for-dependency-resolution" class="hash-link" aria-label="Direct link to No compile-time support for dependency resolution" title="Direct link to No compile-time support for dependency resolution" translate="no">​</a></h3>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="intentional-trade-offs">有意为之的权衡<a aria-label="Direct link to Intentional trade-offs" class="hash-link" href="#intentional-trade-offs" title="Direct link to Intentional trade-offs" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="no-compile-time-support-for-dependency-resolution">不支持编译时的依赖解析<a aria-label="Direct link to No compile-time support for dependency resolution" class="hash-link" href="#no-compile-time-support-for-dependency-resolution" title="Direct link to No compile-time support for dependency resolution" translate="no">​</a></h3>
 <p>目前的理论是，这需要太多的 TypeScript 来携带图中存在的所有依赖项名称列表，并且可能会给 <code>LexicalExtension</code> 添加另一个类型参数。</p>
 <p>这阻碍的功能包括：</p>
 <ul>
@@ -182,21 +600,20 @@
 <li class="">必需的 peer dependencies 的编译时支持。这种情况的一个用例是要求由 <code>LexicalExtensionComposer</code> 或 <code>ReactPluginHost</code> 提供的 <code>RectProviderExtension</code>。扩展可以在 <code>init</code> 或 <code>register</code> 中在运行时实现此功能。</li>
 </ul>
 <p>总的来说，所有这些都已经作为运行时错误出现，在构建编辑器时提供了足够的信息来快速追踪根本原因。</p>
-<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="known-missing-features">已知缺失的功能<a href="#known-missing-features" class="hash-link" aria-label="Direct link to Known Missing Features" title="Direct link to Known Missing Features" translate="no">​</a></h2>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="direct-support-for-devtools">直接支持开发者工具<a href="#direct-support-for-devtools" class="hash-link" aria-label="Direct link to Direct support for devtools" title="Direct link to Direct support for devtools" translate="no">​</a></h3>
+<h2 class="anchor anchorTargetStickyNavbar_JufQ" id="known-missing-features">已知缺失的功能<a aria-label="Direct link to Known Missing Features" class="hash-link" href="#known-missing-features" title="Direct link to Known Missing Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="direct-support-for-devtools">直接支持开发者工具<a aria-label="Direct link to Direct support for devtools" class="hash-link" href="#direct-support-for-devtools" title="Direct link to Direct support for devtools" translate="no">​</a></h3>
 <p>这是一个 TODO，基础设施的设计考虑到了这一点。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="helpers-for-working-with-nested-editors">处理嵌套编辑器的辅助工具<a href="#helpers-for-working-with-nested-editors" class="hash-link" aria-label="Direct link to Helpers for working with nested editors" title="Direct link to Helpers for working with nested editors" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="helpers-for-working-with-nested-editors">处理嵌套编辑器的辅助工具<a aria-label="Direct link to Helpers for working with nested editors" class="hash-link" href="#helpers-for-working-with-nested-editors" title="Direct link to Helpers for working with nested editors" translate="no">​</a></h3>
 <p>目前还不完全清楚嵌套 Extension 编辑器的所有使用场景是什么，这是一个 TODO。</p>
-<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="documented-patterns-for-rscssrheadless">RSC/SSR/Headless 的文档化模式<a href="#documented-patterns-for-rscssrheadless" class="hash-link" aria-label="Direct link to Documented patterns for RSC/SSR/Headless" title="Direct link to Documented patterns for RSC/SSR/Headless" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_JufQ" id="documented-patterns-for-rscssrheadless">RSC/SSR/Headless 的文档化模式<a aria-label="Direct link to Documented patterns for RSC/SSR/Headless" class="hash-link" href="#documented-patterns-for-rscssrheadless" title="Direct link to Documented patterns for RSC/SSR/Headless" translate="no">​</a></h3>
 <p>拥有一个用于声明 SSR 的已知 peer dependency 可能有助于指导未来的 Extension 开发。在许多情况下，存在一些具有 React 依赖的装饰器节点，你不希望（或不能）在 SSR 上下文中渲染它们。例如，RSC 无法在当前使用 <code>React.Context</code> 的任何地方得到支持，而这正是 Lexical 中当前使用 React 的所有地方。</p>
 <p>另一个选择是为 SSR 使用场景构建单独的入口点，这更像是一个 RSC 特定的策略，但我们可以鼓励人们即使在原生 JS 或其他定制的 SSR 使用场景中也使用这些导入条件。这种策略可能难以在同一个模块中同时支持"headless"和"non-headless"。</p>
-  </main>
-
-  <footer>
-    <hr>
-    <p style="color: #586069; font-size: 0.85em;">
+</main>
+<footer>
+<hr/>
+<p style="color: #586069; font-size: 0.85em;">
       版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
     </p>
-  </footer>
+</footer>
 </body>
 </html>

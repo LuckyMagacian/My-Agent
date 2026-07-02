@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nodes | Lexical 中文文档</title>
-  <link rel="stylesheet" href="../assets/styles.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nodes | Lexical 中文文档</title>
+<link href="../assets/styles.css" rel="stylesheet"/>
+<style>
     /* Docusaurus 风格适配 */
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
@@ -122,145 +123,533 @@
     }
   </style>
 </head>
-<body>
-  <!-- 翻译横幅 -->
-  <div class="translation-banner">
+<body style=" padding-left: 300px;"><nav aria-label="Docs sidebar" class="menu thin-scrollbar">
+<style>
+  /* 侧边栏样式 */
+  .menu {
+    background: #fff;
+    border-right: 1px solid #e1e4e8;
+    padding: 1rem 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .menu__list-item {
+    margin: 0;
+  }
+  .menu__link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #24292e;
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .menu__link:hover {
+    background: #f6f8fa;
+    color: #0366d6;
+  }
+  .menu__link--active {
+    background: #f6f8fa;
+    border-left-color: #0366d6;
+    color: #0366d6;
+    font-weight: 600;
+  }
+  .menu__link--sublist {
+    font-weight: 600;
+    padding-left: 1rem;
+  }
+  .menu__list-item-collapsible {
+    cursor: pointer;
+  }
+  .categoryLinkLabel, .linkLabel {
+    display: block;
+  }
+  .theme-doc-sidebar-item-category > .menu__list {
+    padding-left: 1rem;
+    display: block;
+  }
+  .theme-doc-sidebar-item-category.menu__list-item--collapsed > .menu__list {
+    display: none;
+  }
+  .menu__list-item--collapsed .menu__link--sublist::after {
+    content: ' ▸';
+  }
+  .menu__list-item--expanded .menu__link--sublist::after {
+    content: ' ▾';
+  }
+</style>
+<ul class="theme-doc-sidebar-menu menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../intro.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="getting-started">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">快速开始</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/quick-start.html"><span class="linkLabel">快速开始 (Vanilla JS)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/react.html"><span class="linkLabel">React 快速开始</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/theming.html"><span class="linkLabel">主题</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/supported-browsers.html"><span class="linkLabel">支持的浏览器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/creating-plugin.html"><span class="linkLabel">创建插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/devtools.html"><span class="linkLabel">开发者工具</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="concepts">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">概念</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/editor-state.html"><span class="linkLabel">编辑器状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/nodes.html"><span class="linkLabel">节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-replacement.html"><span class="linkLabel">节点替换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-state.html"><span class="linkLabel">节点状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/named-slots.html"><span class="linkLabel">命名插槽</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/key-management.html"><span class="linkLabel">键管理</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-cloning.html"><span class="linkLabel">节点克隆</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/listeners.html"><span class="linkLabel">监听器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/transforms.html"><span class="linkLabel">节点变换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/commands.html"><span class="linkLabel">命令</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/selection.html"><span class="linkLabel">选择</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/read-only.html"><span class="linkLabel">只读模式 / 编辑模式</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/history.html"><span class="linkLabel">useHistory</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/dom-events.html"><span class="linkLabel">处理 DOM 事件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/keyboard-accessibility.html"><span class="linkLabel">键盘无障碍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/shadow-dom.html"><span class="linkLabel">Shadow DOM 和 iframe</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/traversals.html"><span class="linkLabel">使用 NodeCaret 遍历节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/updates.html"><span class="linkLabel">更新</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="serialization">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">序列化</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/index.html"><span class="linkLabel">序列化与反序列化</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-import.html"><span class="linkLabel">DOM 导入扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-render.html"><span class="linkLabel">DOM 渲染扩展</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="extensions">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">扩展</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/intro.html"><span class="linkLabel">Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/defining-extensions.html"><span class="linkLabel">定义扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/migration.html"><span class="linkLabel">迁移指南</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/react.html"><span class="linkLabel">React 和 Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/signals.html"><span class="linkLabel">信号</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/peer-dependencies.html"><span class="linkLabel">对等依赖</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/included-extensions.html"><span class="linkLabel">内置扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/design.html"><span class="linkLabel">设计文档</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="packages">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">包</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical.html"><span class="linkLabel">lexical (核心)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-a11y.html"><span class="linkLabel">@lexical/a11y</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-clipboard.html"><span class="linkLabel">@lexical/clipboard</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-core.html"><span class="linkLabel">@lexical/code-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-prism.html"><span class="linkLabel">@lexical/code-prism</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-shiki.html"><span class="linkLabel">@lexical/code-shiki</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code.html"><span class="linkLabel">@lexical/code</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-devtools-core.html"><span class="linkLabel">@lexical/devtools-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-dragon.html"><span class="linkLabel">@lexical/dragon</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-eslint-plugin.html"><span class="linkLabel">@lexical/eslint-plugin</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-extension.html"><span class="linkLabel">@lexical/extension</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-file.html"><span class="linkLabel">@lexical/file</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-hashtag.html"><span class="linkLabel">@lexical/hashtag</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-headless.html"><span class="linkLabel">@lexical/headless</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-history.html"><span class="linkLabel">@lexical/history</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-html.html"><span class="linkLabel">@lexical/html</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-internal.html"><span class="linkLabel">@lexical/internal</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-link.html"><span class="linkLabel">@lexical/link</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-list.html"><span class="linkLabel">@lexical/list</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-mark.html"><span class="linkLabel">@lexical/mark</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-markdown.html"><span class="linkLabel">@lexical/markdown</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-offset.html"><span class="linkLabel">@lexical/offset</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-overflow.html"><span class="linkLabel">@lexical/overflow</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-plain-text.html"><span class="linkLabel">@lexical/plain-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-react.html"><span class="linkLabel">@lexical/react</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-rich-text.html"><span class="linkLabel">@lexical/rich-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-selection.html"><span class="linkLabel">@lexical/selection</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-table.html"><span class="linkLabel">@lexical/table</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-tailwind.html"><span class="linkLabel">@lexical/tailwind</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-text.html"><span class="linkLabel">@lexical/text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-utils.html"><span class="linkLabel">@lexical/utils</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-yjs.html"><span class="linkLabel">@lexical/yjs</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="react">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">React</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/index.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/plugins.html"><span class="linkLabel">Lexical 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/create_plugin.html"><span class="linkLabel">创建 React 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/faq.html"><span class="linkLabel">React FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="collaboration">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">协作</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/react.html"><span class="linkLabel">React</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/faq.html"><span class="linkLabel">协作 FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</nav>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 从 localStorage 恢复展开状态
+  const savedState = localStorage.getItem('sidebar_expanded_state');
+  if (savedState) {
+    const expandedCategories = JSON.parse(savedState);
+    expandedCategories.forEach(category => {
+      const item = document.querySelector(`.theme-doc-sidebar-item-category[data-category="${category}"]`);
+      if (item) {
+        item.classList.remove('menu__list-item--expanded');
+        item.classList.add('menu__list-item--expanded');
+      }
+    });
+  }
+
+  // 为折叠菜单添加交互
+  const collapsibles = document.querySelectorAll('.menu__list-item-collapsible');
+  collapsibles.forEach(collapsible => {
+    collapsible.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parent = this.parentElement;
+      parent.classList.toggle('menu__list-item--expanded');
+      parent.classList.toggle('menu__list-item--expanded');
+
+      // 保存展开状态到 localStorage
+      saveExpandedState();
+    });
+  });
+
+  // 高亮当前页面
+  const currentPath = window.location.pathname.split('/').pop();
+  const activeLink = document.querySelector(`a[href$="${currentPath}"]`);
+  if (activeLink) {
+    activeLink.classList.add('menu__link--active');
+    // 确保父分类展开
+    let parent = activeLink.closest('.theme-doc-sidebar-item-category');
+    while (parent) {
+      parent.classList.remove('menu__list-item--expanded');
+      parent.classList.add('menu__list-item--expanded');
+      parent = parent.parentElement.closest('.theme-doc-sidebar-item-category');
+    }
+
+    // 保存展开状态
+    saveExpandedState();
+  }
+
+  // 保存展开状态的函数
+  function saveExpandedState() {
+    const expandedCategories = [];
+    document.querySelectorAll('.theme-doc-sidebar-item-category.menu__list-item--expanded').forEach(item => {
+      const category = item.getAttribute('data-category');
+      if (category) {
+        expandedCategories.push(category);
+      }
+    });
+    localStorage.setItem('sidebar_expanded_state', JSON.stringify(expandedCategories));
+  }
+});
+</script>
+
+<!-- 翻译横幅 -->
+<div class="translation-banner">
     这是 <a href="https://lexical.dev/docs/concepts/nodes">Lexical 官方文档 Nodes 页面</a> 的中文翻译版本。
     如有疑问，请以 <a href="https://lexical.dev/docs/concepts/nodes">原文</a> 为准。
   </div>
-
-  <nav aria-label="面包屑导航">
-    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Nodes
+<nav aria-label="面包屑导航">
+<a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Nodes
   </nav>
-
-  <main>
-    <header>
-      <h1>Nodes</h1>
-    </header>
-
-    <h2 id="base-nodes">
+<main>
+<header>
+<h1>Nodes</h1>
+</header>
+<h2 id="base-nodes">
       Base Nodes
-      <a href="#base-nodes" class="hash-link">#</a>
-    </h2>
-
-    <p>Nodes 是 Lexical 的核心概念。它们不仅构成可视化编辑器视图（作为 <code>EditorState</code> 的一部分），还表示编辑器在任何时刻存储内容的底层数据模型。Lexical 有一个单一的核心基础节点，称为 <code>LexicalNode</code>，它在内部被扩展以创建 Lexical 的五个基础节点：</p>
-
-    <ul>
-      <li><code>RootNode</code></li>
-      <li><code>LineBreakNode</code></li>
-      <li><code>ElementNode</code></li>
-      <li><code>TextNode</code></li>
-      <li><code>DecoratorNode</code></li>
-    </ul>
-
-    <p>在这些基础节点中，有三个可以被扩展以创建新类型的节点：</p>
-
-    <ul>
-      <li><code>ElementNode</code></li>
-      <li><code>TextNode</code></li>
-      <li><code>DecoratorNode</code></li>
-    </ul>
-
-    <h3 id="rootnode">
-      <a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalRootNode.ts" target="_blank"><code>RootNode</code></a>
-      <a href="#rootnode" class="hash-link">#</a>
-    </h3>
-
-    <p>在 <code>EditorState</code> 中只有一个 <code>RootNode</code>，它始终位于顶部并表示 <code>contenteditable</code> 本身。这意味着 <code>RootNode</code> 没有父节点或兄弟节点。它不能被子类化或替换。</p>
-
-    <ul>
-      <li>要获取整个编辑器的文本内容，您应该使用 <code>rootNode.getTextContent()</code>。</li>
-      <li>为了避免选区问题，Lexical 禁止将文本节点直接插入到 <code>RootNode</code> 中。</li>
-    </ul>
-
-    <h4 id="semantics-and-use-cases">
+      <a class="hash-link" href="#base-nodes">#</a>
+</h2>
+<p>Nodes 是 Lexical 的核心概念。它们不仅构成可视化编辑器视图（作为 <code>EditorState</code> 的一部分），还表示编辑器在任何时刻存储内容的底层数据模型。Lexical 有一个单一的核心基础节点，称为 <code>LexicalNode</code>，它在内部被扩展以创建 Lexical 的五个基础节点：</p>
+<ul>
+<li><code>RootNode</code></li>
+<li><code>LineBreakNode</code></li>
+<li><code>ElementNode</code></li>
+<li><code>TextNode</code></li>
+<li><code>DecoratorNode</code></li>
+</ul>
+<p>在这些基础节点中，有三个可以被扩展以创建新类型的节点：</p>
+<ul>
+<li><code>ElementNode</code></li>
+<li><code>TextNode</code></li>
+<li><code>DecoratorNode</code></li>
+</ul>
+<h3 id="rootnode">
+<a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalRootNode.ts" target="_blank"><code>RootNode</code></a>
+<a class="hash-link" href="#rootnode">#</a>
+</h3>
+<p>在 <code>EditorState</code> 中只有一个 <code>RootNode</code>，它始终位于顶部并表示 <code>contenteditable</code> 本身。这意味着 <code>RootNode</code> 没有父节点或兄弟节点。它不能被子类化或替换。</p>
+<ul>
+<li>要获取整个编辑器的文本内容，您应该使用 <code>rootNode.getTextContent()</code>。</li>
+<li>为了避免选区问题，Lexical 禁止将文本节点直接插入到 <code>RootNode</code> 中。</li>
+</ul>
+<h4 id="semantics-and-use-cases">
       Semantics and Use Cases
-      <a href="#semantics-and-use-cases" class="hash-link">#</a>
-    </h4>
-
-    <p>与其他 <code>ElementNode</code> 子类不同，<code>RootNode</code> 具有特定的特性和限制以维护编辑器的完整性：</p>
-
-    <ol>
-      <li>
-        <p><strong>Non-extensibility</strong><br>
-        <code>RootNode</code> 不能被子类化或用自定义实现替换。它被设计为编辑器架构的固定部分。</p>
-      </li>
-      <li>
-        <p><strong>Exclusion from Mutation Listeners</strong><br>
-        <code>RootNode</code> 不参与 mutation listeners。相反，使用 root-level 或 update listener 来观察文档级别的更改。</p>
-      </li>
-      <li>
-        <p><strong>Compatibility with Node Transforms</strong><br>
+      <a class="hash-link" href="#semantics-and-use-cases">#</a>
+</h4>
+<p>与其他 <code>ElementNode</code> 子类不同，<code>RootNode</code> 具有特定的特性和限制以维护编辑器的完整性：</p>
+<ol>
+<li>
+<p><strong>Non-extensibility</strong><br/>
+<code>RootNode</code> 不能被子类化或用自定义实现替换。它被设计为编辑器架构的固定部分。</p>
+</li>
+<li>
+<p><strong>Exclusion from Mutation Listeners</strong><br/>
+<code>RootNode</code> 不参与 mutation listeners。相反，使用 root-level 或 update listener 来观察文档级别的更改。</p>
+</li>
+<li>
+<p><strong>Compatibility with Node Transforms</strong><br/>
         虽然 <code>RootNode</code> 在传统意义上不是"文档的一部分"，但在某些情况下它可能会出现，例如在序列化期间或应用 node transforms 时。对 <code>RootNode</code> 的 node transform 将在<em>每个</em> node transform 循环结束时调用。这在您需要类似 update listener 但在编辑器状态协调之前发生的情况下非常有用。</p>
-      </li>
-      <li>
-        <p><strong>Document-Level Metadata</strong><br>
+</li>
+<li>
+<p><strong>Document-Level Metadata</strong><br/>
         如果您尝试使用 <code>RootNode</code> 存储文档级元数据（例如 undo/redo 支持），请使用 <a href="node-state.html">NodeState</a> API。</p>
-      </li>
-    </ol>
-
-    <p>根据设计，<code>RootNode</code> 作为编辑器内容的容器，而不是文档逻辑结构的活跃部分。这种方法简化了序列化等操作，并将焦点保持在内容节点上。</p>
-
-    <h3 id="linebreaknode">
-      <a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalLineBreakNode.ts" target="_blank"><code>LineBreakNode</code></a>
-      <a href="#linebreaknode" class="hash-link">#</a>
-    </h3>
-
-    <p>您的文本节点中永远不应该有 <code>'\n'</code>，相反，您应该使用 <code>LineBreakNode</code>，它表示 <code>'\n'</code>，更重要的是，可以在浏览器和操作系统之间一致地工作。</p>
-
-    <h3 id="elementnode">
-      <a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalElementNode.ts" target="_blank"><code>ElementNode</code></a>
-      <a href="#elementnode" class="hash-link">#</a>
-    </h3>
-
-    <p>用作其他节点的父节点，可以是块级（<code>ParagraphNode</code>、<code>HeadingNode</code>）或内联（<code>LinkNode</code>）。具有各种定义其行为的方法，可以在扩展期间覆盖（<code>isInline</code>、<code>canBeEmpty</code>、<code>canInsertTextBefore</code> 等）。</p>
-
-    <h3 id="textnode">
-      <a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalTextNode.ts" target="_blank"><code>TextNode</code></a>
-      <a href="#textnode" class="hash-link">#</a>
-    </h3>
-
-    <p>包含文本的叶节点类型。它还包括一些文本特有的属性：</p>
-
-    <ul>
-      <li><code>format</code>：任意组合的 <code>bold</code>、<code>italic</code>、<code>underline</code>、<code>strikethrough</code>、<code>code</code>、<code>highlight</code>、<code>subscript</code> 和 <code>superscript</code></li>
-      <li><code>mode</code>：
+</li>
+</ol>
+<p>根据设计，<code>RootNode</code> 作为编辑器内容的容器，而不是文档逻辑结构的活跃部分。这种方法简化了序列化等操作，并将焦点保持在内容节点上。</p>
+<h3 id="linebreaknode">
+<a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalLineBreakNode.ts" target="_blank"><code>LineBreakNode</code></a>
+<a class="hash-link" href="#linebreaknode">#</a>
+</h3>
+<p>您的文本节点中永远不应该有 <code>'\n'</code>，相反，您应该使用 <code>LineBreakNode</code>，它表示 <code>'\n'</code>，更重要的是，可以在浏览器和操作系统之间一致地工作。</p>
+<h3 id="elementnode">
+<a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalElementNode.ts" target="_blank"><code>ElementNode</code></a>
+<a class="hash-link" href="#elementnode">#</a>
+</h3>
+<p>用作其他节点的父节点，可以是块级（<code>ParagraphNode</code>、<code>HeadingNode</code>）或内联（<code>LinkNode</code>）。具有各种定义其行为的方法，可以在扩展期间覆盖（<code>isInline</code>、<code>canBeEmpty</code>、<code>canInsertTextBefore</code> 等）。</p>
+<h3 id="textnode">
+<a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalTextNode.ts" target="_blank"><code>TextNode</code></a>
+<a class="hash-link" href="#textnode">#</a>
+</h3>
+<p>包含文本的叶节点类型。它还包括一些文本特有的属性：</p>
+<ul>
+<li><code>format</code>：任意组合的 <code>bold</code>、<code>italic</code>、<code>underline</code>、<code>strikethrough</code>、<code>code</code>、<code>highlight</code>、<code>subscript</code> 和 <code>superscript</code></li>
+<li><code>mode</code>：
         <ul>
-          <li><code>token</code> - 作为不可变节点，无法更改其内容，一次性删除</li>
-          <li><code>segmented</code> - 其内容按段删除（一次一个单词），它是可编辑的，但节点在内容更新后变为非分段</li>
-        </ul>
-      </li>
-      <li><code>style</code>：可用于将内联 CSS 样式应用于文本</li>
-    </ul>
-
-    <h3 id="decoratornode">
-      <a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalDecoratorNode.ts" target="_blank"><code>DecoratorNode</code></a>
-      <a href="#decoratornode" class="hash-link">#</a>
-    </h3>
-
-    <p>包装节点，用于在编辑器内插入任意视图（组件）。Decorator node 渲染是框架无关的，可以输出来自 React、vanilla js 或其他框架的组件。</p>
-
-    <h2 id="node-properties">
+<li><code>token</code> - 作为不可变节点，无法更改其内容，一次性删除</li>
+<li><code>segmented</code> - 其内容按段删除（一次一个单词），它是可编辑的，但节点在内容更新后变为非分段</li>
+</ul>
+</li>
+<li><code>style</code>：可用于将内联 CSS 样式应用于文本</li>
+</ul>
+<h3 id="decoratornode">
+<a href="https://github.com/facebook/lexical/blob/main/packages/lexical/src/nodes/LexicalDecoratorNode.ts" target="_blank"><code>DecoratorNode</code></a>
+<a class="hash-link" href="#decoratornode">#</a>
+</h3>
+<p>包装节点，用于在编辑器内插入任意视图（组件）。Decorator node 渲染是框架无关的，可以输出来自 React、vanilla js 或其他框架的组件。</p>
+<h2 id="node-properties">
       Node Properties
-      <a href="#node-properties" class="hash-link">#</a>
-    </h2>
-
-    <div class="admonition-tip">
-      <div class="admonition-tip-title">💡 提示</div>
-      <p>如果您使用 Lexical v0.26.0 或更高版本，应该考虑使用 <a href="node-state.html">NodeState</a> API 而不是在子类上直接定义属性。NodeState 自动支持 <code>afterCloneFrom</code>、<code>exportJSON</code> 和 <code>updateFromJSON</code>，需要更少的样板代码和一些额外的好处。您可能会发现某些情况下根本不需要子类，因为您的 NodeState 可以临时应用于任何节点。</p>
-    </div>
-
-    <p>Lexical nodes 可以有属性。这些属性也必须是 JSON 可序列化的，因此您永远不应该将函数、Symbol、Map、Set 或任何具有与内置类型不同原型对象分配给节点。<code>null</code>、<code>undefined</code>、<code>number</code>、<code>string</code>、<code>boolean</code>、<code>{}</code> 和 <code>[]</code> 都是可以分配给节点的属性类型。</p>
-
-    <p>按照惯例，我们使用 <code>__</code>（双下划线）前缀属性，以便明确这些属性是私有的，应该避免直接访问。我们选择 <code>__</code> 而不是 <code>_</code>，因为某些构建工具会混淆和压缩单个 <code>_</code> 前缀属性以提高代码大小。但是，如果您将节点暴露给构建外部进行扩展，这就会出问题。</p>
-
-    <p>如果您添加一个预期可修改或可访问的属性，则应该始终为该属性在节点上创建一组 <code>get*()</code> 和 <code>set*()</code> 方法。在这些方法内部，您需要调用一些非常重要的方法以确保与 Lexical 内部不可变系统的一致性。这些方法是 <code>getWritable()</code> 和 <code>getLatest()</code>。</p>
-
-    <p>我们建议您的构造函数应始终支持零参数实例化，以便更好地支持协作并减少所需的样板代码量。您可以始终使用必需参数定义您的 <code>$create*</code> 函数。</p>
-
-    <p>如果您的节点将参与 <code>@lexical/yjs</code> 协作，并且您将自定义数据存储为直接属性而不是 <a href="node-state.html">NodeState</a>，请在构造函数中无条件初始化每个属性，包括 <code>undefined</code> 默认值。像 <code>__foo?: string</code> 这样的可选属性语法而没有赋值是不够的，因为新构造的实例不会有该属性来同步。有关详细信息，请参阅 <a href="https://lexical.dev/docs/collaboration/react#custom-node-property-syncing">collaboration guide</a>。</p>
-
-    <pre><code class="language-ts">import type {NodeKey} from 'lexical';
+      <a class="hash-link" href="#node-properties">#</a>
+</h2>
+<div class="admonition-tip">
+<div class="admonition-tip-title">💡 提示</div>
+<p>如果您使用 Lexical v0.26.0 或更高版本，应该考虑使用 <a href="node-state.html">NodeState</a> API 而不是在子类上直接定义属性。NodeState 自动支持 <code>afterCloneFrom</code>、<code>exportJSON</code> 和 <code>updateFromJSON</code>，需要更少的样板代码和一些额外的好处。您可能会发现某些情况下根本不需要子类，因为您的 NodeState 可以临时应用于任何节点。</p>
+</div>
+<p>Lexical nodes 可以有属性。这些属性也必须是 JSON 可序列化的，因此您永远不应该将函数、Symbol、Map、Set 或任何具有与内置类型不同原型对象分配给节点。<code>null</code>、<code>undefined</code>、<code>number</code>、<code>string</code>、<code>boolean</code>、<code>{}</code> 和 <code>[]</code> 都是可以分配给节点的属性类型。</p>
+<p>按照惯例，我们使用 <code>__</code>（双下划线）前缀属性，以便明确这些属性是私有的，应该避免直接访问。我们选择 <code>__</code> 而不是 <code>_</code>，因为某些构建工具会混淆和压缩单个 <code>_</code> 前缀属性以提高代码大小。但是，如果您将节点暴露给构建外部进行扩展，这就会出问题。</p>
+<p>如果您添加一个预期可修改或可访问的属性，则应该始终为该属性在节点上创建一组 <code>get*()</code> 和 <code>set*()</code> 方法。在这些方法内部，您需要调用一些非常重要的方法以确保与 Lexical 内部不可变系统的一致性。这些方法是 <code>getWritable()</code> 和 <code>getLatest()</code>。</p>
+<p>我们建议您的构造函数应始终支持零参数实例化，以便更好地支持协作并减少所需的样板代码量。您可以始终使用必需参数定义您的 <code>$create*</code> 函数。</p>
+<p>如果您的节点将参与 <code>@lexical/yjs</code> 协作，并且您将自定义数据存储为直接属性而不是 <a href="node-state.html">NodeState</a>，请在构造函数中无条件初始化每个属性，包括 <code>undefined</code> 默认值。像 <code>__foo?: string</code> 这样的可选属性语法而没有赋值是不够的，因为新构造的实例不会有该属性来同步。有关详细信息，请参阅 <a href="https://lexical.dev/docs/collaboration/react#custom-node-property-syncing">collaboration guide</a>。</p>
+<pre><code class="language-ts">import type {NodeKey} from 'lexical';
 
 class MyCustomNode extends SomeOtherNode {
   __foo: string;
@@ -286,12 +675,9 @@ class MyCustomNode extends SomeOtherNode {
     return self.__foo;
   }
 }</code></pre>
-
-    <p>最后，所有节点都应该有 <code>static getType()</code>、<code>static clone()</code> 和 <code>static importJSON()</code> 方法。Lexical 使用 type 在反序列化期间能够用其关联的类原型重建节点（对于复制+粘贴很重要！）。Lexical 使用 cloning 来确保创建新 <code>EditorState</code> 快照之间的一致性。</p>
-
-    <p>在上面的示例基础上扩展这些方法：</p>
-
-    <pre><code class="language-ts">interface SerializedCustomNode extends SerializedLexicalNode {
+<p>最后，所有节点都应该有 <code>static getType()</code>、<code>static clone()</code> 和 <code>static importJSON()</code> 方法。Lexical 使用 type 在反序列化期间能够用其关联的类原型重建节点（对于复制+粘贴很重要！）。Lexical 使用 cloning 来确保创建新 <code>EditorState</code> 快照之间的一致性。</p>
+<p>在上面的示例基础上扩展这些方法：</p>
+<pre><code class="language-ts">interface SerializedCustomNode extends SerializedLexicalNode {
   foo?: string;
 }
 
@@ -348,27 +734,21 @@ class MyCustomNode extends SomeOtherNode {
     return self.__foo;
   }
 }</code></pre>
-
-    <h2 id="creating-custom-nodes">
+<h2 id="creating-custom-nodes">
       Creating custom nodes
-      <a href="#creating-custom-nodes" class="hash-link">#</a>
-    </h2>
-
-    <p>如上所述，Lexical 提供了三个可以扩展的基础节点。</p>
-
-    <div class="admonition-info">
-      <div class="admonition-info-title">你知道吗？</div>
-      <p>像 <code>ElementNode</code> 这样的节点已经由 Lexical 在核心中扩展，例如 <code>ParagraphNode</code> 和 <code>RootNode</code>！</p>
-    </div>
-
-    <h3 id="extending-elementnode">
+      <a class="hash-link" href="#creating-custom-nodes">#</a>
+</h2>
+<p>如上所述，Lexical 提供了三个可以扩展的基础节点。</p>
+<div class="admonition-info">
+<div class="admonition-info-title">你知道吗？</div>
+<p>像 <code>ElementNode</code> 这样的节点已经由 Lexical 在核心中扩展，例如 <code>ParagraphNode</code> 和 <code>RootNode</code>！</p>
+</div>
+<h3 id="extending-elementnode">
       Extending <code>ElementNode</code>
-      <a href="#extending-elementnode" class="hash-link">#</a>
-    </h3>
-
-    <p>以下是如何扩展 <code>ElementNode</code> 的示例：</p>
-
-    <pre><code class="language-ts">import {ElementNode, LexicalNode} from 'lexical';
+<a class="hash-link" href="#extending-elementnode">#</a>
+</h3>
+<p>以下是如何扩展 <code>ElementNode</code> 的示例：</p>
+<pre><code class="language-ts">import {ElementNode, LexicalNode} from 'lexical';
 
 export class CustomParagraph extends ElementNode {
   static getType(): string {
@@ -391,10 +771,8 @@ export class CustomParagraph extends ElementNode {
     return false;
   }
 }</code></pre>
-
-    <p>为您的自定义 <code>ElementNode</code> 提供一些 <code>$</code> 前缀的实用函数也是良好的习惯，以便其他人可以轻松消费和验证节点是您的自定义节点。以下是您如何为上面的示例做到这一点：</p>
-
-    <pre><code class="language-ts">export function $createCustomParagraphNode(): CustomParagraph {
+<p>为您的自定义 <code>ElementNode</code> 提供一些 <code>$</code> 前缀的实用函数也是良好的习惯，以便其他人可以轻松消费和验证节点是您的自定义节点。以下是您如何为上面的示例做到这一点：</p>
+<pre><code class="language-ts">export function $createCustomParagraphNode(): CustomParagraph {
   return $applyNodeReplacement(new CustomParagraph());
 }
 
@@ -403,13 +781,11 @@ export function $isCustomParagraphNode(
 ): node is CustomParagraph {
   return node instanceof CustomParagraph;
 }</code></pre>
-
-    <h3 id="extending-textnode">
+<h3 id="extending-textnode">
       Extending <code>TextNode</code>
-      <a href="#extending-textnode" class="hash-link">#</a>
-    </h3>
-
-    <pre><code class="language-ts">export class ColoredNode extends TextNode {
+<a class="hash-link" href="#extending-textnode">#</a>
+</h3>
+<pre><code class="language-ts">export class ColoredNode extends TextNode {
   __color: string;
 
   constructor(text: string, color: string, key?: NodeKey): void {
@@ -449,13 +825,11 @@ export function $isColoredNode(
 ): node is ColoredNode {
   return node instanceof ColoredNode;
 }</code></pre>
-
-    <h3 id="extending-decoratornode">
+<h3 id="extending-decoratornode">
       Extending <code>DecoratorNode</code>
-      <a href="#extending-decoratornode" class="hash-link">#</a>
-    </h3>
-
-    <pre><code class="language-ts">export class VideoNode extends DecoratorNode&lt;ReactNode&gt; {
+<a class="hash-link" href="#extending-decoratornode">#</a>
+</h3>
+<pre><code class="language-ts">export class VideoNode extends DecoratorNode&lt;ReactNode&gt; {
   __id: string;
 
   static getType(): string {
@@ -493,69 +867,55 @@ export function $isVideoNode(
 ): node is VideoNode {
   return node instanceof VideoNode;
 }</code></pre>
-
-    <p>使用 <code>useDecorators</code>、<code>PlainTextPlugin</code> 和 <code>RichTextPlugin</code> 会为每个 <code>DecoratorNode</code> 执行 <code>React.createPortal(reactDecorator, element)</code>，其中 <code>reactDecorator</code> 是 <code>DecoratorNode.prototype.decorate</code> 返回的内容，<code>element</code> 是 <code>DecoratorNode.prototype.createDOM</code> 返回的 <code>HTMLElement</code>。</p>
-
-    <h3 id="the-rest-of-the-boilerplate">
+<p>使用 <code>useDecorators</code>、<code>PlainTextPlugin</code> 和 <code>RichTextPlugin</code> 会为每个 <code>DecoratorNode</code> 执行 <code>React.createPortal(reactDecorator, element)</code>，其中 <code>reactDecorator</code> 是 <code>DecoratorNode.prototype.decorate</code> 返回的内容，<code>element</code> 是 <code>DecoratorNode.prototype.createDOM</code> 返回的 <code>HTMLElement</code>。</p>
+<h3 id="the-rest-of-the-boilerplate">
       The rest of the boilerplate
-      <a href="#the-rest-of-the-boilerplate" class="hash-link">#</a>
-    </h3>
-
-    <p>使用此扩展方法时，还需要实现以下方法：</p>
-
-    <ul>
-      <li><code>static clone</code>（始终需要 - 已在上面的示例中）</li>
-      <li><code>static importFromJSON</code>（始终需要）</li>
-      <li><code>updateFromJSON</code>（如果定义了任何自定义属性）</li>
-      <li><code>afterCloneFrom</code>（如果定义了任何不从 static clone 继承的自定义属性）</li>
-      <li><code>exportJSON</code>（如果定义了任何自定义属性）</li>
-    </ul>
-
-    <h2 id="creating-custom-nodes-with-config-and-nodestate">
+      <a class="hash-link" href="#the-rest-of-the-boilerplate">#</a>
+</h3>
+<p>使用此扩展方法时，还需要实现以下方法：</p>
+<ul>
+<li><code>static clone</code>（始终需要 - 已在上面的示例中）</li>
+<li><code>static importFromJSON</code>（始终需要）</li>
+<li><code>updateFromJSON</code>（如果定义了任何自定义属性）</li>
+<li><code>afterCloneFrom</code>（如果定义了任何不从 static clone 继承的自定义属性）</li>
+<li><code>exportJSON</code>（如果定义了任何自定义属性）</li>
+</ul>
+<h2 id="creating-custom-nodes-with-config-and-nodestate">
       Creating custom nodes with $config and NodeState
-      <a href="#creating-custom-nodes-with-config-and-nodestate" class="hash-link">#</a>
-    </h2>
-
-    <p>在 Lexical v0.33.0 中，添加了一种定义自定义节点的新方法，以减少样板代码并添加 <a href="node-state.html">NodeState</a> API 所使用的功能。</p>
-
-    <p>以下部分展示了如何将前面的示例重构为使用最新功能，减少样板代码。</p>
-
-    <p>请注意，由于这些示例使用 NodeState 和 <code>$config</code>，它们将自动获得以下方法的完整且正确的实现：</p>
-
-    <ul>
-      <li><code>static clone</code></li>
-      <li><code>static importFromJSON</code></li>
-      <li><code>updateFromJSON</code></li>
-      <li><code>afterCloneFrom</code></li>
-      <li><code>exportJSON</code></li>
-    </ul>
-
-    <h3 id="best-practices">
+      <a class="hash-link" href="#creating-custom-nodes-with-config-and-nodestate">#</a>
+</h2>
+<p>在 Lexical v0.33.0 中，添加了一种定义自定义节点的新方法，以减少样板代码并添加 <a href="node-state.html">NodeState</a> API 所使用的功能。</p>
+<p>以下部分展示了如何将前面的示例重构为使用最新功能，减少样板代码。</p>
+<p>请注意，由于这些示例使用 NodeState 和 <code>$config</code>，它们将自动获得以下方法的完整且正确的实现：</p>
+<ul>
+<li><code>static clone</code></li>
+<li><code>static importFromJSON</code></li>
+<li><code>updateFromJSON</code></li>
+<li><code>afterCloneFrom</code></li>
+<li><code>exportJSON</code></li>
+</ul>
+<h3 id="best-practices">
       Best Practices
-      <a href="#best-practices" class="hash-link">#</a>
-    </h3>
-
-    <ul>
-      <li>
-        <p>任何自定义节点的构造函数必须没有必需参数。这是 <code>@lexical/yjs</code> 支持、<code>$create</code> 支持所必需的，并允许消除样板静态 <code>clone</code> 和 <code>importJSON</code> 方法。</p>
-        <ul>
-          <li>✅ <code>constructor(text: string = '', key?: NodeKey)</code></li>
-          <li>❌ <code>constructor(text: string, key?: NodeKey)</code></li>
-        </ul>
-      </li>
-      <li>
-        <p>仅使用 NodeState（而不是直接属性访问）在节点上存储额外数据，允许消除样板 <code>afterCloneFrom</code>、<code>exportJSON</code> 和 <code>updateFromJSON</code> 方法。</p>
-      </li>
-    </ul>
-
-    <h3 id="extending-elementnode-with-config">
+      <a class="hash-link" href="#best-practices">#</a>
+</h3>
+<ul>
+<li>
+<p>任何自定义节点的构造函数必须没有必需参数。这是 <code>@lexical/yjs</code> 支持、<code>$create</code> 支持所必需的，并允许消除样板静态 <code>clone</code> 和 <code>importJSON</code> 方法。</p>
+<ul>
+<li>✅ <code>constructor(text: string = '', key?: NodeKey)</code></li>
+<li>❌ <code>constructor(text: string, key?: NodeKey)</code></li>
+</ul>
+</li>
+<li>
+<p>仅使用 NodeState（而不是直接属性访问）在节点上存储额外数据，允许消除样板 <code>afterCloneFrom</code>、<code>exportJSON</code> 和 <code>updateFromJSON</code> 方法。</p>
+</li>
+</ul>
+<h3 id="extending-elementnode-with-config">
       Extending <code>ElementNode</code> with $config
-      <a href="#extending-elementnode-with-config" class="hash-link">#</a>
-    </h3>
-
-    <p>以下是如何使用 <code>$config</code> 扩展 <code>ElementNode</code> 的示例：</p>
-
-    <pre><code class="language-ts">import {
+      <a class="hash-link" href="#extending-elementnode-with-config">#</a>
+</h3>
+<p>以下是如何使用 <code>$config</code> 扩展 <code>ElementNode</code> 的示例：</p>
+<pre><code class="language-ts">import {
   $create,
   type EditorConfig,
   ElementNode,
@@ -579,10 +939,8 @@ export class CustomParagraph extends ElementNode {
     return false;
   }
 }</code></pre>
-
-    <p>为您的自定义节点提供一些 <code>$</code> 前缀的实用函数也是良好的习惯：</p>
-
-    <pre><code class="language-ts">export function $createCustomParagraphNode(): CustomParagraph {
+<p>为您的自定义节点提供一些 <code>$</code> 前缀的实用函数也是良好的习惯：</p>
+<pre><code class="language-ts">export function $createCustomParagraphNode(): CustomParagraph {
   return $create(CustomParagraph);
 }
 
@@ -591,18 +949,17 @@ export function $isCustomParagraphNode(
 ): node is CustomParagraph {
   return node instanceof CustomParagraph;
 }</code></pre>
-  </main>
-
-  <footer>
-    <hr>
-    <p>
-      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/nodes.md" target="_blank">编辑此页</a> |
+</main>
+<footer>
+<hr/>
+<p>
+<a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/nodes.md" target="_blank">编辑此页</a> |
       <a href="editor-state.html">上一篇：Editor State</a> |
       <a href="node-replacement.html">下一篇：Node Replacement</a>
-    </p>
-    <p style="color: #586069; font-size: 0.85em;">
+</p>
+<p style="color: #586069; font-size: 0.85em;">
       版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
     </p>
-  </footer>
+</footer>
 </body>
 </html>

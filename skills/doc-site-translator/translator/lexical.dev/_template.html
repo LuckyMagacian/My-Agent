@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}} | Lexical 中文文档</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+      display: flex;
+    }
+
+    /* 侧边栏 */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      border-right: 1px solid #e1e4e8;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .sidebar-header {
+      padding: 0.5rem 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-header a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .sidebar-section {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-section-title {
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-section-title:hover {
+      color: #0366d6;
+    }
+
+    .sidebar-section-title .arrow {
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .sidebar-section.collapsed .arrow {
+      transform: rotate(-90deg);
+    }
+
+    .sidebar-section.collapsed .sidebar-links {
+      display: none;
+    }
+
+    .sidebar-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-links li {
+      margin: 0;
+    }
+
+    .sidebar-links a {
+      display: block;
+      padding: 0.35rem 1rem 0.35rem 1.5rem;
+      color: #333;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .sidebar-links a:hover {
+      color: #0366d6;
+      background: #e8e8e8;
+    }
+
+    .sidebar-links a.active {
+      color: #0366d6;
+      background: #e1e4e8;
+      font-weight: 500;
+    }
+
+    /* 主内容区 */
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
+    }
+
+    /* 翻译横幅 */
+    .translation-banner {
+      background: #fff3cd;
+      padding: 12px 20px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+    }
+
+    .translation-banner a {
+      color: #0366d6;
+      font-weight: 500;
+    }
+
+    /* 面包屑 */
+    .breadcrumbs {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .breadcrumbs a {
+      color: #0366d6;
+    }
+
+    /* 内容样式 */
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.25rem; color: #2a2a2a; }
+
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: 'SF Mono', Consolas, monospace;
+      background: #f6f8fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e1e4e8;
+    }
+    pre code { background: none; padding: 0; }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    th, td {
+      border: 1px solid #d0d7de;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th { background: #f6f8fa; font-weight: 600; }
+
+    ul, ol { margin: 1em 0; padding-left: 2em; }
+    li { margin: 0.5em 0; }
+
+    figure { margin: 1.5rem 0; text-align: center; }
+    figcaption { font-size: 0.9em; color: #586069; margin-top: 0.5rem; }
+    img { max-width: 100%; height: auto; }
+
+    .hash-link { color: #0366d6; opacity: 0.5; margin-left: 0.25rem; }
+
+    /* 提示框 */
+    .admonition-tip {
+      background: #f0fff4;
+      border-left: 4px solid #38a169;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    /* 页脚 */
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e1e4e8;
+      font-size: 0.85rem;
+      color: #586069;
+    }
+
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .footer-nav a {
+      color: #0366d6;
+    }
+  </style>
+</head>
+<body>
+  <!-- 侧边栏 -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="intro.html">📘 Lexical 中文文档</a>
+    </div>
+
+    <!-- Introduction -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 介绍
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="intro.html" data-page="intro">介绍</a></li>
+      </ul>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 快速开始
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="getting-started/quick-start.html">快速开始（Vanilla JS）</a></li>
+        <li><a href="getting-started/react.html">Getting Started with React</a></li>
+        <li><a href="getting-started/theming.html">主题</a></li>
+        <li><a href="getting-started/supported-browsers.html">支持的浏览器</a></li>
+        <li><a href="getting-started/creating-plugin.html">创建插件</a></li>
+        <li><a href="getting-started/devtools.html">开发者工具</a></li>
+      </ul>
+    </div>
+
+    <!-- Concepts -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 核心概念
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="concepts/intro.html">概念介绍</a></li>
+        <li><a href="concepts/editor-state.html">编辑器状态</a></li>
+        <li><a href="concepts/nodes.html">节点</a></li>
+        <li><a href="concepts/node-replacement.html">节点替换</a></li>
+        <li><a href="concepts/node-state.html">节点状态</a></li>
+        <li><a href="concepts/named-slots.html">命名槽</a></li>
+        <li><a href="concepts/key-management.html">键管理</a></li>
+        <li><a href="concepts/node-cloning.html">节点克隆</a></li>
+        <li><a href="concepts/listeners.html">监听器</a></li>
+        <li><a href="concepts/transforms.html">变换</a></li>
+        <li><a href="concepts/commands.html">命令</a></li>
+        <li><a href="concepts/selection.html">选择</a></li>
+        <li><a href="concepts/read-only.html">只读</a></li>
+        <li><a href="concepts/history.html">历史</a></li>
+        <li><a href="concepts/dom-events.html">DOM 事件</a></li>
+        <li><a href="concepts/shadow-dom.html">Shadow DOM</a></li>
+        <li><a href="concepts/traversals.html">遍历</a></li>
+        <li><a href="concepts/updates.html">更新</a></li>
+        <li><a href="concepts/decorator-nodes.html">装饰器节点</a></li>
+        <li><a href="concepts/synchronization.html">同步</a></li>
+      </ul>
+    </div>
+
+    <!-- Serialization -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 序列化
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="serialization/index.html">序列化概述</a></li>
+        <li><a href="serialization/dom-import.html">DOM 导入</a></li>
+        <li><a href="serialization/dom-render.html">DOM 渲染</a></li>
+      </ul>
+    </div>
+
+    <!-- Extensions -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 扩展
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="extensions/intro.html">扩展介绍</a></li>
+        <li><a href="extensions/defining-extensions.html">定义扩展</a></li>
+        <li><a href="extensions/migration.html">迁移</a></li>
+        <li><a href="extensions/react.html">React 扩展</a></li>
+        <li><a href="extensions/signals.html">信号</a></li>
+        <li><a href="extensions/peer-dependencies.html">Peer Dependencies</a></li>
+        <li><a href="extensions/included-extensions.html">内置扩展</a></li>
+        <li><a href="extensions/design.html">扩展设计</a></li>
+        <li><a href="extensions/faq.html">扩展 FAQ</a></li>
+      </ul>
+    </div>
+
+    <!-- Packages -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> Packages API
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="packages/lexical.html">lexical</a></li>
+        <li><a href="packages/lexical-clipboard.html">lexical-clipboard</a></li>
+        <li><a href="packages/lexical-code.html">lexical-code</a></li>
+        <li><a href="packages/lexical-code-core.html">lexical-code-core</a></li>
+        <li><a href="packages/lexical-code-prism.html">lexical-code-prism</a></li>
+        <li><a href="packages/lexical-code-shiki.html">lexical-code-shiki</a></li>
+        <li><a href="packages/lexical-devtools-core.html">lexical-devtools-core</a></li>
+        <li><a href="packages/lexical-dragon.html">lexical-dragon</a></li>
+        <li><a href="packages/lexical-eslint-plugin.html">lexical-eslint-plugin</a></li>
+        <li><a href="packages/lexical-extension.html">lexical-extension</a></li>
+        <li><a href="packages/lexical-file.html">lexical-file</a></li>
+        <li><a href="packages/lexical-hashtag.html">lexical-hashtag</a></li>
+        <li><a href="packages/lexical-headless.html">lexical-headless</a></li>
+        <li><a href="packages/lexical-history.html">lexical-history</a></li>
+        <li><a href="packages/lexical-html.html">lexical-html</a></li>
+        <li><a href="packages/lexical-internal.html">lexical-internal</a></li>
+        <li><a href="packages/lexical-link.html">lexical-link</a></li>
+        <li><a href="packages/lexical-list.html">lexical-list</a></li>
+        <li><a href="packages/lexical-mark.html">lexical-mark</a></li>
+        <li><a href="packages/lexical-markdown.html">lexical-markdown</a></li>
+        <li><a href="packages/lexical-offset.html">lexical-offset</a></li>
+        <li><a href="packages/lexical-overflow.html">lexical-overflow</a></li>
+        <li><a href="packages/lexical-plain-text.html">lexical-plain-text</a></li>
+        <li><a href="packages/lexical-react.html">lexical-react</a></li>
+        <li><a href="packages/lexical-rich-text.html">lexical-rich-text</a></li>
+        <li><a href="packages/lexical-selection.html">lexical-selection</a></li>
+        <li><a href="packages/lexical-table.html">lexical-table</a></li>
+        <li><a href="packages/lexical-tailwind.html">lexical-tailwind</a></li>
+        <li><a href="packages/lexical-text.html">lexical-text</a></li>
+        <li><a href="packages/lexical-utils.html">lexical-utils</a></li>
+        <li><a href="packages/lexical-yjs.html">lexical-yjs</a></li>
+      </ul>
+    </div>
+
+    <!-- React -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> React 集成
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="react/index.html">React 概述</a></li>
+        <li><a href="react/plugins.html">React Plugins</a></li>
+        <li><a href="react/create_plugin.html">创建 React Plugin</a></li>
+        <li><a href="react/faq.html">React FAQ</a></li>
+      </ul>
+    </div>
+
+    <!-- Collaboration -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 协作编辑
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="collaboration/react.html">协作 React</a></li>
+        <li><a href="collaboration/faq.html">协作 FAQ</a></li>
+      </ul>
+    </div>
+
+    <!-- FAQ -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" onclick="toggleSection(this)">
+        <span class="arrow">▼</span> 常见问题
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+
+    <!-- 原站链接 -->
+    <div style="padding: 1rem; margin-top: 1rem; border-top: 1px solid #e1e4e8;">
+      <a href="https://lexical.dev/docs/intro" target="_blank" style="color: #666; font-size: 0.85rem;">
+        🔗 原站文档
+      </a>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <div class="main-wrapper">
+    <div class="content">
+      <!-- 翻译横幅 -->
+      <div class="translation-banner">
+        这是 <a href="{{ORIGINAL_URL}}">Lexical 官方文档 {{ORIGINAL_TITLE}} 页面</a> 的中文翻译版本。
+        如有疑问，请以 <a href="{{ORIGINAL_URL}}">原文</a> 为准。
+      </div>
+
+      <!-- 面包屑 -->
+      <div class="breadcrumbs">
+        <a href="intro.html">首页</a> » {{BREADCRUMB}}
+      </div>
+
+      <!-- 主内容 -->
+      <main>
+        {{CONTENT}}
+      </main>
+
+      <!-- 页脚 -->
+      <div class="footer">
+        <div class="footer-nav">
+          <div>{{PREV_LINK}}</div>
+          <div>{{NEXT_LINK}}</div>
+        </div>
+        <p>
+          <a href="{{EDIT_URL}}" target="_blank">编辑此页</a> |
+          <a href="{{ORIGINAL_URL}}" target="_blank">查看原文</a>
+        </p>
+        <p style="color: #586069;">
+          版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 折叠/展开侧边栏
+    function toggleSection(titleEl) {
+      const section = titleEl.parentElement;
+      section.classList.toggle('collapsed');
+    }
+
+    // 高亮当前页面
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentPage = window.location.pathname.split('/').pop() || 'intro.html';
+      const links = document.querySelectorAll('.sidebar-links a');
+      links.forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        if (linkPage === currentPage || link.getAttribute('data-page') === currentPage.replace('.html', '')) {
+          link.classList.add('active');
+          // 展开父级
+          const section = link.closest('.sidebar-section');
+          if (section) section.classList.remove('collapsed');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

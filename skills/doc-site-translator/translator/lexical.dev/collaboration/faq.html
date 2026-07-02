@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Collaboration FAQ | Lexical 中文文档</title>
-  <link rel="stylesheet" href="../assets/styles.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Collaboration FAQ | Lexical 中文文档</title>
+<link href="../assets/styles.css" rel="stylesheet"/>
+<style>
     /* Docusaurus 风格适配 */
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
@@ -108,107 +109,502 @@
     }
   </style>
 </head>
-<body>
-  <!-- 翻译横幅 -->
-  <div class="translation-banner">
+<body style=" padding-left: 300px;"><nav aria-label="Docs sidebar" class="menu thin-scrollbar">
+<style>
+  /* 侧边栏样式 */
+  .menu {
+    background: #fff;
+    border-right: 1px solid #e1e4e8;
+    padding: 1rem 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .menu__list-item {
+    margin: 0;
+  }
+  .menu__link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #24292e;
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .menu__link:hover {
+    background: #f6f8fa;
+    color: #0366d6;
+  }
+  .menu__link--active {
+    background: #f6f8fa;
+    border-left-color: #0366d6;
+    color: #0366d6;
+    font-weight: 600;
+  }
+  .menu__link--sublist {
+    font-weight: 600;
+    padding-left: 1rem;
+  }
+  .menu__list-item-collapsible {
+    cursor: pointer;
+  }
+  .categoryLinkLabel, .linkLabel {
+    display: block;
+  }
+  .theme-doc-sidebar-item-category > .menu__list {
+    padding-left: 1rem;
+    display: block;
+  }
+  .theme-doc-sidebar-item-category.menu__list-item--collapsed > .menu__list {
+    display: none;
+  }
+  .menu__list-item--collapsed .menu__link--sublist::after {
+    content: ' ▸';
+  }
+  .menu__list-item--expanded .menu__link--sublist::after {
+    content: ' ▾';
+  }
+</style>
+<ul class="theme-doc-sidebar-menu menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../intro.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="getting-started">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">快速开始</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/quick-start.html"><span class="linkLabel">快速开始 (Vanilla JS)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/react.html"><span class="linkLabel">React 快速开始</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/theming.html"><span class="linkLabel">主题</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/supported-browsers.html"><span class="linkLabel">支持的浏览器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/creating-plugin.html"><span class="linkLabel">创建插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/devtools.html"><span class="linkLabel">开发者工具</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="concepts">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">概念</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/editor-state.html"><span class="linkLabel">编辑器状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/nodes.html"><span class="linkLabel">节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-replacement.html"><span class="linkLabel">节点替换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-state.html"><span class="linkLabel">节点状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/named-slots.html"><span class="linkLabel">命名插槽</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/key-management.html"><span class="linkLabel">键管理</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-cloning.html"><span class="linkLabel">节点克隆</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/listeners.html"><span class="linkLabel">监听器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/transforms.html"><span class="linkLabel">节点变换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/commands.html"><span class="linkLabel">命令</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/selection.html"><span class="linkLabel">选择</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/read-only.html"><span class="linkLabel">只读模式 / 编辑模式</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/history.html"><span class="linkLabel">useHistory</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/dom-events.html"><span class="linkLabel">处理 DOM 事件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/keyboard-accessibility.html"><span class="linkLabel">键盘无障碍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/shadow-dom.html"><span class="linkLabel">Shadow DOM 和 iframe</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/traversals.html"><span class="linkLabel">使用 NodeCaret 遍历节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/updates.html"><span class="linkLabel">更新</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="serialization">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">序列化</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/index.html"><span class="linkLabel">序列化与反序列化</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-import.html"><span class="linkLabel">DOM 导入扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-render.html"><span class="linkLabel">DOM 渲染扩展</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="extensions">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">扩展</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/intro.html"><span class="linkLabel">Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/defining-extensions.html"><span class="linkLabel">定义扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/migration.html"><span class="linkLabel">迁移指南</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/react.html"><span class="linkLabel">React 和 Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/signals.html"><span class="linkLabel">信号</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/peer-dependencies.html"><span class="linkLabel">对等依赖</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/included-extensions.html"><span class="linkLabel">内置扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/design.html"><span class="linkLabel">设计文档</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="packages">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">包</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical.html"><span class="linkLabel">lexical (核心)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-a11y.html"><span class="linkLabel">@lexical/a11y</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-clipboard.html"><span class="linkLabel">@lexical/clipboard</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-core.html"><span class="linkLabel">@lexical/code-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-prism.html"><span class="linkLabel">@lexical/code-prism</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-shiki.html"><span class="linkLabel">@lexical/code-shiki</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code.html"><span class="linkLabel">@lexical/code</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-devtools-core.html"><span class="linkLabel">@lexical/devtools-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-dragon.html"><span class="linkLabel">@lexical/dragon</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-eslint-plugin.html"><span class="linkLabel">@lexical/eslint-plugin</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-extension.html"><span class="linkLabel">@lexical/extension</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-file.html"><span class="linkLabel">@lexical/file</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-hashtag.html"><span class="linkLabel">@lexical/hashtag</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-headless.html"><span class="linkLabel">@lexical/headless</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-history.html"><span class="linkLabel">@lexical/history</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-html.html"><span class="linkLabel">@lexical/html</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-internal.html"><span class="linkLabel">@lexical/internal</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-link.html"><span class="linkLabel">@lexical/link</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-list.html"><span class="linkLabel">@lexical/list</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-mark.html"><span class="linkLabel">@lexical/mark</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-markdown.html"><span class="linkLabel">@lexical/markdown</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-offset.html"><span class="linkLabel">@lexical/offset</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-overflow.html"><span class="linkLabel">@lexical/overflow</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-plain-text.html"><span class="linkLabel">@lexical/plain-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-react.html"><span class="linkLabel">@lexical/react</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-rich-text.html"><span class="linkLabel">@lexical/rich-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-selection.html"><span class="linkLabel">@lexical/selection</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-table.html"><span class="linkLabel">@lexical/table</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-tailwind.html"><span class="linkLabel">@lexical/tailwind</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-text.html"><span class="linkLabel">@lexical/text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-utils.html"><span class="linkLabel">@lexical/utils</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-yjs.html"><span class="linkLabel">@lexical/yjs</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="react">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">React</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/index.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/plugins.html"><span class="linkLabel">Lexical 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/create_plugin.html"><span class="linkLabel">创建 React 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/faq.html"><span class="linkLabel">React FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="collaboration">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">协作</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/react.html"><span class="linkLabel">React</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/faq.html"><span class="linkLabel">协作 FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</nav>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 从 localStorage 恢复展开状态
+  const savedState = localStorage.getItem('sidebar_expanded_state');
+  if (savedState) {
+    const expandedCategories = JSON.parse(savedState);
+    expandedCategories.forEach(category => {
+      const item = document.querySelector(`.theme-doc-sidebar-item-category[data-category="${category}"]`);
+      if (item) {
+        item.classList.remove('menu__list-item--expanded');
+        item.classList.add('menu__list-item--expanded');
+      }
+    });
+  }
+
+  // 为折叠菜单添加交互
+  const collapsibles = document.querySelectorAll('.menu__list-item-collapsible');
+  collapsibles.forEach(collapsible => {
+    collapsible.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parent = this.parentElement;
+      parent.classList.toggle('menu__list-item--expanded');
+      parent.classList.toggle('menu__list-item--expanded');
+
+      // 保存展开状态到 localStorage
+      saveExpandedState();
+    });
+  });
+
+  // 高亮当前页面
+  const currentPath = window.location.pathname.split('/').pop();
+  const activeLink = document.querySelector(`a[href$="${currentPath}"]`);
+  if (activeLink) {
+    activeLink.classList.add('menu__link--active');
+    // 确保父分类展开
+    let parent = activeLink.closest('.theme-doc-sidebar-item-category');
+    while (parent) {
+      parent.classList.remove('menu__list-item--expanded');
+      parent.classList.add('menu__list-item--expanded');
+      parent = parent.parentElement.closest('.theme-doc-sidebar-item-category');
+    }
+
+    // 保存展开状态
+    saveExpandedState();
+  }
+
+  // 保存展开状态的函数
+  function saveExpandedState() {
+    const expandedCategories = [];
+    document.querySelectorAll('.theme-doc-sidebar-item-category.menu__list-item--expanded').forEach(item => {
+      const category = item.getAttribute('data-category');
+      if (category) {
+        expandedCategories.push(category);
+      }
+    });
+    localStorage.setItem('sidebar_expanded_state', JSON.stringify(expandedCategories));
+  }
+});
+</script>
+
+<!-- 翻译横幅 -->
+<div class="translation-banner">
     这是 <a href="https://lexical.dev/docs/collaboration/faq">Lexical 官方文档 Collaboration FAQ 页面</a> 的中文翻译版本。
     如有疑问，请以 <a href="https://lexical.dev/docs/collaboration/faq">原文</a> 为准。
   </div>
-
-  <nav aria-label="面包屑导航">
-    <a href="https://lexical.dev/">首页</a> » Collaboration » FAQ
+<nav aria-label="面包屑导航">
+<a href="https://lexical.dev/">首页</a> » Collaboration » FAQ
   </nav>
-
-  <main>
-    <header>
-      <h1>Collaboration FAQ</h1>
-    </header>
-
-    <h2 id="source-of-truth">
+<main>
+<header>
+<h1>Collaboration FAQ</h1>
+</header>
+<h2 id="source-of-truth">
       真相来源：Lexical State、Yjs 和应用数据库
-      <a href="#source-of-truth" class="hash-link">#</a>
-    </h2>
-
-    <p>建议将 Yjs model 视为 Lexical 协作的真相来源。虽然文档可以存储在数据库中以进行索引，但 Yjs model 对于没有互联网访问权限的客户端可靠地加入并与服务器同步至关重要。</p>
-
-    <p>或者，可以将数据库视为真相来源，这需要仔细管理 session ID 和客户端连接与断开时的内容同步。</p>
-
-    <h3 id="yjs-as-source">
+      <a class="hash-link" href="#source-of-truth">#</a>
+</h2>
+<p>建议将 Yjs model 视为 Lexical 协作的真相来源。虽然文档可以存储在数据库中以进行索引，但 Yjs model 对于没有互联网访问权限的客户端可靠地加入并与服务器同步至关重要。</p>
+<p>或者，可以将数据库视为真相来源，这需要仔细管理 session ID 和客户端连接与断开时的内容同步。</p>
+<h3 id="yjs-as-source">
       Yjs 作为真相来源
-      <a href="#yjs-as-source" class="hash-link">#</a>
-    </h3>
-
-    <p>优点：</p>
-
-    <ul>
-      <li>离线客户端可以稍后可靠地同步</li>
-      <li>内置冲突解决机制</li>
-      <li>实时同步效率高</li>
-    </ul>
-
-    <p>缺点：</p>
-
-    <ul>
-      <li>需要持久化 Yjs 文档</li>
-      <li>数据库中的内容可能与 Yjs model 不同步</li>
-    </ul>
-
-    <h3 id="database-as-source">
+      <a class="hash-link" href="#yjs-as-source">#</a>
+</h3>
+<p>优点：</p>
+<ul>
+<li>离线客户端可以稍后可靠地同步</li>
+<li>内置冲突解决机制</li>
+<li>实时同步效率高</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>需要持久化 Yjs 文档</li>
+<li>数据库中的内容可能与 Yjs model 不同步</li>
+</ul>
+<h3 id="database-as-source">
       数据库作为真相来源
-      <a href="#database-as-source" class="hash-link">#</a>
-    </h3>
-
-    <p>优点：</p>
-
-    <ul>
-      <li>集中控制内容</li>
-      <li>易于索引和搜索</li>
-      <li>与现有系统集成更简单</li>
-    </ul>
-
-    <p>缺点：</p>
-
-    <ul>
-      <li>需要仔细管理 session ID</li>
-      <li>客户端连接和断开时需要同步内容</li>
-      <li>离线场景更复杂</li>
-    </ul>
-
-    <div class="admonition-tip">
-      <div class="admonition-tip-title">💡 推荐</div>
-      <p>对于大多数协作编辑场景，建议将 Yjs model 作为主要真相来源，同时可选地将内容持久化到数据库以进行索引和备份。</p>
-    </div>
-
-    <h2 id="sync-strategies">
+      <a class="hash-link" href="#database-as-source">#</a>
+</h3>
+<p>优点：</p>
+<ul>
+<li>集中控制内容</li>
+<li>易于索引和搜索</li>
+<li>与现有系统集成更简单</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>需要仔细管理 session ID</li>
+<li>客户端连接和断开时需要同步内容</li>
+<li>离线场景更复杂</li>
+</ul>
+<div class="admonition-tip">
+<div class="admonition-tip-title">💡 推荐</div>
+<p>对于大多数协作编辑场景，建议将 Yjs model 作为主要真相来源，同时可选地将内容持久化到数据库以进行索引和备份。</p>
+</div>
+<h2 id="sync-strategies">
       同步策略
-      <a href="#sync-strategies" class="hash-link">#</a>
-    </h2>
-
-    <p>在协作编辑中，您需要考虑以下同步场景：</p>
-
-    <ol>
-      <li><strong>初始加载</strong> - 客户端首次连接时获取文档状态</li>
-      <li><strong>实时更新</strong> - 多个客户端同时编辑时的冲突解决</li>
-      <li><strong>离线重连</strong> - 客户端离线后重新连接的同步</li>
-      <li><strong>持久化</strong> - 将文档状态保存到服务器</li>
-    </ol>
-
-    <h2 id="connection-management">
+      <a class="hash-link" href="#sync-strategies">#</a>
+</h2>
+<p>在协作编辑中，您需要考虑以下同步场景：</p>
+<ol>
+<li><strong>初始加载</strong> - 客户端首次连接时获取文档状态</li>
+<li><strong>实时更新</strong> - 多个客户端同时编辑时的冲突解决</li>
+<li><strong>离线重连</strong> - 客户端离线后重新连接的同步</li>
+<li><strong>持久化</strong> - 将文档状态保存到服务器</li>
+</ol>
+<h2 id="connection-management">
       连接管理
-      <a href="#connection-management" class="hash-link">#</a>
-    </h2>
-
-    <p>使用 <code>TOGGLE_CONNECT_COMMAND</code> 控制连接状态：</p>
-
-    <pre><code class="language-jsx">// 断开连接（例如用户离线时）
+      <a class="hash-link" href="#connection-management">#</a>
+</h2>
+<p>使用 <code>TOGGLE_CONNECT_COMMAND</code> 控制连接状态：</p>
+<pre><code class="language-jsx">// 断开连接（例如用户离线时）
 editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, false);
 
 // 重新连接
 editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, true);</code></pre>
-
-    <p>使用 <code>CONNECTED_COMMAND</code> 监听连接状态变化：</p>
-
-    <pre><code class="language-jsx">editor.registerCommand(CONNECTED_COMMAND, (isConnected) => {
+<p>使用 <code>CONNECTED_COMMAND</code> 监听连接状态变化：</p>
+<pre><code class="language-jsx">editor.registerCommand(CONNECTED_COMMAND, (isConnected) =&gt; {
   if (isConnected) {
     console.log('已连接到协作服务器');
   } else {
@@ -216,126 +612,107 @@ editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, true);</code></pre>
   }
   return false;
 }, 0);</code></pre>
-
-    <h2 id="conflict-resolution">
+<h2 id="conflict-resolution">
       冲突解决
-      <a href="#conflict-resolution" class="hash-link">#</a>
-    </h2>
-
-    <p>Yjs 使用 CRDT（Conflict-free Replicated Data Types）自动处理冲突。当多个客户端同时编辑同一位置时，Yjs 会自动合并更改。Lexical 的 Yjs binding 确保这些合并后的更改正确反映在编辑器中。</p>
-
-    <h2 id="performance">
+      <a class="hash-link" href="#conflict-resolution">#</a>
+</h2>
+<p>Yjs 使用 CRDT（Conflict-free Replicated Data Types）自动处理冲突。当多个客户端同时编辑同一位置时，Yjs 会自动合并更改。Lexical 的 Yjs binding 确保这些合并后的更改正确反映在编辑器中。</p>
+<h2 id="performance">
       性能优化
-      <a href="#performance" class="hash-link">#</a>
-    </h2>
-
-    <p>对于大型文档或高频率编辑，考虑以下优化：</p>
-
-    <ul>
-      <li>使用 <code>excludedProperties</code> 排除不需要同步的属性</li>
-      <li>配置合适的撤销/重做 timeout</li>
-      <li>使用 debounce 控制保存频率</li>
-      <li>考虑使用 V2 binding（实验性）以提高性能</li>
-    </ul>
-
-    <h2 id="nested-editors">
+      <a class="hash-link" href="#performance">#</a>
+</h2>
+<p>对于大型文档或高频率编辑，考虑以下优化：</p>
+<ul>
+<li>使用 <code>excludedProperties</code> 排除不需要同步的属性</li>
+<li>配置合适的撤销/重做 timeout</li>
+<li>使用 debounce 控制保存频率</li>
+<li>考虑使用 V2 binding（实验性）以提高性能</li>
+</ul>
+<h2 id="nested-editors">
       嵌套编辑器与协作
-      <a href="#nested-editors" class="hash-link">#</a>
-    </h2>
-
-    <p>使用 <code>LexicalNestedComposer</code> 时，如果 collaboration plugin 处于活动状态且 <code>skipCollabChecks</code> 未设置为 <code>true</code>，嵌套编辑器的子组件将不会渲染，直到 collaboration 准备就绪。</p>
-
-    <pre><code class="language-jsx">&lt;LexicalNestedComposer
+      <a class="hash-link" href="#nested-editors">#</a>
+</h2>
+<p>使用 <code>LexicalNestedComposer</code> 时，如果 collaboration plugin 处于活动状态且 <code>skipCollabChecks</code> 未设置为 <code>true</code>，嵌套编辑器的子组件将不会渲染，直到 collaboration 准备就绪。</p>
+<pre><code class="language-jsx">&lt;LexicalNestedComposer
   initialConfig={nestedConfig}
   skipCollabChecks={true}  // 跳过协作准备检查
 &gt;
   &lt;RichTextPlugin ... /&gt;
 &lt;/LexicalNestedComposer&gt;</code></pre>
-
-    <h2 id="providers">
+<h2 id="providers">
       Provider 选择
-      <a href="#providers" class="hash-link">#</a>
-    </h2>
-
-    <p>Yjs providers 处理客户端通信、awareness 管理和离线数据存储的复杂性。常用选项：</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Provider</th>
-          <th>适用场景</th>
-          <th>特点</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>y-websocket</td>
-          <td>实时协作</td>
-          <td>简单易用，支持持久化</td>
-        </tr>
-        <tr>
-          <td>y-indexeddb</td>
-          <td>离线编辑</td>
-          <td>浏览器本地存储</td>
-        </tr>
-        <tr>
-          <td>WebrtcProvider</td>
-          <td>点对点协作</td>
-          <td>无需中心服务器</td>
-        </tr>
-        <tr>
-          <td>Hocuspocus</td>
-          <td>企业级应用</td>
-          <td>可扩展、支持钩子</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2 id="awareness">
+      <a class="hash-link" href="#providers">#</a>
+</h2>
+<p>Yjs providers 处理客户端通信、awareness 管理和离线数据存储的复杂性。常用选项：</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>适用场景</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>y-websocket</td>
+<td>实时协作</td>
+<td>简单易用，支持持久化</td>
+</tr>
+<tr>
+<td>y-indexeddb</td>
+<td>离线编辑</td>
+<td>浏览器本地存储</td>
+</tr>
+<tr>
+<td>WebrtcProvider</td>
+<td>点对点协作</td>
+<td>无需中心服务器</td>
+</tr>
+<tr>
+<td>Hocuspocus</td>
+<td>企业级应用</td>
+<td>可扩展、支持钩子</td>
+</tr>
+</tbody>
+</table>
+<h2 id="awareness">
       Awareness 功能
-      <a href="#awareness" class="hash-link">#</a>
-    </h2>
-
-    <p>Yjs awareness 用于跟踪协作用户的状态，包括：</p>
-
-    <ul>
-      <li>用户名称和光标颜色</li>
-      <li>当前光标位置和选区</li>
-      <li>用户是否在线</li>
-    </ul>
-
-    <p>Provider 的 <code>awareness</code> 属性提供访问这些信息：</p>
-
-    <pre><code class="language-jsx">provider.awareness.setLocalStateField('user', {
+      <a class="hash-link" href="#awareness">#</a>
+</h2>
+<p>Yjs awareness 用于跟踪协作用户的状态，包括：</p>
+<ul>
+<li>用户名称和光标颜色</li>
+<li>当前光标位置和选区</li>
+<li>用户是否在线</li>
+</ul>
+<p>Provider 的 <code>awareness</code> 属性提供访问这些信息：</p>
+<pre><code class="language-jsx">provider.awareness.setLocalStateField('user', {
   name: 'Alice',
   color: '#FF0000',
 });
 
-provider.awareness.on('change', () => {
+provider.awareness.on('change', () =&gt; {
   const states = provider.awareness.getStates();
   // 更新用户列表...
 });</code></pre>
-
-    <h2 id="next-steps">
+<h2 id="next-steps">
       相关资源
-      <a href="#next-steps" class="hash-link">#</a>
-    </h2>
-
-    <ul>
-      <li><a href="react.html">Collaboration (React)</a> - React 协作设置指南</li>
-      <li><a href="../packages/lexical-yjs.html">@lexical/yjs</a> - Yjs binding 包文档</li>
-      <li><a href="https://docs.yjs.dev" target="_blank">Yjs 官方文档</a></li>
-    </ul>
-  </main>
-
-  <footer>
-    <hr>
-    <p>
-      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/collaboration/faq.md" target="_blank">编辑此页</a>
-    </p>
-    <p style="color: #586069; font-size: 0.85em;">
+      <a class="hash-link" href="#next-steps">#</a>
+</h2>
+<ul>
+<li><a href="react.html">Collaboration (React)</a> - React 协作设置指南</li>
+<li><a href="../packages/lexical-yjs.html">@lexical/yjs</a> - Yjs binding 包文档</li>
+<li><a href="https://docs.yjs.dev" target="_blank">Yjs 官方文档</a></li>
+</ul>
+</main>
+<footer>
+<hr/>
+<p>
+<a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/collaboration/faq.md" target="_blank">编辑此页</a>
+</p>
+<p style="color: #586069; font-size: 0.85em;">
       版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
     </p>
-  </footer>
+</footer>
 </body>
 </html>

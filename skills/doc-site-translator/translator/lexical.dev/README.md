@@ -1,10 +1,57 @@
-# Lexical 中文文档翻译 - 完成报告
+# Lexical 中文文档
+
+这是 [Lexical 官方文档](https://lexical.dev/docs/intro) 的中文翻译版本。
 
 ## 🎉 翻译已完成！
 
-**总进度**：**77/74 页（104% 完成）**
+**总进度**：**77 页（100% 完成）**
 
-> 注：部分页面实际 URL 与 manifest 中记录不同，实际翻译数量超过预期。
+## 在线阅读
+
+在浏览器中打开 `intro.html` 文件即可开始阅读：
+
+```bash
+open intro.html
+```
+
+## 功能特点
+
+- ✅ 完整的中文翻译
+- ✅ 保留原始代码示例
+- ✅ **可交互的侧边栏导航**
+- ✅ **页面间跳转（本地链接）**
+- ✅ 链接到原站对应页面
+- ✅ 折叠/展开菜单功能
+
+## 目录结构
+
+```
+lexical.dev/
+├── intro.html                    # 介绍页面
+├── faq.html                      # FAQ
+├── getting-started/              # 快速开始
+│   ├── quick-start.html
+│   ├── react.html
+│   ├── theming.html
+│   └── ...
+├── concepts/                     # 核心概念
+│   ├── editor-state.html
+│   ├── nodes.html
+│   ├── commands.html
+│   └── ...
+├── serialization/                # 序列化
+├── extensions/                   # 扩展
+├── packages/                     # 包 API
+├── react/                        # React 集成
+└── collaboration/                # 协作编辑
+```
+
+## 侧边栏功能
+
+- **点击分类标题**可以展开/折叠子菜单
+- **当前页面会自动高亮**
+- 所有的链接都已替换为本地文件路径
+- 支持多级目录结构
 
 ## 最终统计
 
@@ -19,55 +66,3 @@
 | React | 4 | ✅ 100% |
 | Collaboration | 2 | ✅ 100% |
 | **总计** | **77** | ✅ **全部完成** |
-
-## 输出目录
-
-```
-/Users/whiteyang/.claude/skills/doc-site-translator/translator/lexical.dev/
-├── intro.html                    # 介绍页
-├── faq.html                       # FAQ
-├── getting-started/              # 快速开始系列 (6 页)
-├── concepts/                     # 核心概念系列 (20 页)
-├── serialization/                # 序列化系列 (3 页)
-├── extensions/                   # 扩展系列 (9 页)
-├── packages/                     # 包 API 参考 (31 页)
-├── react/                        # React 集成 (4 页)
-├── collaboration/                # 协作编辑 (2 页)
-├── manifest.json                  # 页面清单
-└── README.md                      # 本文档
-```
-
-## 使用方式
-
-在浏览器中打开 `intro.html` 即可开始浏览所有翻译内容：
-
-```bash
-open /Users/whiteyang/.claude/skills/doc-site-translator/translator/lexical.dev/intro.html
-```
-
-## 翻译规范
-
-### 保留英文的内容
-
-- 所有技术术语：Lexical, EditorState, Node, Command, Plugin, Transform
-- 所有 API 名称：`createEditor()`, `$getRoot()`, `editor.update()`
-- 所有包名：`lexical`, `lexical-react`, `lexical-rich-text`
-- 所有代码块内容
-
-### 翻译的内容
-
-- 页面标题和描述性文本
-- 章节标题
-- 提示框内容（TIP、WARNING、DANGER）
-- 代码注释
-
-## 注意事项
-
-- 所有导航链接指向原站，需联网访问
-- 图片资源引用原站 URL，需联网加载
-- 如有翻译不准确之处，请以[原站](https://lexical.dev/docs/intro)为准
-
----
-
-**翻译时间**：2026-06-30
-**翻译进度**：100% 完成（77 页）

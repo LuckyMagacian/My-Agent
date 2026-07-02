@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shadow DOM and iframes | Lexical 中文文档</title>
-  <link rel="stylesheet" href="../assets/styles.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shadow DOM and iframes | Lexical 中文文档</title>
+<link href="../assets/styles.css" rel="stylesheet"/>
+<style>
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
       max-width: 800px;
@@ -88,240 +89,623 @@
     }
   </style>
 </head>
-<body>
-  <div class="translation-banner">
+<body style=" padding-left: 300px;"><nav aria-label="Docs sidebar" class="menu thin-scrollbar">
+<style>
+  /* 侧边栏样式 */
+  .menu {
+    background: #fff;
+    border-right: 1px solid #e1e4e8;
+    padding: 1rem 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .menu__list-item {
+    margin: 0;
+  }
+  .menu__link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #24292e;
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .menu__link:hover {
+    background: #f6f8fa;
+    color: #0366d6;
+  }
+  .menu__link--active {
+    background: #f6f8fa;
+    border-left-color: #0366d6;
+    color: #0366d6;
+    font-weight: 600;
+  }
+  .menu__link--sublist {
+    font-weight: 600;
+    padding-left: 1rem;
+  }
+  .menu__list-item-collapsible {
+    cursor: pointer;
+  }
+  .categoryLinkLabel, .linkLabel {
+    display: block;
+  }
+  .theme-doc-sidebar-item-category > .menu__list {
+    padding-left: 1rem;
+    display: block;
+  }
+  .theme-doc-sidebar-item-category.menu__list-item--collapsed > .menu__list {
+    display: none;
+  }
+  .menu__list-item--collapsed .menu__link--sublist::after {
+    content: ' ▸';
+  }
+  .menu__list-item--expanded .menu__link--sublist::after {
+    content: ' ▾';
+  }
+</style>
+<ul class="theme-doc-sidebar-menu menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../intro.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="getting-started">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">快速开始</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/quick-start.html"><span class="linkLabel">快速开始 (Vanilla JS)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/react.html"><span class="linkLabel">React 快速开始</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/theming.html"><span class="linkLabel">主题</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/supported-browsers.html"><span class="linkLabel">支持的浏览器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/creating-plugin.html"><span class="linkLabel">创建插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../getting-started/devtools.html"><span class="linkLabel">开发者工具</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="concepts">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">概念</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/editor-state.html"><span class="linkLabel">编辑器状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/nodes.html"><span class="linkLabel">节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-replacement.html"><span class="linkLabel">节点替换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-state.html"><span class="linkLabel">节点状态</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/named-slots.html"><span class="linkLabel">命名插槽</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/key-management.html"><span class="linkLabel">键管理</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/node-cloning.html"><span class="linkLabel">节点克隆</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/listeners.html"><span class="linkLabel">监听器</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/transforms.html"><span class="linkLabel">节点变换</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/commands.html"><span class="linkLabel">命令</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/selection.html"><span class="linkLabel">选择</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/read-only.html"><span class="linkLabel">只读模式 / 编辑模式</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/history.html"><span class="linkLabel">useHistory</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/dom-events.html"><span class="linkLabel">处理 DOM 事件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/keyboard-accessibility.html"><span class="linkLabel">键盘无障碍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/shadow-dom.html"><span class="linkLabel">Shadow DOM 和 iframe</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/traversals.html"><span class="linkLabel">使用 NodeCaret 遍历节点</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../concepts/updates.html"><span class="linkLabel">更新</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="serialization">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">序列化</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/index.html"><span class="linkLabel">序列化与反序列化</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-import.html"><span class="linkLabel">DOM 导入扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../serialization/dom-render.html"><span class="linkLabel">DOM 渲染扩展</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="extensions">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">扩展</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/intro.html"><span class="linkLabel">Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/defining-extensions.html"><span class="linkLabel">定义扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/migration.html"><span class="linkLabel">迁移指南</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/react.html"><span class="linkLabel">React 和 Lexical 扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/signals.html"><span class="linkLabel">信号</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/peer-dependencies.html"><span class="linkLabel">对等依赖</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/included-extensions.html"><span class="linkLabel">内置扩展</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/design.html"><span class="linkLabel">设计文档</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../extensions/faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="packages">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">包</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical.html"><span class="linkLabel">lexical (核心)</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-a11y.html"><span class="linkLabel">@lexical/a11y</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-clipboard.html"><span class="linkLabel">@lexical/clipboard</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-core.html"><span class="linkLabel">@lexical/code-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-prism.html"><span class="linkLabel">@lexical/code-prism</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code-shiki.html"><span class="linkLabel">@lexical/code-shiki</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-code.html"><span class="linkLabel">@lexical/code</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-devtools-core.html"><span class="linkLabel">@lexical/devtools-core</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-dragon.html"><span class="linkLabel">@lexical/dragon</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-eslint-plugin.html"><span class="linkLabel">@lexical/eslint-plugin</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-extension.html"><span class="linkLabel">@lexical/extension</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-file.html"><span class="linkLabel">@lexical/file</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-hashtag.html"><span class="linkLabel">@lexical/hashtag</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-headless.html"><span class="linkLabel">@lexical/headless</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-history.html"><span class="linkLabel">@lexical/history</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-html.html"><span class="linkLabel">@lexical/html</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-internal.html"><span class="linkLabel">@lexical/internal</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-link.html"><span class="linkLabel">@lexical/link</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-list.html"><span class="linkLabel">@lexical/list</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-mark.html"><span class="linkLabel">@lexical/mark</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-markdown.html"><span class="linkLabel">@lexical/markdown</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-offset.html"><span class="linkLabel">@lexical/offset</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-overflow.html"><span class="linkLabel">@lexical/overflow</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-plain-text.html"><span class="linkLabel">@lexical/plain-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-react.html"><span class="linkLabel">@lexical/react</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-rich-text.html"><span class="linkLabel">@lexical/rich-text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-selection.html"><span class="linkLabel">@lexical/selection</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-table.html"><span class="linkLabel">@lexical/table</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-tailwind.html"><span class="linkLabel">@lexical/tailwind</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-text.html"><span class="linkLabel">@lexical/text</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-utils.html"><span class="linkLabel">@lexical/utils</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../packages/lexical-yjs.html"><span class="linkLabel">@lexical/yjs</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="react">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">React</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/index.html"><span class="linkLabel">介绍</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/plugins.html"><span class="linkLabel">Lexical 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/create_plugin.html"><span class="linkLabel">创建 React 插件</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../react/faq.html"><span class="linkLabel">React FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--expanded" data-category="collaboration">
+<div class="menu__list-item-collapsible">
+<a class="menu__link menu__link--sublist" role="button">
+<span class="categoryLinkLabel">协作</span>
+</a>
+</div>
+<ul class="menu__list">
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/react.html"><span class="linkLabel">React</span></a>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item">
+<a class="menu__link" href="../collaboration/faq.html"><span class="linkLabel">协作 FAQ</span></a>
+</li>
+</ul>
+</li>
+<li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item">
+<a class="menu__link" href="../faq.html"><span class="linkLabel">FAQ</span></a>
+</li>
+</ul>
+</nav>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 从 localStorage 恢复展开状态
+  const savedState = localStorage.getItem('sidebar_expanded_state');
+  if (savedState) {
+    const expandedCategories = JSON.parse(savedState);
+    expandedCategories.forEach(category => {
+      const item = document.querySelector(`.theme-doc-sidebar-item-category[data-category="${category}"]`);
+      if (item) {
+        item.classList.remove('menu__list-item--expanded');
+        item.classList.add('menu__list-item--expanded');
+      }
+    });
+  }
+
+  // 为折叠菜单添加交互
+  const collapsibles = document.querySelectorAll('.menu__list-item-collapsible');
+  collapsibles.forEach(collapsible => {
+    collapsible.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parent = this.parentElement;
+      parent.classList.toggle('menu__list-item--expanded');
+      parent.classList.toggle('menu__list-item--expanded');
+
+      // 保存展开状态到 localStorage
+      saveExpandedState();
+    });
+  });
+
+  // 高亮当前页面
+  const currentPath = window.location.pathname.split('/').pop();
+  const activeLink = document.querySelector(`a[href$="${currentPath}"]`);
+  if (activeLink) {
+    activeLink.classList.add('menu__link--active');
+    // 确保父分类展开
+    let parent = activeLink.closest('.theme-doc-sidebar-item-category');
+    while (parent) {
+      parent.classList.remove('menu__list-item--expanded');
+      parent.classList.add('menu__list-item--expanded');
+      parent = parent.parentElement.closest('.theme-doc-sidebar-item-category');
+    }
+
+    // 保存展开状态
+    saveExpandedState();
+  }
+
+  // 保存展开状态的函数
+  function saveExpandedState() {
+    const expandedCategories = [];
+    document.querySelectorAll('.theme-doc-sidebar-item-category.menu__list-item--expanded').forEach(item => {
+      const category = item.getAttribute('data-category');
+      if (category) {
+        expandedCategories.push(category);
+      }
+    });
+    localStorage.setItem('sidebar_expanded_state', JSON.stringify(expandedCategories));
+  }
+});
+</script>
+
+<div class="translation-banner">
     这是 <a href="https://lexical.dev/docs/concepts/shadow-dom">Lexical 官方文档 Shadow DOM and iframes 页面</a> 的中文翻译版本。
     如有疑问，请以 <a href="https://lexical.dev/docs/concepts/shadow-dom">原文</a> 为准。
   </div>
-
-  <nav aria-label="面包屑导航">
-    <a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Shadow DOM and iframes
+<nav aria-label="面包屑导航">
+<a href="https://lexical.dev/">首页</a> » <a href="index.html">Concepts</a> » Shadow DOM and iframes
   </nav>
-
-  <main>
-    <header>
-      <h1>Shadow DOM and iframes</h1>
-    </header>
-
-    <p>当 Lexical 编辑器的 <code>contentEditable</code> 位于一个 <code>open</code> <a href="https://developer.mozilla.org/docs/Web/API/ShadowRoot">DOM ShadowRoot</a> 内（例如在 <a href="https://developer.mozilla.org/docs/Web/API/Web_components">web component</a> 内）或 <code>&lt;iframe&gt;</code> 文档内时，它可以正常工作。两者都开箱即用支持 —— 您只需要将编辑器指向正确的根元素。</p>
-
-    <h2 id="embedding-in-a-shadow-root">
+<main>
+<header>
+<h1>Shadow DOM and iframes</h1>
+</header>
+<p>当 Lexical 编辑器的 <code>contentEditable</code> 位于一个 <code>open</code> <a href="https://developer.mozilla.org/docs/Web/API/ShadowRoot">DOM ShadowRoot</a> 内（例如在 <a href="https://developer.mozilla.org/docs/Web/API/Web_components">web component</a> 内）或 <code>&lt;iframe&gt;</code> 文档内时，它可以正常工作。两者都开箱即用支持 —— 您只需要将编辑器指向正确的根元素。</p>
+<h2 id="embedding-in-a-shadow-root">
       在 Shadow Root 中嵌入
-      <a href="#embedding-in-a-shadow-root" class="hash-link">#</a>
-    </h2>
-
-    <p>附加一个 open shadow root，在其中渲染一个 <code>contentEditable</code>，并将该元素传递给 <code>editor.setRootElement</code>（或使用 <code>@lexical/react</code>，将 <code>ContentEditable</code> portal 到 shadow root 中 —— React context 跨 portal 流动，因此编辑器的构建方式与在 light DOM 中完全相同）：</p>
-
-    <pre><code class="language-js">const host = document.querySelector('#editor-host');
+      <a class="hash-link" href="#embedding-in-a-shadow-root">#</a>
+</h2>
+<p>附加一个 open shadow root，在其中渲染一个 <code>contentEditable</code>，并将该元素传递给 <code>editor.setRootElement</code>（或使用 <code>@lexical/react</code>，将 <code>ContentEditable</code> portal 到 shadow root 中 —— React context 跨 portal 流动，因此编辑器的构建方式与在 light DOM 中完全相同）：</p>
+<pre><code class="language-js">const host = document.querySelector('#editor-host');
 const shadow = host.attachShadow({mode: 'open'});
 const contentEditable = document.createElement('div');
 contentEditable.contentEditable = 'true';
 shadow.appendChild(contentEditable);
 
 editor.setRootElement(contentEditable);</code></pre>
-
-    <p>Lexical 从根元素检测 enclosing shadow root 并通过它解析 selection。无需其他配置。</p>
-
-    <h2 id="why-it-needs-platform-support">
+<p>Lexical 从根元素检测 enclosing shadow root 并通过它解析 selection。无需其他配置。</p>
+<h2 id="why-it-needs-platform-support">
       为什么需要平台支持
-      <a href="#why-it-needs-platform-support" class="hash-link">#</a>
-    </h2>
-
-    <p>在 shadow tree 内，浏览器将文档的 selection <strong>重新定位</strong>到 shadow host：<code>Selection.anchorNode</code>/<code>focusNode</code> 和 <code>Selection.getRangeAt</code> 报告 host 元素，而不是光标实际所在的节点，<code>document.activeElement</code> 报告 host 而不是聚焦的元素。Lexical 仅使用标准平台 API 解决此问题：</p>
-    <ul>
-      <li>Selection 使用 <a href="https://developer.mozilla.org/docs/Web/API/Selection/getComposedRanges"><code>Selection.getComposedRanges</code></a> 和 <a href="https://developer.mozilla.org/docs/Web/API/Selection/direction"><code>Selection.direction</code></a> 读取，它们返回真实的（未重新定位的）边界点。</li>
-      <li>Focus 通过 <a href="https://developer.mozilla.org/docs/Web/API/DocumentOrShadowRoot/activeElement"><code>ShadowRoot.activeElement</code></a> 和 <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode"><code>Node.getRootNode</code></a> 读取。</li>
-      <li>光标移动和单词/行删除使用原生 <code>Selection.modify</code>，selection 使用 <code>Selection.setBaseAndExtent</code> 写入，两者都直接操作 shadow-tree 节点。</li>
-      <li>Drop target 和 image-drag hit-test 通过带 <code>shadowRoots</code> 选项的 <a href="https://developer.mozilla.org/docs/Web/API/Document/caretPositionFromPoint"><code>Document.caretPositionFromPoint</code></a> 解析，因此 dropped point 落在真实节点上而不是重新定位的 host。</li>
-    </ul>
-
-    <h2 id="browser-support">
+      <a class="hash-link" href="#why-it-needs-platform-support">#</a>
+</h2>
+<p>在 shadow tree 内，浏览器将文档的 selection <strong>重新定位</strong>到 shadow host：<code>Selection.anchorNode</code>/<code>focusNode</code> 和 <code>Selection.getRangeAt</code> 报告 host 元素，而不是光标实际所在的节点，<code>document.activeElement</code> 报告 host 而不是聚焦的元素。Lexical 仅使用标准平台 API 解决此问题：</p>
+<ul>
+<li>Selection 使用 <a href="https://developer.mozilla.org/docs/Web/API/Selection/getComposedRanges"><code>Selection.getComposedRanges</code></a> 和 <a href="https://developer.mozilla.org/docs/Web/API/Selection/direction"><code>Selection.direction</code></a> 读取，它们返回真实的（未重新定位的）边界点。</li>
+<li>Focus 通过 <a href="https://developer.mozilla.org/docs/Web/API/DocumentOrShadowRoot/activeElement"><code>ShadowRoot.activeElement</code></a> 和 <a href="https://developer.mozilla.org/docs/Web/API/Node/getRootNode"><code>Node.getRootNode</code></a> 读取。</li>
+<li>光标移动和单词/行删除使用原生 <code>Selection.modify</code>，selection 使用 <code>Selection.setBaseAndExtent</code> 写入，两者都直接操作 shadow-tree 节点。</li>
+<li>Drop target 和 image-drag hit-test 通过带 <code>shadowRoots</code> 选项的 <a href="https://developer.mozilla.org/docs/Web/API/Document/caretPositionFromPoint"><code>Document.caretPositionFromPoint</code></a> 解析，因此 dropped point 落在真实节点上而不是重新定位的 host。</li>
+</ul>
+<h2 id="browser-support">
       浏览器支持
-      <a href="#browser-support" class="hash-link">#</a>
-    </h2>
-
-    <p>Shadow-aware 路径需要上面列出的平台 API。当这些 API 缺失时，Lexical 回退到 light-DOM 读取，因此不在 shadow tree 中的编辑器可以在 Lexical 支持的任何引擎上继续工作。</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Platform API</th>
-          <th>用途</th>
-          <th>Chrome / Edge</th>
-          <th>Firefox</th>
-          <th>Safari</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><code>Selection.getComposedRanges</code></td>
-          <td>读取未重新定位的边界点</td>
-          <td>137+</td>
-          <td>142+</td>
-          <td>17.0+</td>
-        </tr>
-        <tr>
-          <td><code>Selection.direction</code></td>
-          <td>将 composed range 映射回 anchor/focus</td>
-          <td>137+</td>
-          <td>126+</td>
-          <td>17.0+</td>
-        </tr>
-        <tr>
-          <td><code>ShadowRoot.activeElement</code></td>
-          <td>通过 host 解析聚焦元素</td>
-          <td>All modern</td>
-          <td>All modern</td>
-          <td>All modern</td>
-        </tr>
-        <tr>
-          <td><code>Document.caretPositionFromPoint({shadowRoots})</code></td>
-          <td>Shadow-aware drop / drag hit-tests</td>
-          <td>128+</td>
-          <td>(not yet)</td>
-          <td>18.1+</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>Lexical 还支持 Safari 17 / 17.1 提供的 <code>getComposedRanges</code> 传统可变参数形式，在运行时自动选择字典或可变参数调用形式。</p>
-
-    <h2 id="closed-shadow-roots">
+      <a class="hash-link" href="#browser-support">#</a>
+</h2>
+<p>Shadow-aware 路径需要上面列出的平台 API。当这些 API 缺失时，Lexical 回退到 light-DOM 读取，因此不在 shadow tree 中的编辑器可以在 Lexical 支持的任何引擎上继续工作。</p>
+<table>
+<thead>
+<tr>
+<th>Platform API</th>
+<th>用途</th>
+<th>Chrome / Edge</th>
+<th>Firefox</th>
+<th>Safari</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Selection.getComposedRanges</code></td>
+<td>读取未重新定位的边界点</td>
+<td>137+</td>
+<td>142+</td>
+<td>17.0+</td>
+</tr>
+<tr>
+<td><code>Selection.direction</code></td>
+<td>将 composed range 映射回 anchor/focus</td>
+<td>137+</td>
+<td>126+</td>
+<td>17.0+</td>
+</tr>
+<tr>
+<td><code>ShadowRoot.activeElement</code></td>
+<td>通过 host 解析聚焦元素</td>
+<td>All modern</td>
+<td>All modern</td>
+<td>All modern</td>
+</tr>
+<tr>
+<td><code>Document.caretPositionFromPoint({shadowRoots})</code></td>
+<td>Shadow-aware drop / drag hit-tests</td>
+<td>128+</td>
+<td>(not yet)</td>
+<td>18.1+</td>
+</tr>
+</tbody>
+</table>
+<p>Lexical 还支持 Safari 17 / 17.1 提供的 <code>getComposedRanges</code> 传统可变参数形式，在运行时自动选择字典或可变参数调用形式。</p>
+<h2 id="closed-shadow-roots">
       Closed Shadow Roots
-      <a href="#closed-shadow-roots" class="hash-link">#</a>
-    </h2>
-
-    <div class="admonition-warning">
-      <div class="admonition-warning-title">警告</div>
-      <p>Closed shadow root（<code>{mode: 'closed'}</code>）将其内容隐藏在外部代码之外：<code>Node.getRootNode({composed: false})</code> 在每次外部探测时返回 host，<code>Selection.getComposedRanges({shadowRoots})</code> 忽略 closed root。closed shadow root 内的编辑器无法通过 host 读取自己的 selection，因此 closed shadow roots <strong>不支持</strong>。</p>
-    </div>
-
-    <p>如果您需要样式/标记封装而没有 selection 隔离，请使用带 <code>delegatesFocus: true</code> 的 open shadow root 来挂载编辑器 —— 外部代码仍然可以观察 focus 和 selection，同时 CSS 和标记保持封装。</p>
-
-    <h2 id="styling">
+      <a class="hash-link" href="#closed-shadow-roots">#</a>
+</h2>
+<div class="admonition-warning">
+<div class="admonition-warning-title">警告</div>
+<p>Closed shadow root（<code>{mode: 'closed'}</code>）将其内容隐藏在外部代码之外：<code>Node.getRootNode({composed: false})</code> 在每次外部探测时返回 host，<code>Selection.getComposedRanges({shadowRoots})</code> 忽略 closed root。closed shadow root 内的编辑器无法通过 host 读取自己的 selection，因此 closed shadow roots <strong>不支持</strong>。</p>
+</div>
+<p>如果您需要样式/标记封装而没有 selection 隔离，请使用带 <code>delegatesFocus: true</code> 的 open shadow root 来挂载编辑器 —— 外部代码仍然可以观察 focus 和 selection，同时 CSS 和标记保持封装。</p>
+<h2 id="styling">
       样式
-      <a href="#styling" class="hash-link">#</a>
-    </h2>
-
-    <p>Shadow tree 不继承文档的样式表，因此您的编辑器/主题 CSS 必须位于 shadow root 内。附加到 root 的 <code>&lt;style&gt;</code> 元素是最简单的选项；通过 <code>shadowRoot.adoptedStyleSheets</code> 采用的 <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleSheet#constructor">constructable stylesheet</a> 在一个样式表服务于多个编辑器实例时扩展性更好。Playground 的 <code>ShadowDomWrapper</code> 将页面的现有 <code>&lt;link&gt;</code> / <code>&lt;style&gt;</code> 节点克隆到 shadow root 中，以便它可以重用 Vite 的 HMR-managed 样式表。这是 Shadow DOM 的属性，不是 Lexical 的。</p>
-
-    <h2 id="embedding-in-an-iframe">
+      <a class="hash-link" href="#styling">#</a>
+</h2>
+<p>Shadow tree 不继承文档的样式表，因此您的编辑器/主题 CSS 必须位于 shadow root 内。附加到 root 的 <code>&lt;style&gt;</code> 元素是最简单的选项；通过 <code>shadowRoot.adoptedStyleSheets</code> 采用的 <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleSheet#constructor">constructable stylesheet</a> 在一个样式表服务于多个编辑器实例时扩展性更好。Playground 的 <code>ShadowDomWrapper</code> 将页面的现有 <code>&lt;link&gt;</code> / <code>&lt;style&gt;</code> 节点克隆到 shadow root 中，以便它可以重用 Vite 的 HMR-managed 样式表。这是 Shadow DOM 的属性，不是 Lexical 的。</p>
+<h2 id="embedding-in-an-iframe">
       在 iframe 中嵌入
-      <a href="#embedding-in-an-iframe" class="hash-link">#</a>
-    </h2>
-
-    <p>根元素属于 <code>&lt;iframe&gt;</code> 文档的编辑器也受支持。Lexical 从根元素（<code>rootElement.ownerDocument.defaultView</code>）读取编辑器的 <code>window</code>/<code>document</code>，因此 selection 和 focus 是针对 iframe 而不是顶级文档解析的：</p>
-
-    <pre><code class="language-js">const iframeDoc = iframe.contentDocument;
+      <a class="hash-link" href="#embedding-in-an-iframe">#</a>
+</h2>
+<p>根元素属于 <code>&lt;iframe&gt;</code> 文档的编辑器也受支持。Lexical 从根元素（<code>rootElement.ownerDocument.defaultView</code>）读取编辑器的 <code>window</code>/<code>document</code>，因此 selection 和 focus 是针对 iframe 而不是顶级文档解析的：</p>
+<pre><code class="language-js">const iframeDoc = iframe.contentDocument;
 const contentEditable = iframeDoc.querySelector('#editor');
 
 // createEditor / setRootElement 可以在父 frame 中运行；编辑器使用
 // iframe 自己的 window 和 document 进行 selection 和 focus。
 editor.setRootElement(contentEditable);</code></pre>
-
-    <p>iframe 内的 selection <strong>不会</strong>被重新定位（iframe 是单独的文档，不是 shadow boundary），因此 <code>getComposedRanges</code> 不涉及此处 —— iframe 自己的 selection 已经报告正确的节点。</p>
-
-    <h2 id="shadow-aware-helpers">
+<p>iframe 内的 selection <strong>不会</strong>被重新定位（iframe 是单独的文档，不是 shadow boundary），因此 <code>getComposedRanges</code> 不涉及此处 —— iframe 自己的 selection 已经报告正确的节点。</p>
+<h2 id="shadow-aware-helpers">
       Shadow-aware 辅助函数
-      <a href="#shadow-aware-helpers" class="hash-link">#</a>
-    </h2>
-
-    <p>如果插件直接读取 DOM selection 或聚焦元素，请使用从 <code>lexical</code> 导出的 shadow/iframe-aware 辅助函数而不是 <code>Selection.anchorNode</code> / <code>document.activeElement</code>，以便在这些上下文中继续工作。在普通 light DOM 中，每个辅助函数都回退到标准读取，没有任何额外成本。</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>替代</th>
-          <th>使用</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><code>Selection.anchorNode</code> / <code>anchorOffset</code> / <code>focusNode</code> / <code>focusOffset</code></td>
-          <td><code>getDOMSelectionPoints(selection, rootElement)</code></td>
-        </tr>
-        <tr>
-          <td><code>selection.getRangeAt(0)</code></td>
-          <td><code>getDOMSelectionRange(selection, rootElement)</code></td>
-        </tr>
-        <tr>
-          <td>一次读取获取两种形式</td>
-          <td><code>getDOMSelectionRangeAndPoints(selection, rootElement)</code></td>
-        </tr>
-        <tr>
-          <td><code>selection.getComposedRanges</code> 原始调用</td>
-          <td><code>getComposedStaticRange(selection, rootElement)</code></td>
-        </tr>
-        <tr>
-          <td><code>document.activeElement === el</code></td>
-          <td><code>getActiveElement(el) === el</code></td>
-        </tr>
-        <tr>
-          <td>通过嵌套 shadow tree 获取最深聚焦元素</td>
-          <td><code>getActiveElementDeep(document)</code></td>
-        </tr>
-        <tr>
-          <td>在 shadow boundary 上方监听 <code>composed: true</code> 事件的 <code>event.target</code></td>
-          <td><code>getComposedEventTarget(event)</code></td>
-        </tr>
-        <tr>
-          <td><code>node.getRootNode() instanceof ShadowRoot</code>（跨 realm 安全）</td>
-          <td><code>isDOMShadowRoot(node)</code></td>
-        </tr>
-        <tr>
-          <td>向上遍历发现 enclosing shadow roots</td>
-          <td><code>getDOMShadowRoots(node)</code></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>所有九个辅助函数都标记为 <code>@experimental</code>，因为表面正在稳定 —— 返回形式可能更改，但 light DOM 中的行为是稳定的。</p>
-
-    <h2 id="common-pitfalls">
+      <a class="hash-link" href="#shadow-aware-helpers">#</a>
+</h2>
+<p>如果插件直接读取 DOM selection 或聚焦元素，请使用从 <code>lexical</code> 导出的 shadow/iframe-aware 辅助函数而不是 <code>Selection.anchorNode</code> / <code>document.activeElement</code>，以便在这些上下文中继续工作。在普通 light DOM 中，每个辅助函数都回退到标准读取，没有任何额外成本。</p>
+<table>
+<thead>
+<tr>
+<th>替代</th>
+<th>使用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Selection.anchorNode</code> / <code>anchorOffset</code> / <code>focusNode</code> / <code>focusOffset</code></td>
+<td><code>getDOMSelectionPoints(selection, rootElement)</code></td>
+</tr>
+<tr>
+<td><code>selection.getRangeAt(0)</code></td>
+<td><code>getDOMSelectionRange(selection, rootElement)</code></td>
+</tr>
+<tr>
+<td>一次读取获取两种形式</td>
+<td><code>getDOMSelectionRangeAndPoints(selection, rootElement)</code></td>
+</tr>
+<tr>
+<td><code>selection.getComposedRanges</code> 原始调用</td>
+<td><code>getComposedStaticRange(selection, rootElement)</code></td>
+</tr>
+<tr>
+<td><code>document.activeElement === el</code></td>
+<td><code>getActiveElement(el) === el</code></td>
+</tr>
+<tr>
+<td>通过嵌套 shadow tree 获取最深聚焦元素</td>
+<td><code>getActiveElementDeep(document)</code></td>
+</tr>
+<tr>
+<td>在 shadow boundary 上方监听 <code>composed: true</code> 事件的 <code>event.target</code></td>
+<td><code>getComposedEventTarget(event)</code></td>
+</tr>
+<tr>
+<td><code>node.getRootNode() instanceof ShadowRoot</code>（跨 realm 安全）</td>
+<td><code>isDOMShadowRoot(node)</code></td>
+</tr>
+<tr>
+<td>向上遍历发现 enclosing shadow roots</td>
+<td><code>getDOMShadowRoots(node)</code></td>
+</tr>
+</tbody>
+</table>
+<p>所有九个辅助函数都标记为 <code>@experimental</code>，因为表面正在稳定 —— 返回形式可能更改，但 light DOM 中的行为是稳定的。</p>
+<h2 id="common-pitfalls">
       常见陷阱
-      <a href="#common-pitfalls" class="hash-link">#</a>
-    </h2>
-
-    <p>将现有编辑器移入 shadow root 会暴露一些常见的 DOM API 您可能使用的方式与它们报告的内容之间的不匹配。</p>
-
-    <h3 id="event-retargeting">Event retargeting</h3>
-    <p>Shadow boundary 上方的 listener —— <code>window</code>、<code>document</code> 的 <code>selectionchange</code>、portal 到 <code>document.body</code> 的弹出窗口 —— 看到 <code>event.target</code> 重新定位到 shadow host，而不是实际点击的元素。<code>rootElement.contains(event.target)</code> 门因此总是拒绝来自编辑器的点击。通过 composed path 解析：</p>
-
-    <pre><code class="language-js">const target = getComposedEventTarget(event);
-if (target instanceof Node && rootElement.contains(target)) {
+      <a class="hash-link" href="#common-pitfalls">#</a>
+</h2>
+<p>将现有编辑器移入 shadow root 会暴露一些常见的 DOM API 您可能使用的方式与它们报告的内容之间的不匹配。</p>
+<h3 id="event-retargeting">Event retargeting</h3>
+<p>Shadow boundary 上方的 listener —— <code>window</code>、<code>document</code> 的 <code>selectionchange</code>、portal 到 <code>document.body</code> 的弹出窗口 —— 看到 <code>event.target</code> 重新定位到 shadow host，而不是实际点击的元素。<code>rootElement.contains(event.target)</code> 门因此总是拒绝来自编辑器的点击。通过 composed path 解析：</p>
+<pre><code class="language-js">const target = getComposedEventTarget(event);
+if (target instanceof Node &amp;&amp; rootElement.contains(target)) {
   // 点击确实落在 shadow-hosted 编辑器内
 }</code></pre>
-
-    <h3 id="focus-probes">Focus probes</h3>
-    <p><code>document.activeElement</code> 当 focus 在 open shadow tree 内时报告 host，因此 <code>document.activeElement === rootElement</code> 总是 false。<code>getActiveElement(rootElement)</code> 通过 <code>Node.getRootNode</code> 读取 <code>DocumentOrShadowRoot.activeElement</code>，而 <code>getActiveElementDeep</code> 在装饰器嵌入 web component 的编辑器需要最内层聚焦元素时继续下降到嵌套 shadow root。</p>
-
-    <h3 id="outside-click-handlers">Outside-click handlers</h3>
-    <p>典型的下拉菜单注册 <code>document.addEventListener('click', ...)</code> 并在 <code>button.contains(event.target)</code> 为 false 时调用 <code>setShowDropDown(false)</code>。从 shadow tree 内，该检查总是失败（target 是 host），因此下拉菜单在打开它的同一点击时关闭。改为比较 <code>getComposedEventTarget(event)</code> —— 这是 Lexical 的 <code>LexicalMenu</code> 和 playground 的 <code>DropDown</code> 使用的相同修复。</p>
-
-    <h2 id="examples">
+<h3 id="focus-probes">Focus probes</h3>
+<p><code>document.activeElement</code> 当 focus 在 open shadow tree 内时报告 host，因此 <code>document.activeElement === rootElement</code> 总是 false。<code>getActiveElement(rootElement)</code> 通过 <code>Node.getRootNode</code> 读取 <code>DocumentOrShadowRoot.activeElement</code>，而 <code>getActiveElementDeep</code> 在装饰器嵌入 web component 的编辑器需要最内层聚焦元素时继续下降到嵌套 shadow root。</p>
+<h3 id="outside-click-handlers">Outside-click handlers</h3>
+<p>典型的下拉菜单注册 <code>document.addEventListener('click', ...)</code> 并在 <code>button.contains(event.target)</code> 为 false 时调用 <code>setShowDropDown(false)</code>。从 shadow tree 内，该检查总是失败（target 是 host），因此下拉菜单在打开它的同一点击时关闭。改为比较 <code>getComposedEventTarget(event)</code> —— 这是 Lexical 的 <code>LexicalMenu</code> 和 playground 的 <code>DropDown</code> 使用的相同修复。</p>
+<h2 id="examples">
       示例
-      <a href="#examples" class="hash-link">#</a>
-    </h2>
-
-    <p>可运行示例位于仓库中：</p>
-    <ul>
-      <li><a href="https://github.com/facebook/lexical/tree/main/dev-examples/shadow-dom"><code>dev-examples/shadow-dom</code></a> —— shadow root 内的 React 编辑器，带 light-DOM 工具栏。</li>
-      <li><a href="https://github.com/facebook/lexical/tree/main/dev-examples/shadow-dom-web-component"><code>dev-examples/shadow-dom-web-component</code></a> —— 无框架的 <code>&lt;lexical-editor&gt;</code> custom element，通过 <code>ElementInternals</code> 进行 form-associated。页面还在打开自己 shadow root 的 wrapper <code>&lt;div&gt;</code> 内挂载一个实例，练习穿过两个嵌套 shadow boundary 的多级遍历。</li>
-      <li><a href="https://github.com/facebook/lexical/tree/main/examples/vanilla-js-iframe"><code>examples/vanilla-js-iframe</code></a> —— 渲染到 <code>&lt;iframe&gt;</code> 的编辑器。</li>
-    </ul>
-
-    <p>Playground 的 <strong>Render in Shadow DOM</strong> 设置将同一编辑器在 light 和 shadow mount 之间切换，对于 spot-check 您的插件在两种模式下都很有用。</p>
-  </main>
-
-  <footer>
-    <hr>
-    <p>
-      <a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/shadow-dom.md" target="_blank">编辑此页</a> |
+      <a class="hash-link" href="#examples">#</a>
+</h2>
+<p>可运行示例位于仓库中：</p>
+<ul>
+<li><a href="https://github.com/facebook/lexical/tree/main/dev-examples/shadow-dom"><code>dev-examples/shadow-dom</code></a> —— shadow root 内的 React 编辑器，带 light-DOM 工具栏。</li>
+<li><a href="https://github.com/facebook/lexical/tree/main/dev-examples/shadow-dom-web-component"><code>dev-examples/shadow-dom-web-component</code></a> —— 无框架的 <code>&lt;lexical-editor&gt;</code> custom element，通过 <code>ElementInternals</code> 进行 form-associated。页面还在打开自己 shadow root 的 wrapper <code>&lt;div&gt;</code> 内挂载一个实例，练习穿过两个嵌套 shadow boundary 的多级遍历。</li>
+<li><a href="https://github.com/facebook/lexical/tree/main/examples/vanilla-js-iframe"><code>examples/vanilla-js-iframe</code></a> —— 渲染到 <code>&lt;iframe&gt;</code> 的编辑器。</li>
+</ul>
+<p>Playground 的 <strong>Render in Shadow DOM</strong> 设置将同一编辑器在 light 和 shadow mount 之间切换，对于 spot-check 您的插件在两种模式下都很有用。</p>
+</main>
+<footer>
+<hr/>
+<p>
+<a href="https://github.com/facebook/lexical/tree/main/packages/lexical-website/docs/concepts/shadow-dom.md" target="_blank">编辑此页</a> |
       <a href="traversals.html">下一篇：Node Traversals with NodeCaret</a>
-    </p>
-    <p style="color: #586069; font-size: 0.85em;">
+</p>
+<p style="color: #586069; font-size: 0.85em;">
       版权所有 © 2026 Meta Platforms, Inc. 使用 Docusaurus 构建。
     </p>
-  </footer>
+</footer>
 </body>
 </html>
