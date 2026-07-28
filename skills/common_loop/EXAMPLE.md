@@ -59,7 +59,7 @@
 
 **生成 run_dir 与 goal.md**：
 
-- run_dir：`docs/loop-runs/2026-07-28-健康检查脚本/`
+- run_dir：`.ai/docs/loop-runs/2026-07-28-健康检查脚本/`
 - 写入 `goal.md`：
 
 ```markdown
@@ -81,7 +81,7 @@
 ## 元数据
 - 任务类型：新功能
 - 创建日期：2026-07-28
-- run_dir：docs/loop-runs/2026-07-28-健康检查脚本/
+- run_dir：.ai/docs/loop-runs/2026-07-28-健康检查脚本/
 - goal_check_round: 0
 ```
 
@@ -186,7 +186,7 @@
 # 任务下发：T1
 
 ## 任务来源
-> self 模式：读取 `docs/loop-runs/2026-07-28-健康检查脚本/tasks.md` 中 **T1** 任务条目（含描述/预期产出/完成标准/依赖）
+> self 模式：读取 `.ai/docs/loop-runs/2026-07-28-健康检查脚本/tasks.md` 中 **T1** 任务条目（含描述/预期产出/完成标准/依赖）
 
 ## 执行要求
 - 完成标准：以 tasks.md 中 T1 的「完成标准」为准

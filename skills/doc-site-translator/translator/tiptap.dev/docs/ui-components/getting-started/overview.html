@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>集成 Tiptap UI 组件 | Tiptap</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <!-- 翻译横幅 -->
+  <div class="translation-banner">
+    这是 <a href="https://tiptap.dev/docs/ui-components/getting-started/overview">原文</a> 的中文翻译版本。
+    如有疑问，请以 <a href="https://tiptap.dev/docs/ui-components/getting-started/overview">原文</a> 为准。
+  </div>
+
+  <div class="page-layout">
+    <!-- 翻译后的侧边栏 -->
+    <nav class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-group-title">快速开始</div>
+        <a class="sidebar-link active" href="https://tiptap.dev/docs/ui-components/getting-started/overview">概览</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/install/next">安装</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/getting-started/style">样式</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/getting-started/cli">CLI</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/getting-started/changelog">更新日志</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-group-title">模板</div>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/templates/simple-editor">Simple Editor <span class="badge">MIT 许可</span></a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/templates/notion-like-editor">Notion Editor <span class="badge">Start</span></a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/templates/docx-editor">DOCX Editor <span class="badge">Team</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-group-title">UI 组件</div>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/components/overview">概览</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/components">Components</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/node-components">Node components</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/primitives">Primitives</a>
+        <a class="sidebar-link" href="https://tiptap.dev/docs/ui-components/utils-components">Utilities</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-group-title">资源</div>
+        <a class="sidebar-link" href="https://tiptap.dev/pro-license">Pro license</a>
+      </div>
+    </nav>
+
+    <!-- 翻译后的主内容 -->
+    <main>
+      <div class="breadcrumb">
+        <a href="https://tiptap.dev/docs/ui-components/getting-started">组件</a>
+      </div>
+
+      <h1>集成 Tiptap UI 组件</h1>
+
+      <p>Tiptap 是无头（headless）且模块化的，让你对 UI 拥有完全控制权。Tiptap UI 组件库提供了预构建的界面，因此你不必从零开始构建所有内容。可以直接使用，也可以根据你的设置进行自定义。</p>
+
+      <div class="callout warning">
+        <h3>React 19 与框架兼容性</h3>
+        <p>我们目前正在升级对 React 19 及更新框架版本的支持。某些组件可能尚未完全兼容。目前，UI 组件与 <strong>React 18</strong>（以及对应的框架版本如 <strong>Next.js 15</strong>）配合使用效果最佳。我们会在新版本完全支持后更新此页面。</p>
+      </div>
+
+      <h2 id="get-started">快速开始</h2>
+
+      <div class="card-grid">
+        <a class="card" href="https://tiptap.dev/docs/ui-components/templates/simple-editor">
+          <img src="https://tiptap.dev/docs/_next/static/media/simple-editor-template-preview.0w91rbarjb9_o.jpg" alt="Simple Editor 模板预览" loading="lazy">
+          <h3>模板</h3>
+          <p>使用预构建的编辑器快速开始，包含常用功能。</p>
+        </a>
+        <a class="card" href="https://tiptap.dev/docs/ui-components/components/overview">
+          <img src="https://tiptap.dev/docs/_next/static/media/components-preview.0~r94wxy33j9k.jpg" alt="Components 预览" loading="lazy">
+          <h3>组件</h3>
+          <p>已经在使用 Tiptap？只需引入你需要的部分。</p>
+        </a>
+      </div>
+
+      <h2 id="license-and-source-code">许可证与源代码</h2>
+
+      <p>Tiptap <a href="https://tiptap.dev/docs/ui-components/components/overview">UI 组件</a>遵循与其所基于的<a href="https://tiptap.dev/docs/editor/extensions/overview">编辑器扩展</a>相同的许可证。</p>
+
+      <ul>
+        <li>如果扩展是开源的（如 Bold、Heading 或 Image），则 UI 组件同样采用 MIT 许可证。</li>
+        <li>你可以自由阅读源代码、复制并按需自定义。</li>
+      </ul>
+
+      <p>某些组件是为付费 <strong>Tiptap 功能</strong>构建的，如 Comments 或 Version History。</p>
+
+      <ul>
+        <li>这些组件<strong>不</strong>是开源的。</li>
+        <li>大多数包含依赖 Tiptap 后端服务的前端逻辑。</li>
+        <li>使用 Tiptap Cloud 订阅或试用才能使用它们。</li>
+      </ul>
+
+      <p>无论哪种类型（免费或云端连接），你都可以检查源代码并根据你的用例进行适配。</p>
+
+      <div class="callout info">
+        <h3>Tiptap Cloud 功能</h3>
+        <p>我们从开源组件开始。Tiptap Cloud 功能的组件将逐步推出。</p>
+      </div>
+
+      <h2 id="how-components-are-installed">组件的安装方式</h2>
+
+      <p>Tiptap UI 组件不作为 npm 包发布。<a href="https://tiptap.dev/docs/ui-components/getting-started/cli">CLI</a> 将它们以源代码文件的形式复制到你的项目中，你拥有并可以编辑这些文件：</p>
+
+      <pre><code>npx @tiptap/cli@latest add &lt;component&gt;</code></pre>
+
+      <p>每个组件还会自动引入它所依赖的其他组件、hooks、图标、库和样式。这就是为什么已安装组件的导入（例如 <code>@/components/tiptap-node/image-node/image-node-extension</code>）会解析为你自己代码库中的文件，而不是 <code>node_modules</code> 中的模块。要获取这些页面上演示所使用的所有内容，请使用上述命令安装该组件或模板；每个组件页面在<strong>引用的组件</strong>下列出了其引用的文件。</p>
+
+      <h2 id="design-defaults">设计默认值</h2>
+
+      <p>组件被设计为原生的感觉，能融入你的设计。它们带有中性样式：最少的颜色、基本的间距，没有强烈的视觉倾向。你可以直接使用，也可以自定义以匹配你的品牌。</p>
+
+      <p>设计在所有组件之间保持一致和协调，因此如果你同时使用多个组件，它们无需额外工作就能很好地搭配。</p>
+
+      <ul>
+        <li>无需复杂的覆盖或 <code>!important</code> hack</li>
+        <li>直接编辑代码，因为它就是为分叉或扩展而设计的</li>
+      </ul>
+
+      <h2 id="components-and-primitives">组件与原语</h2>
+
+      <p>要在 Tiptap 编辑器中构建出色的编辑体验，你可以集成 UI 元素。该库为此提供了不同类型的构建块：<strong>组件</strong>、<strong>节点组件</strong>和<strong>原语</strong>。</p>
+
+      <h3 id="components">组件</h3>
+
+      <p>即用型、功能特定的 React 组件，例如标题下拉菜单。每个 UI 组件通常与一个 Tiptap 扩展配对（例如，<strong>ListButton</strong> 依赖于列表相关扩展），并使用 React hooks 与编辑器状态交互。</p>
+
+      <ul>
+        <li><strong>与扩展配合使用</strong>：要使用组件（例如 <code>HeadingDropdownMenu</code>），请确保在编辑器中启用了匹配的 Tiptap 扩展（如 <code>@tiptap/extension-heading</code>）。</li>
+        <li><strong>利用 hooks</strong>：许多组件内部使用 hooks（如 <code>useTiptapEditor</code> 或 <code>useFloatingElement</code>）来同步编辑器状态、处理定位或管理键盘导航。你也可以在自己的自定义组件中使用这些 hooks。</li>
+        <li><strong>轻松自定义</strong>：默认情况下，这些组件具有最少的样式，以便融入你的设计。你可以完全覆盖或扩展它们。每个组件的源代码公开可用，可直接编辑，无需 <code>!important</code> hack。</li>
+      </ul>
+
+      <h3 id="primitives">原语</h3>
+
+      <p>底层 UI 元素，如 <code>Button</code>、<code>DropdownMenu</code>、<code>Popover</code> 和 <code>Spacer</code>。它们是许多 UI 组件的基础，处理可访问性和基本行为。你可以混合搭配这些原语来创建自己的编辑器控件，或进一步自定义现有组件。</p>
+
+      <!-- 下一页导航 -->
+      <div class="next-page">
+        <a href="https://tiptap.dev/docs/ui-components/install/next">
+          <span class="next-label">下一步</span>
+          <span class="next-title">安装 →</span>
+        </a>
+      </div>
+
+      <!-- 页脚 -->
+      <footer>
+        <div class="footer-links">
+          <a href="https://tiptap.dev/docs/hocuspocus/getting-started/overview">Hocuspocus</a>
+          <a href="https://tiptap.dev/legal-notice" target="_blank" rel="noopener noreferrer">法律声明</a>
+          <a href="https://tiptap.dev/privacy-policy" target="_blank" rel="noopener noreferrer">隐私政策</a>
+          <a href="https://tiptap.dev/terms-of-service" target="_blank" rel="noopener noreferrer">服务条款</a>
+          <a href="https://tiptap.dev/docs/resources/contributing">贡献指南</a>
+          <a href="https://tiptap.dev/docs/resources/changelog">更新日志</a>
+        </div>
+        <div class="footer-copyright">版权所有 © 2025 Tiptap</div>
+        <a href="https://github.com/ueberdosis/tiptap-docs/blob/main/src/content/ui-components/getting-started/overview.mdx" target="_blank" rel="noopener noreferrer">在 GitHub 上编辑此页面</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

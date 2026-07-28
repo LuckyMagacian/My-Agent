@@ -29,7 +29,7 @@ argument-hint: "[任务ID / tasks.md路径 / target / 失败原因]"
    - **重试约束**：重试时逐条修正失败原因，参考失败历史（reports 路径列表）避免重复尝试已失败方案。
 
 4. 输入契约：
-   - **tasks.md 路径**：`docs/loop-runs/{日期}-{目标}/tasks.md`，从中读取 T{n} 任务条目。
+   - **tasks.md 路径**：`.ai/docs/loop-runs/{日期}-{目标}/tasks.md`，从中读取 T{n} 任务条目。
    - **任务 ID**：T{n}，定位具体任务条目。
    - **target**：主循环 classify_domain 的判定结果（self 或技术域 agent name）。
    - **失败原因**（重试时）：reviewer 指出的具体问题，逐条修正。

@@ -52,7 +52,7 @@ common_loop 是**完全自包含**的通用多轮 agent loop 编排规范。所�
 
 ### ② 确认目标 ✋
 - AskUserQuestion 与用户确认目标（含验收标准）
-- 生成 run_dir：`docs/loop-runs/{YYYY-MM-DD}-{slug}/`（slug = slugify(目标标题)[:20]，保留中文/字母/数字）
+- 生成 run_dir：`.ai/docs/loop-runs/{YYYY-MM-DD}-{slug}/`（slug = slugify(目标标题)[:20]，保留中文/字母/数字）
 - 写入 goal.md（目标 + 验收标准 + 边界 + 元数据 goal_check_round:0）
 - **恢复检测**：入口先 detect_unfinished_runs，有未完成实例则提示恢复
 - 约束：未确认不得进入拆分
@@ -177,7 +177,7 @@ Markdown checklist + 单任务一动作 + 禁止占位符 + 含完成标准（�
 ## 元数据
 - 任务类型：{修复/变更/新功能/优化/分析}
 - 创建日期：{YYYY-MM-DD}
-- run_dir：docs/loop-runs/{date}-{slug}/
+- run_dir：.ai/docs/loop-runs/{date}-{slug}/
 - goal_check_round: 0
 ```
 
@@ -197,7 +197,7 @@ Markdown checklist + 单任务一动作 + 禁止占位符 + 含完成标准（�
 ```
 
 ### 8.3 检查报告（每轮独立文件）
-路径：`docs/loop-runs/{date}-{slug}/reports/T{n}-r{m}.md`，含结论/证据/原因/建议。
+路径：`.ai/docs/loop-runs/{date}-{slug}/reports/T{n}-r{m}.md`，含结论/证据/原因/建议。
 
 ### 8.4 TodoWrite 同步
 tasks.md 为 source of truth，TodoWrite 为运行态镜像，每次状态变更同步（blocked/skipped/aborted 以 completed+前缀标记）。
@@ -205,7 +205,7 @@ tasks.md 为 source of truth，TodoWrite 为运行态镜像，每次状态变更
 ## 9. 恢复机制（不依赖 attention-maintenance）
 
 ### 9.1 恢复检测
-入口 detect_unfinished_runs 扫描 `docs/loop-runs/`：
+入口 detect_unfinished_runs 扫描 `.ai/docs/loop-runs/`：
 - 有 tasks.md 但无 final-report.md 且无 partial-report.md -> 未完成
 - 有 partial-report.md -> 已中止
 - 有 final-report.md -> 已完成，不恢复

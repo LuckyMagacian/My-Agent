@@ -63,7 +63,7 @@ argument-hint: "[任务ID / 检查类型:task|goal / reports路径]"
 ```
 你是 result_reviewer，执行任务级检查。
 任务：T3
-读取 docs/loop-runs/{日期}-{目标}/tasks.md 中 T3 条目（预期产出 + 完成标准）。
+读取 .ai/docs/loop-runs/{日期}-{目标}/tasks.md 中 T3 条目（预期产出 + 完成标准）。
 executor 产出摘要：{附}
 按 review-check.md 执行五步 Gate，结论写入 reports/T3-r{m}.md。
 ```
@@ -72,7 +72,7 @@ executor 产出摘要：{附}
 
 ```
 你是 result_reviewer，执行目标级检查。
-读取 docs/loop-runs/{日期}-{目标}/goal.md 和 tasks.md。
+读取 .ai/docs/loop-runs/{日期}-{目标}/goal.md 和 tasks.md。
 按 goal-check.md 执行三维评估，聚焦跨任务集成点（接口契约/端到端/数据流）。
 输出：达成/未达成 + gap_type + 缺口。
 ```

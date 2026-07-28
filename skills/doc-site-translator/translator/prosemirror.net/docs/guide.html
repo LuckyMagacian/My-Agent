@@ -1,0 +1,955 @@
+<html lang="zh-CN"><head><meta charset="utf8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>ProseMirror 指南</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/styles.css"></head><body><header>
+  <nav>
+    <a class="logo" href="/">ProseMirror</a>
+    <div class="navlinks"><a class="toc-toggle">目录</a><a href="/examples/">示例</a>
+      <a href="/docs/" class="active">文档</a>
+      <a href="https://discuss.prosemirror.net/">讨论</a>
+      <a href="https://code.haverbeke.berlin/prosemirror">代码</a>
+    </div>
+  </nav></header><nav id="toc">
+    <ul><li><a href="#intro">简介</a></li><li><a href="#doc">文档</a></li><li><a href="#schema">Schema</a></li><li><a href="#transform">文档变换</a></li><li><a href="#state">编辑器状态</a></li><li><a href="#view">视图组件</a></li><li><a href="#commands">命令</a></li><li><a href="#collab">协同编辑</a></li></ul>
+  </nav>
+  <script>
+addEventListener("load", function() {
+  var toc = document.querySelector("nav#toc")
+  var state = "top"
+  var footer = document.querySelector("footer"), header = document.querySelector("header")
+  function align() {
+    var tocRect = toc.getBoundingClientRect(),
+        headRect = header.getBoundingClientRect(),
+        footRect = footer.getBoundingClientRect()
+    if (state == "top" && headRect.bottom <= -40 ||
+        state == "bottom" && toc.getBoundingClientRect().top >= 0) {
+      toc.style.top = "0"
+      toc.style.bottom = ""
+      toc.classList.add("fixed")
+      state = "fixed"
+    } else if (state == "fixed" && headRect.bottom > -40) {
+      toc.style.bottom = toc.style.top = ""
+      toc.classList.remove("fixed")
+      state = "top"
+    } else if (state == "fixed" && footRect.top < tocRect.bottom) {
+      toc.style.bottom = footRect.height + "px"
+      toc.style.top = "auto"
+      toc.classList.remove("fixed")
+      state = "bottom"
+    }
+  }
+  if (document.body.scrollHeight - header.offsetHeight > innerHeight) {
+    align()
+    addEventListener("scroll", align)
+  }
+  document.querySelector(".toc-toggle").addEventListener("click", function() {
+    toc.classList.toggle("open")
+  })
+})
+  </script><article><div class="translation-banner">这是 <a href="https://prosemirror.net/docs/guide/">原文</a> 的中文翻译版本。如有疑问，请以 <a href="https://prosemirror.net/docs/guide/">原文</a> 为准。</div><h1>ProseMirror 指南</h1>
+
+<p>本指南介绍了库中使用的各种概念及其相互关系。为了全面了解系统，建议按照章节顺序阅读，至少读到视图组件部分。</p>
+<h2 id="intro">简介</h2><p>ProseMirror 提供了一套用于构建富文本编辑器的工具和概念，其用户界面受所见即所得启发，但试图避免这种编辑方式的陷阱。</p>
+<p>ProseMirror 的核心原则是，你的代码可以完全控制文档及其发生的变化。这个文档不是一团 HTML，而是一个自定义数据结构，只包含你明确允许的元素，并以你指定的关系组织。所有更新都经过一个单一的入口点，你可以在那里检查并响应它们。</p>
+<p>核心库不是一个简单的即插即用组件——我们将模块化和可定制性置于简洁性之上，希望未来人们会基于 ProseMirror 分发即插即用的编辑器。因此，它更像是一套乐高积木，而非一辆火柴盒小车。</p>
+<p>有四个核心模块，是进行任何编辑所必需的，还有许多由核心团队维护的扩展模块，它们的状态类似于第三方模块——提供有用的功能，但你可以省略它们，或用实现类似功能的其他模块替换。</p>
+<p>核心模块包括：</p>
+<ul>
+<li>
+<p><a href="/docs/ref/#model"><code>prosemirror-model</code></a> 定义了编辑器的<a href="#doc">文档模型</a>，即用于描述编辑器内容的数据结构。</p>
+</li>
+<li>
+<p><a href="/docs/ref/#state"><code>prosemirror-state</code></a> 提供了描述编辑器整体状态的数据结构，包括选区，以及用于从一个状态迁移到下一个状态的事务系统。</p>
+</li>
+<li>
+<p><a href="/docs/ref/#view"><code>prosemirror-view</code></a> 实现了一个用户界面组件，将给定的编辑器状态显示为浏览器中可编辑的元素，并处理用户与该元素的交互。</p>
+</li>
+<li>
+<p><a href="/docs/ref/#transform"><code>prosemirror-transform</code></a> 包含以可记录和可重放的方式修改文档的功能，这是 <code>state</code> 模块中事务的基础，也使撤销历史和协同编辑成为可能。</p>
+</li>
+</ul>
+<p>此外，还有用于<a href="/docs/ref/#commands">基本编辑命令</a>、<a href="/docs/ref/#keymap">键绑定</a>、<a href="/docs/ref/#history">撤销历史</a>、<a href="/docs/ref/#inputrules">输入宏</a>、<a href="/docs/ref/#collab">协同编辑</a>、<a href="/docs/ref/#schema-basic">简单文档 schema</a> 等的模块，以及更多在 <a href="https://code.haverbeke.berlin/prosemirror/" target="_blank">prosemirror
+organization</a> 下的模块。</p>
+<p>ProseMirror 不是以单个可由浏览器加载的脚本分发的，这意味着你可能需要使用某种打包工具。打包工具是一种自动查找脚本依赖并将其合并为一个大文件的工具，方便从网页中加载。你可以在网上阅读更多关于打包的内容，例如<a href="https://medium.freecodecamp.org/javascript-modules-part-2-module-bundling-5020383cf306" target="_blank">这里</a>。</p>
+<h3><a id="intro.my_first_editor"></a>我的第一个编辑器</h3>
+<p>乐高积木可以这样拼装来创建一个非常基础的编辑器：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">schema</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-schema-basic"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorState</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-state"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorView</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-view"</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">body</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>ProseMirror 要求你指定文档所遵循的 schema，因此这里首先导入了一个包含基础 schema 的模块。</p>
+<p>然后使用该 schema 创建一个 state，它会生成一个符合 schema 的空文档，并在文档开头设置一个默认选区。最后，为该 state 创建一个 view，并挂载到 <code>document.body</code>。这会将 state 的文档渲染为一个可编辑的 DOM 节点，并在用户输入时生成状态事务。</p>
+<p>这个编辑器还不太好用。例如，按回车键什么也不会发生，因为核心库对回车应该做什么没有预设。我们稍后会解决这个问题。</p>
+<h3><a id="intro.transactions"></a>事务</h3>
+<p>当用户输入或以其他方式与 view 交互时，它会生成"状态事务"。这意味着它不会直接就地修改文档并隐式更新状态，而是每次更改都会创建一个<a href="#state.transactions"><em>事务</em></a>，描述对 state 所做的更改，并可以被应用以创建一个<em>新</em>的 state，然后用这个新 state 来更新 view。</p>
+<p>默认情况下，这一切都在幕后进行，但你可以通过编写<a href="#state.plugins">插件</a>或配置 view 来介入。例如，以下代码添加了一个<a href="/docs/ref/#view.DirectEditorProps.dispatchTransaction"><code>dispatchTransaction</code></a><a href="/docs/ref/#view.EditorProps">属性</a>，它会在每次创建事务时被调用：</p>
+<pre><code class="language-javascript"><span class="tok-comment">// (Imports omitted)</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">body</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">dispatchTransaction</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">transaction</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-string">"Document size went from"</span><span class="tok-punctuation">,</span> <span class="tok-variableName">transaction</span><span class="tok-operator">.</span><span class="tok-propertyName">before</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">,</span>
+                <span class="tok-string">"to"</span><span class="tok-punctuation">,</span> <span class="tok-variableName">transaction</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">newState</span> <span class="tok-operator">=</span> <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName">transaction</span><span class="tok-punctuation">)</span>
+    <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">updateState</span><span class="tok-punctuation">(</span><span class="tok-variableName">newState</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p><em>每次</em>状态更新都必须通过<a href="/docs/ref/#view.EditorView.updateState"><code>updateState</code></a>，而每次正常的编辑更新都是通过派发事务来完成的。</p>
+<h3><a id="intro.plugins"></a>插件</h3>
+<p>插件用于以多种方式扩展编辑器和编辑器状态的行为。有些相对简单，比如<a href="/docs/ref/#keymap">keymap</a> 插件将<a href="#commands">动作</a>绑定到键盘输入。有些则更复杂，比如<a href="/docs/ref/#history">history</a> 插件通过观察事务并存储其逆操作来实现撤销历史，以备用户想要撤销它们。</p>
+<p>让我们将这两个插件添加到编辑器中以获得 undo/redo 功能：</p>
+<pre><code class="language-javascript"><span class="tok-comment">// (Omitted repeated imports)</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">undo</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">redo</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">history</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-history"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">keymap</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-keymap"</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">plugins</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">[</span>
+    <span class="tok-variableName">history</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+    <span class="tok-variableName">keymap</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-string">"Mod-z"</span><span class="tok-punctuation">:</span> <span class="tok-variableName">undo</span><span class="tok-punctuation">,</span> <span class="tok-string">"Mod-y"</span><span class="tok-punctuation">:</span> <span class="tok-variableName">redo</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">]</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">body</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>插件在创建 state 时注册（因为它们可以访问状态事务）。为这个启用了 history 的 state 创建 view 后，你就可以按 Ctrl-Z（或在 OS X 上按 Cmd-Z）来撤销上一次更改了。</p>
+<h3><a id="intro.commands"></a>命令</h3>
+<p>前一个示例中绑定到键的 <code>undo</code> 和 <code>redo</code> 值是一种特殊类型的函数，称为<a href="#commands"><em>命令</em></a>。大多数编辑操作都编写为命令，可以绑定到键、关联到菜单，或以其他方式暴露给用户。</p>
+<p><code>prosemirror-commands</code> 包提供了许多基本编辑命令，以及一个最小 keymap，你可能希望启用它，让回车和删除等操作在编辑器中按预期工作。</p>
+<pre><code class="language-javascript"><span class="tok-comment">// (Omitted repeated imports)</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">baseKeymap</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-commands"</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">plugins</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">[</span>
+    <span class="tok-variableName">history</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+    <span class="tok-variableName">keymap</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-string">"Mod-z"</span><span class="tok-punctuation">:</span> <span class="tok-variableName">undo</span><span class="tok-punctuation">,</span> <span class="tok-string">"Mod-y"</span><span class="tok-punctuation">:</span> <span class="tok-variableName">redo</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+    <span class="tok-variableName">keymap</span><span class="tok-punctuation">(</span><span class="tok-variableName">baseKeymap</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">]</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">body</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>此时，你已经有了一个基本可用的编辑器。</p>
+<p>要添加菜单、针对 schema 特定内容的额外键绑定等，你可以了解一下 <a href="https://code.haverbeke.berlin/prosemirror/prosemirror-example-setup" target="_blank"><code>prosemirror-example-setup</code></a> 包。这是一个提供一组插件数组的模块，用于设置一个基础编辑器，但正如其名称所示，它更多是作为示例而非生产级库。在实际部署中，你可能需要用自定义代码替换它，按照你想要的方式精确设置一切。</p>
+<h3><a id="intro.content"></a>内容</h3>
+<p>state 的文档存放在其 <a href="/docs/ref/#state.EditorState.doc"><code>doc</code></a> 属性中。这是一个只读数据结构，将文档表示为节点的层级结构，类似于浏览器 DOM。一个简单的文档可能是一个 <code>"doc"</code> 节点，包含两个 <code>"paragraph"</code> 节点，每个段落包含一个 <code>"text"</code> 节点。</p>
+<p>初始化 state 时，你可以给它一个初始文档。在这种情况下，<code>schema</code> 字段是可选的，因为 schema 可以从文档中获取。</p>
+<p>这里我们通过解析 ID 为 <code>"content"</code> 的 DOM 元素中的内容来初始化一个 state，使用 DOM 解析器机制，该机制利用 schema 中提供的关于 DOM 节点与 schema 元素映射关系的信息：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">DOMParser</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-model"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorState</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-state"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">schema</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-schema-basic"</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">content</span> <span class="tok-operator">=</span> <span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">getElementById</span><span class="tok-punctuation">(</span><span class="tok-string">"content"</span><span class="tok-punctuation">)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-variableName">DOMParser</span><span class="tok-operator">.</span><span class="tok-propertyName">fromSchema</span><span class="tok-punctuation">(</span><span class="tok-variableName">schema</span><span class="tok-punctuation">)</span><span class="tok-operator">.</span><span class="tok-propertyName">parse</span><span class="tok-punctuation">(</span><span class="tok-variableName">content</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<h2 id="doc">文档</h2><style>
+  .box {
+    color: white;
+    display: inline-block;
+    border-radius: 5px;
+    padding: 3px 6px;
+    margin: 3px 0;
+    vertical-align: top;
+  }
+</style>
+<p>ProseMirror 定义了自己的<a href="/docs/ref/#model.Node">数据结构</a>来表示内容文档。由于文档是编辑器构建的核心元素，理解其工作方式很有帮助。</p>
+<h3><a id="doc.structure"></a>结构</h3>
+<p>ProseMirror 文档是一个<a href="/docs/ref/#model.Node">node</a>，它持有一个包含零个或多个子节点的<a href="/docs/ref/#model.Fragment">fragment</a>。</p>
+<p>这与<a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model" target="_blank">浏览器 DOM</a>很相似，都是递归的树形结构。但它在存储行内内容的方式上与 DOM 不同。</p>
+<p>在 HTML 中，一个带有标记的段落表示为一棵树，像这样：</p>
+<pre><code class="language-html"><span class="tok-punctuation">&lt;</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span>This is <span class="tok-punctuation">&lt;</span><span class="tok-typeName">strong</span><span class="tok-punctuation">&gt;</span>strong text with <span class="tok-punctuation">&lt;</span><span class="tok-typeName">em</span><span class="tok-punctuation">&gt;</span>emphasis<span class="tok-punctuation">&lt;/</span><span class="tok-typeName">em</span><span class="tok-punctuation">&gt;</span><span class="tok-punctuation">&lt;/</span><span class="tok-typeName">strong</span><span class="tok-punctuation">&gt;</span><span class="tok-punctuation">&lt;/</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span>
+</code></pre>
+<div class="figure">
+  <div class="box" style="background: #77e">
+    <strong>p</strong><br>
+    "This is "
+    <div class="box" style="background: #55b">
+      <strong>strong</strong><br>
+      "strong text with "
+      <div class="box" style="background: #77e">
+        <strong>em</strong><br>
+        "emphasis"
+      </div>
+    </div>
+  </div>
+</div>
+<p>而在 ProseMirror 中，行内内容被建模为一个扁平序列，标记作为元数据附加到节点上：</p>
+<div class="figure">
+  <div class="box" style="background: #77e">
+    <strong>paragraph</strong><br>
+    <div class="box" style="background: #55b">
+      "This is "
+    </div>
+    <div class="box" style="background: #55b">
+      "strong text with "<br>
+      <div class="box" style="background: #d94">
+        <strong>strong</strong>
+      </div>
+    </div>
+    <div class="box" style="background: #55b">
+      "emphasis"<br>
+      <div class="box" style="background: #d94">
+        <strong>strong</strong>
+      </div>
+      <div class="box" style="background: #d94">
+        <strong>em</strong>
+      </div>
+    </div>
+  </div>
+</div>
+<p>这更贴近我们思考和操作此类文本的方式。它允许我们使用字符偏移量而非树中的路径来表示段落中的位置，并使拆分或更改内容样式等操作更加容易，无需执行笨拙的树操作。</p>
+<p>这也意味着每个文档只有<em>一种</em>有效表示。具有相同标记集合的相邻文本节点总会被合并，且不允许空文本节点。标记出现的顺序由 schema 指定。</p>
+<p>因此，ProseMirror 文档是一棵由块级节点组成的树，其中大部分叶节点是<em>textblock</em>，即包含文本的块级节点。也可以有简单为空的块级叶节点，例如水平线或视频元素。</p>
+<p>Node 对象具有若干反映其在文档中角色的属性：</p>
+<ul>
+<li><code>isBlock</code> 和 <code>isInline</code> 告诉你给定节点是块级节点还是行内节点。</li>
+<li><code>inlineContent</code> 对于期望行内节点作为内容的节点为 true。</li>
+<li><code>isTextblock</code> 对于包含行内内容的块级节点为 true。</li>
+<li><code>isLeaf</code> 告诉你该节点不允许任何内容。</li>
+</ul>
+<p>所以一个典型的 <code>"paragraph"</code> 节点是 textblock，而 blockquote 可能是一个内容包含其他块级节点的块级元素。文本、硬换行和行内图片是行内叶节点，水平线节点则是块级叶节点的例子。</p>
+<p><a href="#schema">schema</a> 允许对什么可以出现在哪里指定更精确的约束——即，即使一个节点允许块级内容，也不意味着它允许<em>所有</em>块级节点作为内容。</p>
+<h3><a id="doc.identity_and_persistence"></a>标识与持久性</h3>
+<p>DOM 树和 ProseMirror 文档之间的另一个重要区别在于表示节点的对象的行为方式。在 DOM 中，节点是具有<em>标识</em>的可变对象，这意味着一个节点只能出现在一个父节点中，且节点对象在更新时会被修改。</p>
+<p>而在 ProseMirror 中，节点仅仅是<em>值</em>，应像对待表示数字 3 的值那样来对待它。3 可以同时出现在多个数据结构中，它没有指向当前所属数据结构的父链接，如果给它加 1，你会得到一个<em>新</em>值 4，而不会对原来的 3 产生任何改变。</p>
+<p>ProseMirror 文档的各个部分也是如此。它们不会改变，但可以作为起始值来计算修改后的文档片段。它们不知道自己属于哪个数据结构，但可以属于多个结构，甚至在单一结构中出现多次。它们是<em>值</em>，而非有状态对象。</p>
+<p>这意味着每次更新文档时，你都会得到一个新的文档值。该文档值会与原始文档值共享所有未更改的子节点，使得创建新文档的开销相对较小。</p>
+<p>这带来了一系列优势。它使得编辑器在更新过程中不可能处于无效的中间状态，因为新状态（带有新文档）可以被瞬间替换。它也使得以某种数学方式来推理文档变得更加容易——如果你的值不断在你脚下变化，这几乎是不可能的。这有助于实现协同编辑，并允许 ProseMirror 通过将上次绘制到屏幕的文档与当前文档进行比较，来运行非常高效的 DOM <a href="/docs/ref/#view.EditorView.update">更新</a>算法。</p>
+<p>因为这些节点由常规 JavaScript 对象表示，且显式<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze" target="_blank">冻结</a>其属性会影响性能，所以实际上<em>可以</em>修改它们。但这样做不受支持，且会导致问题，因为它们几乎总是在多个数据结构之间共享。所以要小心！注意，这同样适用于作为节点对象<em>一部分</em>的数组和普通对象，例如用于存储节点属性的对象，或 fragment 中的子节点数组。</p>
+<h3><a id="doc.data_structures"></a>数据结构</h3>
+<p>文档的对象结构大致如下：</p>
+<style>
+  .classbox { border-radius: 8px; padding: 4px 10px; color: white; display: inline-block; vertical-align: middle; }
+  .classbox td { vertical-align: top; padding: 0; border-right: 5px solid transparent; }
+</style>
+<div class="classbox" style="background: #77e; margin-left: 20px">
+  <table style="cell-spacing: collapse">
+    <tbody><tr><td><strong>Node</strong></td></tr>
+    <tr>
+      <td>type:</td>
+      <td><div class="classbox" style="background: #446"><strong>NodeType</strong></div></td>
+    </tr>
+    <tr>
+      <td>content:</td>
+      <td><div class="classbox" style="background: #44e"><strong>Fragment</strong><br>
+        [<div class="classbox" style="background: #77e"><strong>Node</strong></div>,
+         <div class="classbox" style="background: #77e"><strong>Node</strong></div>, ...]</div></td>
+    </tr>
+    <tr>
+      <td>attrs:</td>
+      <td><div class="classbox" style="background: #99e"><strong>Object</strong></div></td>
+    </tr>
+    <tr>
+      <td>marks:</td>
+      <td>[<div class="classbox" style="background: #55b">
+        <table style="cell-spacing: collapse">
+          <tbody><tr><td><strong>Mark</strong></td></tr>
+          <tr>
+            <td>type:</td>
+            <td><div class="classbox" style="background: #446"><strong>MarkType</strong></div></td>
+          </tr>
+          <tr>
+           <td>attrs:</td>
+           <td><div class="classbox" style="background: #99e"><strong>Object</strong></div></td>
+         </tr>
+       </tbody></table></div>, ...]</td>
+    </tr>
+  </tbody></table>
+</div>
+<p>每个节点由 <a href="/docs/ref/#model.Node"><code>Node</code></a> 类的实例表示。它带有一个<a href="/docs/ref/#model.NodeType">type</a>标签，该类型知道节点的名称、有效属性等信息。NodeType（以及 MarkType）在每个 schema 中只创建一次，并知道自己属于哪个 schema。</p>
+<p>节点的内容存储在 <a href="/docs/ref/#model.Fragment"><code>Fragment</code></a> 实例中，它持有一个节点序列。即使对于没有或不允许内容的节点，该字段也会被填充（使用共享的<a href="/docs/ref/#model.Fragment%5Eempty">空 fragment</a>）。</p>
+<p>某些节点类型允许属性，即与每个节点一起存储的额外值。例如，图片节点可能使用属性来存储其替代文本和图片 URL。</p>
+<p>此外，行内节点持有一组活动标记——如强调或链接——这些标记表示为 <a href="/docs/ref/#model.Mark"><code>Mark</code></a> 实例的数组。</p>
+<p>完整的文档就是一个 node。文档内容表示为顶层节点的子节点。通常，它会包含一系列块级节点，其中一些可能是包含行内内容的 textblock。但顶层节点本身也可以是 textblock，这样文档就只包含行内内容。</p>
+<p>哪种节点允许出现在哪里由文档的 <a href="#schema">schema</a> 决定。要以编程方式创建节点，你必须通过 schema，例如使用 <a href="/docs/ref/#model.Schema.node"><code>node</code></a> 和 <a href="/docs/ref/#model.Schema.text"><code>text</code></a> 方法。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">schema</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-schema-basic"</span>
+
+<span class="tok-comment">// (The null arguments are where you can specify attributes, if necessary.)</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">doc</span> <span class="tok-operator">=</span> <span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">node</span><span class="tok-punctuation">(</span><span class="tok-string">"doc"</span><span class="tok-punctuation">,</span> <span class="tok-keyword">null</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">[</span>
+  <span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">node</span><span class="tok-punctuation">(</span><span class="tok-string">"paragraph"</span><span class="tok-punctuation">,</span> <span class="tok-keyword">null</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">[</span><span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">text</span><span class="tok-punctuation">(</span><span class="tok-string">"One."</span><span class="tok-punctuation">)</span><span class="tok-punctuation">]</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+  <span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">node</span><span class="tok-punctuation">(</span><span class="tok-string">"horizontal_rule"</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+  <span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">node</span><span class="tok-punctuation">(</span><span class="tok-string">"paragraph"</span><span class="tok-punctuation">,</span> <span class="tok-keyword">null</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">[</span><span class="tok-variableName">schema</span><span class="tok-operator">.</span><span class="tok-propertyName">text</span><span class="tok-punctuation">(</span><span class="tok-string">"Two!"</span><span class="tok-punctuation">)</span><span class="tok-punctuation">]</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">]</span><span class="tok-punctuation">)</span>
+</code></pre>
+<h3><a id="doc.indexing"></a>索引</h3>
+<p>ProseMirror 节点支持两种索引方式——可以将其视为树，使用各节点内的偏移量；也可以将其视为扁平的 token 序列。</p>
+<p>第一种方式允许你执行与 DOM 类似的操作——与单个节点交互，使用 <a href="/docs/ref/#model.Node.child"><code>child</code> 方法</a>和 <a href="/docs/ref/#model.Node.childCount"><code>childCount</code></a> 直接访问子节点，编写递归函数扫描文档（如果你只想查看所有节点，可使用 <a href="/docs/ref/#model.Node.descendants"><code>descendants</code></a> 或 <a href="/docs/ref/#model.Node.nodesBetween"><code>nodesBetween</code></a>）。</p>
+<p>第二种方式在定位文档中的特定位置时更有用。它允许将任何文档位置表示为一个整数——token 序列中的索引。这些 token 并不作为对象实际存在于内存中——它们只是一种计数约定——但文档的树形结构以及每个节点知道自身大小这一事实，使得按位置访问的开销很低。</p>
+<ul>
+<li>
+<p>文档的开头，即第一个内容之前，是位置 0。</p>
+</li>
+<li>
+<p>进入或离开一个非叶节点（即支持内容的节点）计为一个 token。因此如果文档以一个段落开始，该段落的起始位置计为位置 1。</p>
+</li>
+<li>
+<p>文本节点中的每个字符计为一个 token。因此如果文档开头的段落包含单词"hi"，位置 2 在"h"之后，位置 3 在"i"之后，位置 4 在整个段落之后。</p>
+</li>
+<li>
+<p>不允许内容的叶节点（如图片）也计为单个 token。</p>
+</li>
+</ul>
+<p>因此，如果你有一个文档，用 HTML 表示如下：</p>
+<pre><code class="language-html"><span class="tok-punctuation">&lt;</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span>One<span class="tok-punctuation">&lt;/</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span>
+<span class="tok-punctuation">&lt;</span><span class="tok-typeName">blockquote</span><span class="tok-punctuation">&gt;</span><span class="tok-punctuation">&lt;</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span>Two<span class="tok-punctuation">&lt;</span><span class="tok-typeName">img</span> <span class="tok-propertyName">src</span><span class="tok-operator">=</span><span class="tok-string">"..."</span><span class="tok-punctuation">&gt;</span><span class="tok-punctuation">&lt;/</span><span class="tok-typeName">p</span><span class="tok-punctuation">&gt;</span><span class="tok-punctuation">&lt;/</span><span class="tok-typeName">blockquote</span><span class="tok-punctuation">&gt;</span>
+</code></pre>
+<p>其 token 序列及位置如下：</p>
+<pre><code>0   1 2 3 4    5
+&nbsp;&lt;p&gt; O n e &lt;/p&gt;
+
+5            6   7 8 9 10    11   12            13
+ &lt;blockquote&gt; &lt;p&gt; T w o &lt;img&gt; &lt;/p&gt; &lt;/blockquote&gt;
+</code></pre>
+<p>每个节点都有一个 <a href="/docs/ref/#model.Node.nodeSize"><code>nodeSize</code></a> 属性，给出整个节点的大小，你可以访问 <a href="/docs/ref/#model.Fragment.size"><code>.content.size</code></a> 来获取节点<em>内容</em>的大小。注意，对于外部文档节点，开闭 token 不被视为文档的一部分（因为你不能将光标放在文档外部），因此文档的大小是 <code>doc.content.size</code>，<strong>不是</strong> <code>doc.nodeSize</code>。</p>
+<p>手动解读这些位置需要大量的计数工作。你可以调用 <a href="/docs/ref/#model.Node.resolve"><code>Node.resolve</code></a> 来获取位置的更具描述性的<a href="/docs/ref/#model.ResolvedPos">数据结构</a>。该数据结构会告诉你位置的父节点是什么、它在该父节点中的偏移量、父节点的祖先是什么，以及其他一些信息。</p>
+<p>请注意区分子节点索引（根据 <a href="/docs/ref/#model.Node.childCount"><code>childCount</code></a>）、文档范围的位置，以及节点局部偏移量（有时在递归函数中用于表示当前处理节点内的位置）。</p>
+<h3><a id="doc.slices"></a>切片</h3>
+<p>为了处理复制粘贴和拖放等操作，需要能够讨论文档的一个切片，即两个位置之间的内容。这种切片与完整的 node 或 fragment 不同，因为其开头或结尾的一些节点可能是"开放的"。</p>
+<p>例如，如果你从一个段落中间选择到下一个段落中间，所选切片包含两个段落，第一个在开头处开放，第二个在结尾处开放；而如果你节点选择一个段落，则选择的是一个封闭节点。这种开放节点中的内容在被视为节点的完整内容时，可能会违反 schema 约束，因为一些必需的节点落在了切片之外。</p>
+<p><a href="/docs/ref/#model.Slice"><code>Slice</code></a> 数据结构用于表示此类切片。它存储一个 <a href="/docs/ref/#model.Fragment">fragment</a> 以及两侧的<a href="/docs/ref/#model.Slice.openStart">开放深度</a>。你可以使用节点上的 <a href="/docs/ref/#model.Node.slice"><code>slice</code> 方法</a>从文档中切出一个切片。</p>
+<pre><code class="language-javascript"><span class="tok-comment">// doc holds two paragraphs, containing text "a" and "b"</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">slice1</span> <span class="tok-operator">=</span> <span class="tok-variableName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">slice</span><span class="tok-punctuation">(</span><span class="tok-number">0</span><span class="tok-punctuation">,</span> <span class="tok-number">3</span><span class="tok-punctuation">)</span> <span class="tok-comment">// The first paragraph</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">slice1</span><span class="tok-operator">.</span><span class="tok-propertyName">openStart</span><span class="tok-punctuation">,</span> <span class="tok-variableName">slice1</span><span class="tok-operator">.</span><span class="tok-propertyName">openEnd</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 0 0</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">slice2</span> <span class="tok-operator">=</span> <span class="tok-variableName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">slice</span><span class="tok-punctuation">(</span><span class="tok-number">1</span><span class="tok-punctuation">,</span> <span class="tok-number">5</span><span class="tok-punctuation">)</span> <span class="tok-comment">// From start of first paragraph</span>
+                             <span class="tok-comment">// to end of second</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">slice2</span><span class="tok-operator">.</span><span class="tok-propertyName">openStart</span><span class="tok-punctuation">,</span> <span class="tok-variableName">slice2</span><span class="tok-operator">.</span><span class="tok-propertyName">openEnd</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 1 1</span>
+</code></pre>
+<h3><a id="doc.changing"></a>修改</h3>
+<p>由于节点和 fragment 是<a href="https://en.wikipedia.org/wiki/Persistent_data_structure" target="_blank">持久化</a>的，你应该<strong>永远不要</strong>修改它们。如果你持有文档（或 node、fragment）的引用，该对象将保持不变。</p>
+<p>大多数时候，你会使用<a href="#transform">变换</a>来更新文档，而不需要直接操作节点。变换还会留下变更记录，这在文档属于编辑器状态时是必要的。</p>
+<p>在你确实想要"手动"派生更新文档的情况下，<a href="/docs/ref/#model.Node"><code>Node</code></a> 和 <a href="/docs/ref/#model.Fragment"><code>Fragment</code></a> 类型上提供了一些辅助方法。要创建整个文档的更新版本，通常使用 <a href="/docs/ref/#model.Node.replace"><code>Node.replace</code></a>，它将文档中给定范围替换为新内容的 <a href="/docs/ref/#model.Slice">slice</a>。要浅层更新一个节点，可以使用其 <a href="/docs/ref/#model.Node.copy"><code>copy</code></a> 方法，该方法创建一个具有新内容的相似节点。Fragment 也有多种更新方法，如 <a href="/docs/ref/#model.Fragment.replaceChild"><code>replaceChild</code></a> 或 <a href="/docs/ref/#model.Fragment.append"><code>append</code></a>。</p>
+
+<h2 id="schema">Schema</h2><p>每个 ProseMirror <a href="#doc">文档</a>都关联着一个 <a href="/docs/ref/#model.Schema">schema</a>。Schema 描述了文档中可以出现的 <a href="/docs/ref/#model.Node">节点</a>类型，以及它们的嵌套方式。例如，它可以规定顶层节点可以包含一个或多个块级节点，段落节点可以包含任意数量的行内节点，并且这些行内节点可以应用任意 <a href="/docs/ref/#model.Mark">标记</a>。</p>
+<p>有一个提供了 <a href="/docs/ref/#schema-basic">基础 schema</a> 的可用包，但 ProseMirror 的优点在于它允许你定义自己的 schema。</p>
+<h3><a id="schema.node_types"></a>节点类型</h3><p>文档中的每个节点都有一个 <a href="/docs/ref/#model.NodeType">类型</a>，它表示节点的语义含义和属性，例如在编辑器中的渲染方式。</p>
+<p>定义 schema 时，你需要枚举其中可以出现的节点类型，并使用 <a href="/docs/ref/#model.NodeSpec">spec 对象</a>来描述每一个：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">const</span> <span class="tok-variableName tok-definition">trivialSchema</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Schema</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">nodes</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"paragraph+"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">paragraph</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">text</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">inline</span><span class="tok-punctuation">:</span> <span class="tok-bool">true</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-comment">/* ... and so on */</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>这定义了一个 schema，其中文档可以包含一个或多个段落，每个段落可以包含任意数量的文本。</p>
+<p>每个 schema 必须至少定义一个顶层节点类型（默认名称为 <code>"doc"</code>，但你可以通过 <a href="/docs/ref/#model.Schema.topNodeType">配置</a>修改），以及一个用于文本内容的 <code>"text"</code> 类型。</p>
+<p>属于行内的节点必须通过 <a href="/docs/ref/#model.NodeSpec.inline"><code>inline</code></a> 属性声明这一点（不过对于 <code>text</code> 类型，因为它本身就是行内的，所以可以省略此属性）。</p>
+<h3><a id="schema.content_expressions"></a>内容表达式</h3><p>上面示例 schema 中 <a href="/docs/ref/#model.NodeSpec.content"><code>content</code></a> 字段中的字符串称为<em>内容表达式</em>。它们控制此节点类型可以包含哪些子节点序列。</p>
+<p>例如，你可以用 <code>"paragraph"</code> 表示"一个段落"，或用 <code>"paragraph+"</code> 表示"一个或多个段落"。类似地，<code>"paragraph*"</code> 表示"零个或多个段落"，<code>"caption?"</code> 表示"零个或一个 caption 节点"。你还可以在节点名称后使用类似正则表达式的范围表示，例如 <code>{2}</code>（"恰好两个"）、<code>{1, 5}</code>（"一到五个"）或 <code>{2,}</code>（"两个或更多"）。</p>
+<p>这些表达式可以组合成序列，例如 <code>"heading paragraph+"</code> 表示"先是一个标题，然后是一个或多个段落"。你还可以使用竖线 <code>|</code> 运算符表示两个表达式之间的选择，如 <code>"(paragraph | blockquote)+"</code>。</p>
+<p>某些元素类型组会在 schema 中多次出现——例如你可能有一个"块级"节点的概念，它们既可以出现在顶层，也可以嵌套在引用块内。你可以通过在节点 spec 中设置 <a href="/docs/ref/#model.NodeSpec.group"><code>group</code></a> 属性来创建节点组，然后在表达式中通过组名引用该组。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">const</span> <span class="tok-variableName tok-definition">groupSchema</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Schema</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">nodes</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"block+"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">paragraph</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">group</span><span class="tok-punctuation">:</span> <span class="tok-string">"block"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">blockquote</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">group</span><span class="tok-punctuation">:</span> <span class="tok-string">"block"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"block+"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">text</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>这里 <code>"block+"</code> 等同于 <code>"(paragraph | blockquote)+"</code>。</p>
+<p>建议对包含块级内容的节点（如上面示例中的 <code>"doc"</code> 和 <code>"blockquote"</code>）始终要求至少一个子节点，因为浏览器会在节点为空时完全折叠它，导致很难编辑。</p>
+<p>节点在或表达式中出现的顺序很重要。当为非可选节点创建默认实例时——例如在 <a href="/docs/ref/#transform.ReplaceStep">替换步骤</a>之后确保文档仍然符合 schema——会使用表达式中的第一个类型。如果该类型是一个组，则使用该组中的第一个类型（由组成员在 <code>nodes</code> 映射中出现的顺序决定）。如果我在上面的示例 schema 中交换 <code>"paragraph"</code> 和 <code>"blockquote"</code> 的位置，编辑器一旦尝试创建块级节点就会发生栈溢出——它会创建一个 <code>"blockquote"</code> 节点，其内容至少需要一个块级节点，于是它又尝试创建另一个 <code>"blockquote"</code> 作为内容，如此往复。</p>
+<p>库中并非所有操作节点的函数都会检查内容是否有效——像 <a href="#transform">transform</a> 这样的高层概念会做检查，但底层的节点创建方法通常不会，而是将提供合法输入的责任交给调用者。完全有可能使用例如 <a href="/docs/ref/#model.NodeType.create"><code>NodeType.create</code></a> 来创建内容无效的节点。对于在 <a href="#doc.slices">slice</a> 边缘"开放"的节点，这甚至是合理的做法。有一个单独的 <a href="/docs/ref/#model.NodeType.createChecked"><code>createChecked</code> 方法</a>，以及事后检查的 <a href="/docs/ref/#model.Node.check"><code>check</code> 方法</a>，可以用来断言给定节点的内容是否有效。</p>
+<h3><a id="schema.marks"></a>标记</h3><p>标记用于为行内内容添加额外的样式或其他信息。Schema 必须在其 <a href="/docs/ref/#model.Schema">schema</a> 中声明它允许的所有标记类型。<a href="/docs/ref/#model.MarkType">MarkType</a> 是与 NodeType 非常相似的对象，用于标记 mark 对象并提供关于它们的附加信息。</p>
+<p>默认情况下，包含行内内容的节点允许 schema 中定义的所有标记应用到其子节点。你可以通过节点 spec 中的 <a href="/docs/ref/#model.NodeSpec.marks"><code>marks</code></a> 属性来配置这一点。</p>
+<p>下面是一个简单的 schema，支持在段落中的文本上应用 strong 和 emphasis 标记，但在标题中不支持：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">const</span> <span class="tok-variableName tok-definition">markSchema</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Schema</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">nodes</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"block+"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">paragraph</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">group</span><span class="tok-punctuation">:</span> <span class="tok-string">"block"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">marks</span><span class="tok-punctuation">:</span> <span class="tok-string">"_"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">heading</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">group</span><span class="tok-punctuation">:</span> <span class="tok-string">"block"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">marks</span><span class="tok-punctuation">:</span> <span class="tok-string">""</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">text</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">inline</span><span class="tok-punctuation">:</span> <span class="tok-bool">true</span><span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">marks</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">strong</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">em</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>标记集合被解析为以空格分隔的标记名称或标记组字符串——<code>"_"</code> 作为通配符，空字符串对应空集合。</p>
+<h3><a id="schema.attributes"></a>属性</h3><p>文档 Schema 还定义了每个节点或标记具有哪些<em>属性</em>。如果你的节点类型需要存储额外的节点特定信息，例如标题节点的级别，最好通过属性来实现。</p>
+<p>属性集表示为普通对象，具有预定义的（每个节点或标记的）属性集合，持有任何可 JSON 序列化的值。要指定允许的属性，请在节点或标记 spec 中使用可选的 <code>attrs</code> 字段。</p>
+<pre><code class="language-javascript">  <span class="tok-labelName">heading</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-labelName">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">,</span>
+    <span class="tok-variableName">attrs</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-labelName">level</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-keyword">default</span><span class="tok-punctuation">:</span> <span class="tok-number">1</span><span class="tok-punctuation">}</span><span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+</code></pre>
+<p>在此 schema 中，<code>heading</code> 节点的每个实例都会在 <code>.attrs.level</code> 下拥有一个 <code>level</code> 属性。如果在节点被 <a href="/docs/ref/#model.NodeType.create">创建</a>时未指定，它将默认为 1。</p>
+<p><a id="generatable"></a>当你没有为属性提供默认值时，如果你尝试在不指定该属性的情况下创建此类节点，将会抛出错误。</p>
+<p>这也会使库无法在 transform 过程中或调用 <a href="/docs/ref/#model.NodeType.createAndFill"><code>createAndFill</code></a> 时生成此类节点作为填充来满足 schema 约束。这就是为什么你不被允许将此类节点放在 schema 中的必需位置——为了能够执行 schema 约束，编辑器需要能够生成空节点来填充内容中缺失的部分。</p>
+<h3><a id="schema.serialization_and_parsing"></a>序列化与解析</h3><p>为了能够在浏览器中编辑文档，必须能够将文档节点表示为浏览器 DOM。最简单的方法是在 schema 中使用节点 spec 的 <a href="/docs/ref/#model.NodeSpec.toDOM"><code>toDOM</code> 字段</a>来包含每个节点的 DOM 表示信息。</p>
+<p>此字段应该持有一个函数，当以节点为参数调用时，返回该节点的 DOM 结构描述。它可以是一个直接的 DOM 节点，也可以是一个<a href="/docs/ref/#model.DOMOutputSpec">描述它的数组</a>，例如：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">const</span> <span class="tok-variableName tok-definition">schema</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Schema</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">nodes</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"paragraph+"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">paragraph</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+      <span class="tok-propertyName tok-definition">content</span><span class="tok-punctuation">:</span> <span class="tok-string">"text*"</span><span class="tok-punctuation">,</span>
+      <span class="tok-propertyName tok-definition">toDOM</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-punctuation">[</span><span class="tok-string">"p"</span><span class="tok-punctuation">,</span> <span class="tok-number">0</span><span class="tok-punctuation">]</span> <span class="tok-punctuation">}</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">text</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span><span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>表达式 <code>["p", 0]</code> 声明段落渲染为 HTML <code>&lt;p&gt;</code> 标签。其中的零是"孔洞"，表示其内容应该渲染的位置。你还可以在标签名后包含一个带有 HTML 属性的对象，例如 <code>["div", {class: "c"}, 0]</code>。叶节点在其 DOM 表示中不需要孔洞，因为它们没有内容。</p>
+<p>标记 spec 允许类似的 <a href="/docs/ref/#model.MarkSpec.toDOM"><code>toDOM</code></a> 方法，但它们必须渲染为直接包裹内容的单个标签，因此内容总是直接放入返回的节点中，不需要指定孔洞。</p>
+<p>你通常还需要从 DOM 数据<em>解析</em>文档，例如当用户将内容粘贴或拖入编辑器时。model 模块也为此提供了功能，并鼓励你通过 <a href="/docs/ref/#model.NodeSpec.parseDOM"><code>parseDOM</code> 属性</a>直接在 schema 中包含解析信息。</p>
+<p>该属性可以列出 <a href="/docs/ref/#model.ParseRule"><em>解析规则</em></a>数组，描述映射到给定节点或标记的 DOM 结构。例如，基础 schema 中 emphasis 标记的解析规则如下：</p>
+<pre><code class="language-javascript">  <span class="tok-labelName">parseDOM</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">[</span>
+    <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">tag</span><span class="tok-punctuation">:</span> <span class="tok-string">"em"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>                 <span class="tok-comment">// Match &lt;em&gt; nodes</span>
+    <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">tag</span><span class="tok-punctuation">:</span> <span class="tok-string">"i"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>                  <span class="tok-comment">// and &lt;i&gt; nodes</span>
+    <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">style</span><span class="tok-punctuation">:</span> <span class="tok-string">"font-style=italic"</span><span class="tok-punctuation">}</span> <span class="tok-comment">// and inline 'font-style: italic'</span>
+  <span class="tok-punctuation">]</span>
+</code></pre>
+<p>解析规则中 <a href="/docs/ref/#model.ParseRule.tag"><code>tag</code></a> 的值可以是 CSS 选择器，因此你也可以使用 <code>"div.myclass"</code> 这样的写法。类似地，<a href="/docs/ref/#model.ParseRule.style"><code>style</code></a> 匹配内联 CSS 样式。</p>
+<p>当 schema 包含 <code>parseDOM</code> 注解时，你可以通过 <a href="/docs/ref/#model.DOMParser%5EfromSchema"><code>DOMParser.fromSchema</code></a> 为其创建一个 <a href="/docs/ref/#model.DOMParser"><code>DOMParser</code></a> 对象。编辑器会这样做来创建默认的剪贴板解析器，但你也可以<a href="/docs/ref/#view.EditorProps.clipboardParser">覆盖</a>它。</p>
+<p>文档还内置了 JSON 序列化格式。你可以对它们调用 <a href="/docs/ref/#model.Node.toJSON"><code>toJSON</code></a> 来获取一个可以安全传递给 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify"><code>JSON.stringify</code></a> 的对象，schema 对象也有一个 <a href="/docs/ref/#model.Schema.nodeFromJSON"><code>nodeFromJSON</code> 方法</a>可以将此表示解析回文档。</p>
+<h3><a id="schema.extending_a_schema"></a>扩展 Schema</h3><p>传递给 <a href="/docs/ref/#model.Schema"><code>Schema 构造函数</code></a>的 <code>nodes</code> 和 <code>marks</code> 选项可以接受 <a href="https://code.haverbeke.berlin/marijn/orderedmap#readme"><code>OrderedMap</code> 对象</a>，也可以接受普通 JavaScript 对象。生成的 schema 的 <a href="/docs/ref/#model.Schema.spec"><code>spec</code></a><code>.nodes</code> 和 <code>spec.marks</code> 属性始终是 <code>OrderedMap</code>，可以用作进一步创建 schema 的基础。</p>
+<p>此类映射支持多种方法来方便地创建更新版本。例如，你可以说 <code>schema.spec.nodes.remove("blockquote")</code> 来派生一个不包含 <code>blockquote</code> 节点的节点集，然后将其作为新 schema 的 <code>nodes</code> 字段传入。</p>
+<p><a href="/docs/ref/#schema-list">schema-list</a> 模块导出了一个<a href="/docs/ref/#schema-list.addListNodes">便捷方法</a>，用于将这些模块导出的节点添加到节点集中。</p>
+
+<h2 id="transform">文档变换</h2>
+<h3><a id="transform.mapping"></a>映射位置</h3>
+<p>当你对文档进行更改时，指向该文档的位置可能会失效或改变含义。例如，如果你插入一个字符，该字符之后的所有位置现在都指向其旧位置前一个标记处。类似地，如果你删除文档中的所有内容，指向该内容的所有位置都将失效。</p>
+<p>我们经常需要跨文档更改保留位置，例如选区边界。为了帮助解决这个问题，步骤可以为你提供一个<a href="/docs/ref/#transform.StepMap"><em>map</em></a>，它可以在应用步骤前后的文档位置之间进行转换。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">step</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">ReplaceStep</span><span class="tok-punctuation">(</span><span class="tok-number">4</span><span class="tok-punctuation">,</span> <span class="tok-number">6</span><span class="tok-punctuation">,</span> <span class="tok-variableName">Slice</span><span class="tok-operator">.</span><span class="tok-propertyName">empty</span><span class="tok-punctuation">)</span> <span class="tok-comment">// Delete 4-5</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">map</span> <span class="tok-operator">=</span> <span class="tok-variableName">step</span><span class="tok-operator">.</span><span class="tok-propertyName">getMap</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">map</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">8</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 6</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">map</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">2</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 2 (nothing changes before the change)</span>
+</code></pre>
+<p>Transform 对象会自动<a href="/docs/ref/#transform.Transform.mapping">累积</a>其中步骤的一组映射，使用一个名为<a href="/docs/ref/#transform.Mapping"><code>Mapping</code></a>的抽象，它收集一系列步骤映射，并允许你一次性映射通过它们。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">tr</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Transform</span><span class="tok-punctuation">(</span><span class="tok-variableName">myDoc</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">split</span><span class="tok-punctuation">(</span><span class="tok-number">10</span><span class="tok-punctuation">)</span>    <span class="tok-comment">// split a node, +2 tokens at 10</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">delete</span><span class="tok-punctuation">(</span><span class="tok-number">2</span><span class="tok-punctuation">,</span> <span class="tok-number">5</span><span class="tok-punctuation">)</span> <span class="tok-comment">// -3 tokens at 2</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">mapping</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">15</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 14</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">mapping</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">6</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>  <span class="tok-comment">// → 3</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">mapping</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">10</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 9</span>
+</code></pre>
+<p>在某些情况下，给定位置应该映射到哪里并不完全清楚。考虑上面示例的最后一行。位置 10 恰好指向我们拆分节点的位置，在那里插入了两个标记。它应该被映射到插入内容<em>之后</em>的位置，还是留在它前面？在示例中，它显然被移到了插入标记之后。</p>
+<p>但有时你想要另一种行为，这就是为什么步骤映射和 Mapping 上的<a href="/docs/ref/#transform.Mappable.map"><code>map</code> 方法</a>接受第二个参数 <code>bias</code>，你可以将其设置为 -1，以便在内容插入到位置上方时保持位置不变。</p>
+<pre><code class="language-javascript"><span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">mapping</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-number">10</span><span class="tok-punctuation">,</span> <span class="tok-operator">-</span><span class="tok-number">1</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 7</span>
+</code></pre>
+<p>将单个步骤定义为小型、直接的操作，其原因是这使得这种映射成为可能，同时还能以无损方式<a href="/docs/ref/#transform.Step.invert">反转</a>步骤，以及将步骤通过彼此的位置映射进行映射。</p>
+
+<h3><a id="transform.rebasing"></a>变基</h3>
+<p>当对步骤和位置映射进行更复杂的操作时，例如实现自己的变更跟踪，或将某些功能与协同编辑集成，你可能会遇到需要<em>变基</em>步骤的情况。</p>
+<p>在确定需要之前，你可能不想费心研究这部分内容。</p>
+<p>变基，在简单情况下，是指取两个以相同文档为起点的步骤，并转换其中一个，使其可以应用到由另一个步骤创建的文档上。用伪代码表示：</p>
+<pre><code>stepA(doc) = docA
+stepB(doc) = docB
+stepB(docA) = MISMATCH!
+rebase(stepB, mapA) = stepB'
+stepB'(docA) = docAB
+</code></pre>
+<p>步骤有一个<a href="/docs/ref/#transform.Step.map"><code>map</code> 方法</a>，给定一个映射，它可以将整个步骤映射通过该映射。这可能会失败，因为某些步骤在例如其应用的内容已被删除时就不再有意义了。但当成功时，你就得到了一个指向新文档的步骤，即你映射通过的更改之后的文档。所以在上面的示例中，<code>rebase(stepB, mapA)</code> 可以简单地调用 <code>stepB.map(mapA)</code>。</p>
+<p>当你想要在一个步骤链上变基另一个步骤链时，事情会变得更加复杂。</p>
+<pre><code>stepA2(stepA1(doc)) = docA
+stepB2(stepB1(doc)) = docB
+???(docA) = docAB
+</code></pre>
+<p>我们可以将 <code>stepB1</code> 映射通过 <code>stepA1</code> 然后通过 <code>stepA2</code>，得到 <code>stepB1'</code>。但对于 <code>stepB2</code>，它从 <code>stepB1(doc)</code> 产生的文档开始，其映射版本必须应用到 <code>stepB1'(docA)</code> 产生的文档上，事情变得更加困难。它必须映射通过以下映射链：</p>
+<pre><code>rebase(stepB2, [invert(mapB1), mapA1, mapA2, mapB1'])
+</code></pre>
+<p>即，首先是 <code>stepB1</code> 映射的逆映射以回到原始文档，然后通过应用 <code>stepA1</code> 和 <code>stepA2</code> 产生的映射管道，最后通过将 <code>stepB1'</code> 应用到 <code>docA</code> 所产生的映射。</p>
+<p>如果还有 <code>stepB3</code>，我们可以通过在上述管道前面加上 <code>invert(mapB2)</code> 并在末尾添加 <code>mapB2'</code> 来获得它的管道。以此类推。</p>
+<p>但是，当 <code>stepB1</code> 插入了一些内容，而 <code>stepB2</code> 对该内容做了操作时，将 <code>stepB2</code> 映射通过 <code>invert(mapB1)</code> 将返回 <code>null</code>，因为 <code>stepB1</code> 的逆映射会<em>删除</em>它所应用的内容。然而，这些内容稍后会在管道中被 <code>mapB1</code> 重新引入。<a href="/docs/ref/#transform.Mapping"><code>Mapping</code></a> 抽象提供了一种跟踪此类管道的方法，包括其中映射之间的逆关系。你可以通过它映射步骤，使它们能够在上述情况中存活。</p>
+<p>即使你已经变基了一个步骤，也不能保证它仍然可以有效地应用到当前文档。例如，如果你的步骤添加了一个 mark，但另一个步骤将你目标内容的父节点更改为不允许 mark 的节点，尝试应用你的步骤将会失败。对此的适当响应通常就是丢弃该步骤。</p>
+
+<h3><a id="state.transactions"></a>事务</h3>
+<p>在正常编辑过程中，新状态将从之前的状态派生而来。在某些情况下，例如加载新文档时，你可能想要创建一个全新的状态，但这只是例外情况。</p>
+<p>状态更新通过将<a href="/docs/ref/#state.Transaction">事务</a><a href="/docs/ref/#state.EditorState.apply">应用</a>到现有状态来发生，产生一个新状态。从概念上讲，它们是一次性完成的：给定旧状态和事务，为状态的每个组件计算新值，然后将它们组合成一个新的状态值。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">tr</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">)</span> <span class="tok-comment">// 25</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">insertText</span><span class="tok-punctuation">(</span><span class="tok-string">&quot;hello&quot;</span><span class="tok-punctuation">)</span> <span class="tok-comment">// Replaces selection with 'hello'</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">newState</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">)</span> <span class="tok-comment">// 30</span>
+</code></pre>
+<p><a href="/docs/ref/#state.Transaction"><code>Transaction</code></a> 是 <a href="/docs/ref/#transform.Transform"><code>Transform</code></a> 的子类，继承了通过将<a href="/docs/ref/#transform.Step">步骤</a>应用到初始文档来构建新文档的方式。除此之外，事务还跟踪选区和其他状态相关组件，并提供一些与选区相关的便捷方法，例如 <a href="/docs/ref/#state.Transaction.replaceSelection"><code>replaceSelection</code></a>。</p>
+<p>创建事务最简单的方法是使用编辑器状态对象上的 <a href="/docs/ref/#state.EditorState.tr"><code>tr</code> getter</a>。它会基于该状态创建一个空事务，然后你可以向其中添加步骤和其他更新。</p>
+<p>默认情况下，旧选区会通过每个步骤进行<a href="/docs/ref/#state.Selection.map">映射</a>以产生新选区，但可以使用 <a href="/docs/ref/#state.Transaction.setSelection"><code>setSelection</code></a> 显式设置新选区。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">tr</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 10</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">delete</span><span class="tok-punctuation">(</span><span class="tok-number">6</span><span class="tok-punctuation">,</span> <span class="tok-number">8</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 8 (moved back)</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">setSelection</span><span class="tok-punctuation">(</span><span class="tok-variableName">TextSelection</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">,</span> <span class="tok-number">3</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 3</span>
+</code></pre>
+<p>类似地，<a href="/docs/ref/#state.EditorState.storedMarks">活跃 mark 集合</a>在文档或选区更改后会自动清除，可以使用 <a href="/docs/ref/#state.Transaction.setStoredMarks"><code>setStoredMarks</code></a> 或 <a href="/docs/ref/#state.Transaction.ensureMarks"><code>ensureMarks</code></a> 方法来设置。</p>
+<p>最后，<a href="/docs/ref/#state.Transaction.scrollIntoView"><code>scrollIntoView</code></a> 方法可用于确保下次绘制状态时选区会滚动到可视区域。对于大多数用户操作，你可能都希望这样做。</p>
+<p>与 <code>Transform</code> 方法一样，许多 <code>Transaction</code> 方法返回事务本身，以便于链式调用。</p>
+
+<h2 id="state">编辑器状态</h2><p>编辑器的状态由什么构成？首先当然是你的文档。还有当前的选区。此外还需要一种方式来存储当前 mark 集合已发生变更这一事实，例如当你禁用或启用某个 mark 但尚未开始用该 mark 输入时。</p>
+<p>这就是 ProseMirror 状态的三个主要组成部分，它们存在于状态对象上，分别是 <a href="/docs/ref/#state.EditorState.doc"><code>doc</code></a>、
+<a href="/docs/ref/#state.EditorState.selection"><code>selection</code></a> 和
+<a href="/docs/ref/#state.EditorState.storedMarks"><code>storedMarks</code></a>。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">schema</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-schema-basic"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorState</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-state"</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">toString</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-comment">// An empty paragraph</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// 1, the start of the paragraph</span>
+</code></pre>
+<p>但插件也可能需要存储状态——例如，撤销历史需要保存其变更历史。这就是为什么活跃插件集合也被存储在状态中，并且这些插件可以定义额外的槽位来存储自己的状态。</p>
+<h3><a id="state.selection"></a>选区</h3>
+<p>ProseMirror 支持多种选区类型（并允许第三方代码定义新的选区类型）。选区由 <a href="/docs/ref/#state.Selection"><code>Selection</code></a>
+类（的子类）的实例表示。与文档和其他与状态相关的值一样，它们是不可变的——要更改选区，你需要创建一个新的选区对象和一个新的状态来持有它。</p>
+<p>选区至少具有一个起点
+(<a href="/docs/ref/#state.Selection.from"><code>.from</code></a>) 和一个终点
+(<a href="/docs/ref/#state.Selection.to"><code>.to</code></a>)，作为指向当前文档中的位置。许多选区类型还区分选区的
+<a href="/docs/ref/#state.Selection.anchor"><em>锚点</em></a>（不可移动）和
+<a href="/docs/ref/#state.Selection.head"><em>头</em></a>（可移动），因此这两个属性在每个选区对象上也是必须存在的。</p>
+<p>最常见的选区类型是<a href="/docs/ref/#state.TextSelection">文本选区</a>，用于普通光标
+（当 <code>anchor</code> 和 <code>head</code> 相同时）或选中的文本。文本选区的两个端点必须位于内联位置，即指向允许内联内容的节点。</p>
+<p>核心库还支持<a href="/docs/ref/#state.NodeSelection">节点选区</a>，即选中单个文档节点，例如当你 ctrl/cmd 点击一个节点时就会得到这种选区。这种选区的范围从紧邻该节点之前的位置到紧邻该节点之后的位置。</p>
+<h3><a id="state.transactions"></a>事务</h3>
+<p>在正常编辑过程中，新状态会从前一个状态派生而来。在某些情况下，例如加载新文档时，你可能需要创建一个全新的状态，但这是例外情况。</p>
+<p>状态更新通过将一个
+<a href="/docs/ref/#state.Transaction">事务</a>
+<a href="/docs/ref/#state.EditorState.apply">应用</a>到现有状态来产生新的状态。从概念上讲，它们是单次完成的：给定旧状态和事务，为状态的每个组件计算一个新值，然后将这些值组合成一个新的状态值。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">tr</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">)</span> <span class="tok-comment">// 25</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">insertText</span><span class="tok-punctuation">(</span><span class="tok-string">"hello"</span><span class="tok-punctuation">)</span> <span class="tok-comment">// Replaces selection with 'hello'</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">newState</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">)</span> <span class="tok-comment">// 30</span>
+</code></pre>
+<p><a href="/docs/ref/#state.Transaction"><code>Transaction</code></a> 是
+<a href="/docs/ref/#transform.Transform"><code>Transform</code></a> 的子类，继承了通过向初始文档应用 <a href="/docs/ref/#transform.Step">步骤</a> 来构建新文档的方式。除此之外，事务还会跟踪选区和其他与状态相关的组件，并提供一些与选区相关的便利方法，例如
+<a href="/docs/ref/#state.Transaction.replaceSelection"><code>replaceSelection</code></a>。</p>
+<p>创建事务最简单的方法是使用编辑器状态对象上的 <a href="/docs/ref/#state.EditorState.tr"><code>tr</code>
+取值器</a>。它会基于该状态创建一个空事务，然后你可以向其中添加步骤和其他更新。</p>
+<p>默认情况下，旧选区会通过每个步骤进行<a href="/docs/ref/#state.Selection.map">映射</a>
+以产生新选区，但可以使用
+<a href="/docs/ref/#state.Transaction.setSelection"><code>setSelection</code></a> 显式设置新选区。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">tr</span> <span class="tok-operator">=</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 10</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">delete</span><span class="tok-punctuation">(</span><span class="tok-number">6</span><span class="tok-punctuation">,</span> <span class="tok-number">8</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 8 (moved back)</span>
+<span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">setSelection</span><span class="tok-punctuation">(</span><span class="tok-variableName">TextSelection</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">,</span> <span class="tok-number">3</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+<span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">from</span><span class="tok-punctuation">)</span> <span class="tok-comment">// → 3</span>
+</code></pre>
+<p>类似地，<a href="/docs/ref/#state.EditorState.storedMarks">活跃 mark 集合</a>
+会在文档或选区变更后自动清除，并可以使用
+<a href="/docs/ref/#state.Transaction.setStoredMarks"><code>setStoredMarks</code></a> 或
+<a href="/docs/ref/#state.Transaction.ensureMarks"><code>ensureMarks</code></a> 方法来设置。</p>
+<p>最后，<a href="/docs/ref/#state.Transaction.scrollIntoView"><code>scrollIntoView</code></a>
+方法可用于确保下次绘制状态时，选区会滚动到可视区域内。你可能希望对大多数用户操作都这样做。</p>
+<p>与 <code>Transform</code> 方法类似，许多 <code>Transaction</code> 方法返回事务本身，以便于链式调用。</p>
+<h3><a id="state.plugins"></a>插件</h3>
+<p>在<a href="/docs/ref/#state.EditorState%5Ecreate">创建</a>新状态时，你可以提供一个插件数组。这些插件将被存储在该状态以及从它派生的任何状态中，并且可以影响事务的应用方式以及基于该状态的编辑器的行为方式。</p>
+<p>插件是 <a href="/docs/ref/#state.Plugin"><code>Plugin</code> 类</a>的实例，可以模拟各种各样的功能。最简单的插件只是为编辑器视图添加一些 <a href="/docs/ref/#view.EditorProps">属性</a>，例如响应某些事件。更复杂的插件可能会为编辑器添加新状态，并根据事务来更新它。</p>
+<p>创建插件时，你需要传入一个<a href="/docs/ref/#state.PluginSpec">对象</a>来指定其行为：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">myPlugin</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">props</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">handleKeyDown</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">view</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">event</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+      <span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-string">"A key was pressed!"</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">return</span> <span class="tok-bool">false</span> <span class="tok-comment">// We did not handle this</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">state</span> <span class="tok-operator">=</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">plugins</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">[</span><span class="tok-variableName">myPlugin</span><span class="tok-punctuation">]</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>当插件需要自己的状态槽位时，可以通过 <a href="/docs/ref/#state.PluginSpec.state"><code>state</code></a> 属性来定义：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">transactionCounter</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">init</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-number">0</span> <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">tr</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">value</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-variableName">value</span> <span class="tok-operator">+</span> <span class="tok-number">1</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">getTransactionCount</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">return</span> <span class="tok-variableName">transactionCounter</span><span class="tok-operator">.</span><span class="tok-propertyName">getState</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>上例中的插件定义了一个非常简单的状态，它只是计算已应用到状态的事务数量。辅助函数使用插件的
+<a href="/docs/ref/#state.Plugin.getState"><code>getState</code></a> 方法，该方法可用于从完整的编辑器状态对象中获取插件状态。</p>
+<p>由于编辑器状态是一个持久化（不可变）对象，而插件状态是该对象的一部分，因此插件状态值必须是不可变的。也就是说，如果需要更改，它们的 <code>apply</code> 方法必须返回一个新值，而不是修改旧值，并且其他代码也不应修改它们。</p>
+<p>插件通常需要向事务添加一些额外信息。例如，撤销历史在执行实际撤销操作时，会标记结果事务，这样当插件看到该事务时，不再执行对变更的常规处理（将它们添加到撤销栈），而是特殊对待——从撤销栈中移除顶部条目，并将该事务添加到重做栈。</p>
+<p>为此，事务允许将<a href="/docs/ref/#state.Transaction.getMeta"><em>元数据</em></a>附加到其上。我们可以更新事务计数器插件，使其不计入被标记的事务，如下所示：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">transactionCounter</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">init</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-number">0</span> <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">tr</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">value</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+      <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">getMeta</span><span class="tok-punctuation">(</span><span class="tok-variableName">transactionCounter</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span> <span class="tok-keyword">return</span> <span class="tok-variableName">value</span>
+      <span class="tok-keyword">else</span> <span class="tok-keyword">return</span> <span class="tok-variableName">value</span> <span class="tok-operator">+</span> <span class="tok-number">1</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">markAsUncounted</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">tr</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">setMeta</span><span class="tok-punctuation">(</span><span class="tok-variableName">transactionCounter</span><span class="tok-punctuation">,</span> <span class="tok-bool">true</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>元数据属性的键可以是字符串，但为避免命名冲突，建议使用插件对象作为键。库中还有一些字符串键具有特定含义，例如 <code>"addToHistory"</code> 可以设置为 <code>false</code> 以阻止事务被撤销，而在处理粘贴时，编辑器视图会将结果事务的 <code>"paste"</code> 属性设置为 true。</p>
+
+<h2 id="view">视图组件</h2><style>
+  .box {
+    color: white;
+    display: inline-block;
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin: 3px 0;
+    vertical-align: top;
+  }
+</style>
+<p>ProseMirror 的<a href="/docs/ref/#view.EditorView">编辑器视图</a>是一个用户界面组件，用于向用户显示<a href="#state">编辑器状态</a>，并允许用户对其执行编辑操作。</p>
+<p>核心视图组件对<em>编辑操作</em>的定义相当狭窄——它处理与编辑界面的直接交互，例如输入、点击、复制、粘贴和拖拽，但除此之外的并不多。这意味着诸如显示菜单，甚至提供完整的按键绑定这样的事情，都不在核心视图组件的职责范围内，需要通过插件来安排。</p>
+<h3><a id="view.editable_dom"></a>可编辑 DOM</h3>
+<p>浏览器允许我们指定 DOM 中的某些部分是<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable" target="_blank">可编辑的</a>，其效果是允许在其中获得焦点和选区，并使得在其中输入文字成为可能。视图创建其文档的 DOM 表示（默认使用你的 schema 的<a href="/docs/ref/#model.NodeSpec.toDOM"><code>toDOM</code>
+方法</a>），并使其可编辑。
+当可编辑元素获得焦点时，ProseMirror 确保<a href="https://developer.mozilla.org/en-US/docs/Web/API/Selection" target="_blank">DOM
+选区</a>
+与编辑器状态中的选区保持一致。</p>
+<p>它还为许多 DOM 事件注册了事件处理器，将事件转换为相应的<a href="#state.transactions">Transaction</a>。
+例如，粘贴时，粘贴的内容会被<a href="/docs/ref/#view.EditorProps.clipboardParser">解析</a>为 ProseMirror 文档切片，然后插入到文档中。</p>
+<p>许多事件也会原样放行，<em>然后</em>才按照 ProseMirror 的数据模型重新解读。例如，浏览器在光标和选区放置方面做得相当好（考虑到双向文本时，这确实是一个非常困难的问题），因此大多数与光标移动相关的按键和鼠标操作由浏览器处理，之后 ProseMirror 检查当前 DOM 选区对应什么样的<a href="/docs/ref/#state.TextSelection">文本
+选区</a>。如果该选区与当前选区不同，则分发一个更新选区的 Transaction。</p>
+<p>甚至输入操作通常也留给浏览器处理，因为干预它往往会破坏拼写检查、某些移动界面上的自动大写以及其他原生功能。当浏览器更新 DOM 时，编辑器会注意到，重新解析文档中发生变化的部分，并将差异转换为 Transaction。</p>
+<h3><a id="view.data_flow"></a>数据流</h3>
+<p>因此，编辑器视图显示给定的编辑器状态，当某些事情发生时，它创建一个 Transaction 并广播它。然后，这个 Transaction 通常被用来创建一个新的状态，并通过其
+<a href="/docs/ref/#view.EditorView.updateState"><code>updateState</code></a> 方法传递给视图。</p>
+<div style="text-align: center; font-size: 140%">
+  <div class="box" style="background: #c33;"><strong>DOM 事件</strong></div>
+  <div>↗<span style="width: 5em; display: inline-block;"></span>↘</div>
+  <div>
+    <div class="box" style="margin-right: 4em; background: #55b"><strong>EditorView</strong></div>
+    <div class="box" style="background: #77e"><strong>Transaction</strong></div>
+  </div>
+  <div>↖<span style="width: 5em; display: inline-block;"></span>↙</div>
+  <div class="box" style="background: #446;">新 <strong>EditorState</strong></div>
+</div>
+<p>这创建了一个直接的循环数据流，与经典方法（在 JavaScript 世界中）——大量命令式事件处理器——形成对比，后者往往会创建更加复杂的数据流网络。</p>
+<p>可以通过 <a href="/docs/ref/#view.DirectEditorProps.dispatchTransaction"><code>dispatchTransaction</code> 属性</a>在 Transaction 被<a href="/docs/ref/#view.EditorView.dispatch">分发</a>时"拦截"它，以便将这个循环数据流接入更大的循环——如果你的整个应用正在使用类似的数据流模型，如
+<a href="https://github.com/reactjs/redux" target="_blank">Redux</a> 及类似架构，你可以将 ProseMirror 的 Transaction 集成到你的主 action 分发循环中，并将 ProseMirror 的状态保存在你的应用"store"中。</p>
+<pre><code class="language-javascript"><span class="tok-comment">// The app's state</span>
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">appState</span> <span class="tok-operator">=</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">editor</span><span class="tok-punctuation">:</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">schema</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">score</span><span class="tok-punctuation">:</span> <span class="tok-number">0</span>
+<span class="tok-punctuation">}</span>
+
+<span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">body</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">editor</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">dispatchTransaction</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">transaction</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-variableName">update</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">type</span><span class="tok-punctuation">:</span> <span class="tok-string">"EDITOR_TRANSACTION"</span><span class="tok-punctuation">,</span> <span class="tok-propertyName tok-definition">transaction</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-comment">// A crude app state update function, which takes an update object,</span>
+<span class="tok-comment">// updates the `appState`, and then refreshes the UI.</span>
+<span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">update</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">event</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">event</span><span class="tok-operator">.</span><span class="tok-propertyName">type</span> <span class="tok-operator">==</span> <span class="tok-string">"EDITOR_TRANSACTION"</span><span class="tok-punctuation">)</span>
+    <span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">editor</span> <span class="tok-operator">=</span> <span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">editor</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName">event</span><span class="tok-operator">.</span><span class="tok-propertyName">transaction</span><span class="tok-punctuation">)</span>
+  <span class="tok-keyword">else</span> <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">event</span><span class="tok-operator">.</span><span class="tok-propertyName">type</span> <span class="tok-operator">==</span> <span class="tok-string">"SCORE_POINT"</span><span class="tok-punctuation">)</span>
+    <span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">score</span><span class="tok-operator">++</span>
+  <span class="tok-variableName">draw</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span>
+
+<span class="tok-comment">// An even cruder drawing function</span>
+<span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">draw</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">querySelector</span><span class="tok-punctuation">(</span><span class="tok-string">"#score"</span><span class="tok-punctuation">)</span><span class="tok-operator">.</span><span class="tok-propertyName">textContent</span> <span class="tok-operator">=</span> <span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">score</span>
+  <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">updateState</span><span class="tok-punctuation">(</span><span class="tok-variableName">appState</span><span class="tok-operator">.</span><span class="tok-propertyName">editor</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<h3><a id="view.efficient_updating"></a>高效更新</h3>
+<p>实现 <a href="/docs/ref/#view.EditorView.updateState"><code>updateState</code></a>
+的一种方式是每次调用时简单地重绘整个文档。但对于大型文档来说，这会非常慢。</p>
+<p>由于在更新时，视图可以同时访问旧文档和新文档，它可以比较两者，并保持 DOM 中对应未变化节点的部分不变。ProseMirror 正是这样做的，使其在典型更新中只需做很少的工作。</p>
+<p>在某些情况下，比如与输入文本对应的更新——该文本已经通过浏览器自身的编辑操作添加到了 DOM——确保 DOM 和状态一致完全不需要任何 DOM 变更。（当这样的 Transaction 被取消或以某种方式修改时，视图<em>会</em>撤销 DOM 变更，以确保 DOM 和状态保持同步。）</p>
+<p>类似地，DOM 选区只在实际与状态中的选区不同步时才更新，以避免破坏浏览器与选区一起维护的各种"隐藏"状态（比如那个功能：当你在短行上方或下方移动光标时，水平位置会在进入下一个长行时回到之前的位置）。</p>
+<h3><a id="view.props"></a>属性（Props）</h3>
+<p>"Props" 是一个取自
+<a href="https://facebook.github.io/react/docs/components-and-props.html" target="_blank">React</a> 的有用但有些模糊的术语。
+Props 类似于 UI 组件的参数。理想情况下，组件获得的属性集合完全定义了它的行为。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-variableName">myState</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">editable</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-bool">false</span> <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span> <span class="tok-comment">// Enables read-only behavior</span>
+  <span class="tok-propertyName tok-definition">handleDoubleClick</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-string">"Double click!"</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>因此，当前的 <a href="/docs/ref/#view.DirectEditorProps.state">状态</a> 是一个属性。其他属性的值也可以随时间变化，如果控制组件的代码<a href="/docs/ref/#view.EditorView.setProps">更新</a>了它们，但它们不被视为<em>状态</em>，因为组件本身不会改变它们。<a href="/docs/ref/#view.EditorView.updateState"><code>updateState</code></a>
+方法只是更新 <a href="/docs/ref/#view.DirectEditorProps.state"><code>state</code>
+属性</a>的简写。</p>
+<p>插件也允许<a href="/docs/ref/#state.PluginSpec.props">声明</a>属性，
+除了 <a href="/docs/ref/#view.DirectEditorProps.state"><code>state</code></a> 和
+<a href="/docs/ref/#view.DirectEditorProps.dispatchTransaction"><code>dispatchTransaction</code></a>，
+它们只能直接提供给视图。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">maxSizePlugin</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">max</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">props</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+      <span class="tok-propertyName tok-definition">editable</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span> <span class="tok-operator">&lt;</span> <span class="tok-variableName">max</span> <span class="tok-punctuation">}</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>当某个属性被多次声明时，处理方式取决于该属性。一般来说，直接提供的属性优先，之后每个插件按顺序获得机会。对于某些属性，如 <a href="/docs/ref/#view.EditorProps.domParser"><code>domParser</code></a>，使用找到的第一个值，其余的被忽略。对于通过返回布尔值来指示是否处理了事件的处理函数，第一个返回 true 的获得处理该事件的机会。最后，对于某些属性，如
+<a href="/docs/ref/#view.EditorProps.attributes"><code>attributes</code></a>（可用于在可编辑 DOM 节点上设置属性）和
+<a href="/docs/ref/#view.EditorProps.decorations"><code>decorations</code></a>（我们将在下一节介绍），使用所有提供值的并集。</p>
+<h3><a id="view.decorations"></a>装饰</h3>
+<p>装饰让你可以控制视图绘制文档的方式。它们通过从 <a href="/docs/ref/#view.EditorProps.decorations"><code>decorations</code>
+属性</a>返回值来创建，有三种类型：</p>
+<ul>
+<li>
+<p><a href="/docs/ref/#view.Decoration%5Enode">节点装饰</a>向单个节点的 DOM 表示添加样式或其他 DOM 属性。</p>
+</li>
+<li>
+<p><a href="/docs/ref/#view.Decoration%5Ewidget">部件装饰</a>在给定位置<em>插入</em>一个不属于实际文档的 DOM 节点。</p>
+</li>
+<li>
+<p><a href="/docs/ref/#view.Decoration%5Einline">行内装饰</a>添加样式或属性，类似于节点装饰，但作用于给定范围内的所有行内节点。</p>
+</li>
+</ul>
+<p>为了能够高效地绘制和比较装饰，它们需要以<a href="/docs/ref/#view.DecorationSet">装饰集</a>的形式提供（这是一种模仿实际文档树形结构的数据结构）。你可以使用静态的 <a href="/docs/ref/#view.DecorationSet%5Ecreate"><code>create</code>
+方法</a>创建一个装饰集，提供文档和装饰对象数组：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">purplePlugin</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">props</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">decorations</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+      <span class="tok-keyword">return</span> <span class="tok-variableName">DecorationSet</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">[</span>
+        <span class="tok-variableName">Decoration</span><span class="tok-operator">.</span><span class="tok-propertyName">inline</span><span class="tok-punctuation">(</span><span class="tok-number">0</span><span class="tok-punctuation">,</span> <span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">style</span><span class="tok-punctuation">:</span> <span class="tok-string">"color: purple"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+      <span class="tok-punctuation">]</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>当你有大量装饰时，每次重绘时即时重新创建装饰集很可能开销过大。在这种情况下，维护装饰的推荐方式是将装饰集放在插件的 state 中，通过变更<a href="/docs/ref/#view.DecorationSet.map">映射</a>向前推进，仅在需要时才更改它。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">specklePlugin</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">Plugin</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">init</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">_</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+      <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">speckles</span> <span class="tok-operator">=</span> <span class="tok-punctuation">[</span><span class="tok-punctuation">]</span>
+      <span class="tok-keyword">for</span> <span class="tok-punctuation">(</span><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">pos</span> <span class="tok-operator">=</span> <span class="tok-number">1</span><span class="tok-punctuation">;</span> <span class="tok-variableName">pos</span> <span class="tok-operator">&lt;</span> <span class="tok-variableName">doc</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span><span class="tok-punctuation">;</span> <span class="tok-variableName">pos</span> <span class="tok-operator">+=</span> <span class="tok-number">4</span><span class="tok-punctuation">)</span>
+        <span class="tok-variableName">speckles</span><span class="tok-operator">.</span><span class="tok-propertyName">push</span><span class="tok-punctuation">(</span><span class="tok-variableName">Decoration</span><span class="tok-operator">.</span><span class="tok-propertyName">inline</span><span class="tok-punctuation">(</span><span class="tok-variableName">pos</span> <span class="tok-operator">-</span> <span class="tok-number">1</span><span class="tok-punctuation">,</span> <span class="tok-variableName">pos</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">style</span><span class="tok-punctuation">:</span> <span class="tok-string">"background: yellow"</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">return</span> <span class="tok-variableName">DecorationSet</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-variableName">doc</span><span class="tok-punctuation">,</span> <span class="tok-variableName">speckles</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">tr</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">set</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-variableName">set</span><span class="tok-operator">.</span><span class="tok-propertyName">map</span><span class="tok-punctuation">(</span><span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">mapping</span><span class="tok-punctuation">,</span> <span class="tok-variableName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">props</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">decorations</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-variableName">specklePlugin</span><span class="tok-operator">.</span><span class="tok-propertyName">getState</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+</code></pre>
+<p>这个插件将其状态初始化为一个装饰集，在每个第 4 个位置添加黄色背景的行内装饰。这并不是特别有用，但有点类似于搜索匹配高亮或标注区域这样的用例。</p>
+<p>当 Transaction 被应用到状态时，插件状态的
+<a href="/docs/ref/#state.StateField.apply"><code>apply</code> 方法</a>将装饰集向前映射，使装饰保持在原位并"适应"新的文档形状。映射方法（对于典型的局部变更）通过利用装饰集的树形结构变得高效——只有实际被变更触及的树部分需要重建。</p>
+<p>（在实际的插件中，<code>apply</code> 方法也是你根据新事件<a href="/docs/ref/#view.DecorationSet.add">添加</a>或
+<a href="/docs/ref/#view.DecorationSet.remove">移除</a>装饰的地方，
+可能通过检查 Transaction 中的变更，或基于附加到 Transaction 的插件特定元数据。）</p>
+<p>最后，<code>decorations</code> 属性简单地返回插件状态，使装饰在视图中显示出来。</p>
+<h3><a id="view.node_views"></a>节点视图</h3>
+<p>还有一种方式可以影响编辑器视图绘制文档的方式。<a href="/docs/ref/#view.NodeView">NodeView</a> 使得为文档中的单个节点<a href="/docs/ref/#view.EditorProps.nodeViews">定义</a>一种小型 UI 组件成为可能。它们允许你渲染其 DOM，定义更新方式，并编写自定义代码来响应事件。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">nodeViews</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">image</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> <span class="tok-className">ImageView</span><span class="tok-punctuation">(</span><span class="tok-variableName">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">class</span> <span class="tok-className">ImageView</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">constructor</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-comment">// The editor will use this as the node's DOM representation</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span> <span class="tok-operator">=</span> <span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">createElement</span><span class="tok-punctuation">(</span><span class="tok-string">"img"</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">src</span> <span class="tok-operator">=</span> <span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">attrs</span><span class="tok-operator">.</span><span class="tok-propertyName">src</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">addEventListener</span><span class="tok-punctuation">(</span><span class="tok-string">"click"</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">e</span> <span class="tok-punctuation">=&gt;</span> <span class="tok-punctuation">{</span>
+      <span class="tok-variableName">console</span><span class="tok-operator">.</span><span class="tok-propertyName">log</span><span class="tok-punctuation">(</span><span class="tok-string">"You clicked me!"</span><span class="tok-punctuation">)</span>
+      <span class="tok-variableName">e</span><span class="tok-operator">.</span><span class="tok-propertyName">preventDefault</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+
+  <span class="tok-propertyName tok-definition">stopEvent</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-bool">true</span> <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>上面示例中为图片节点定义的视图对象创建了自定义的 DOM 节点，添加了事件处理器，并通过 <code>stopEvent</code> 方法声明 ProseMirror 应忽略来自该 DOM 节点的事件。</p>
+<p>你通常希望与节点的交互能对文档中的实际节点产生某种效果。但要创建改变节点的 Transaction，你首先需要知道该节点在哪里。为此，节点视图会接收一个 getter 函数，可用于查询其在文档中的当前位置。让我们修改示例，使得点击节点时提示你为图片输入替代文本：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">nodeViews</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">image</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">view</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">getPos</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> <span class="tok-className">ImageView</span><span class="tok-punctuation">(</span><span class="tok-variableName">node</span><span class="tok-punctuation">,</span> <span class="tok-variableName">view</span><span class="tok-punctuation">,</span> <span class="tok-variableName">getPos</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">class</span> <span class="tok-className">ImageView</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">constructor</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">view</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">getPos</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span> <span class="tok-operator">=</span> <span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">createElement</span><span class="tok-punctuation">(</span><span class="tok-string">"img"</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">src</span> <span class="tok-operator">=</span> <span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">attrs</span><span class="tok-operator">.</span><span class="tok-propertyName">src</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">alt</span> <span class="tok-operator">=</span> <span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">attrs</span><span class="tok-operator">.</span><span class="tok-propertyName">alt</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">addEventListener</span><span class="tok-punctuation">(</span><span class="tok-string">"click"</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">e</span> <span class="tok-punctuation">=&gt;</span> <span class="tok-punctuation">{</span>
+      <span class="tok-variableName">e</span><span class="tok-operator">.</span><span class="tok-propertyName">preventDefault</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">alt</span> <span class="tok-operator">=</span> <span class="tok-variableName">prompt</span><span class="tok-punctuation">(</span><span class="tok-string">"New alt text:"</span><span class="tok-punctuation">,</span> <span class="tok-string">""</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">alt</span><span class="tok-punctuation">)</span> <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">dispatch</span><span class="tok-punctuation">(</span><span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">setNodeMarkup</span><span class="tok-punctuation">(</span><span class="tok-variableName">getPos</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span> <span class="tok-keyword">null</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span>
+        <span class="tok-propertyName tok-definition">src</span><span class="tok-punctuation">:</span> <span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">attrs</span><span class="tok-operator">.</span><span class="tok-propertyName">src</span><span class="tok-punctuation">,</span>
+        <span class="tok-propertyName tok-definition">alt</span>
+      <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+
+  <span class="tok-propertyName tok-definition">stopEvent</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-bool">true</span> <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p><a href="/docs/ref/#transform.Transform.setNodeMarkup"><code>setNodeMarkup</code></a> 是一个方法，可用于更改给定位置节点的类型或属性集。在示例中，我们使用 <code>getPos</code> 查找图片的当前位置，并为其提供包含新替代文本的属性对象。</p>
+<p>当节点更新时，默认行为是保持其外部 DOM 结构不变，并将其子节点与新的子节点集进行比较，根据需要更新或替换它们。节点视图可以用自定义行为覆盖这一点，这使我们能够做到比如根据内容更改段落的 class。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">,</span>
+  <span class="tok-propertyName tok-definition">nodeViews</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">paragraph</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> <span class="tok-className">ParagraphView</span><span class="tok-punctuation">(</span><span class="tok-variableName">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+<span class="tok-keyword">class</span> <span class="tok-className">ParagraphView</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">constructor</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span> <span class="tok-operator">=</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">contentDOM</span> <span class="tok-operator">=</span> <span class="tok-variableName">document</span><span class="tok-operator">.</span><span class="tok-propertyName">createElement</span><span class="tok-punctuation">(</span><span class="tok-string">"p"</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span> <span class="tok-operator">==</span> <span class="tok-number">0</span><span class="tok-punctuation">)</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">classList</span><span class="tok-operator">.</span><span class="tok-propertyName">add</span><span class="tok-punctuation">(</span><span class="tok-string">"empty"</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+
+  <span class="tok-propertyName tok-definition">update</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">node</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">node</span><span class="tok-operator">.</span><span class="tok-propertyName">content</span><span class="tok-operator">.</span><span class="tok-propertyName">size</span> <span class="tok-operator">&gt;</span> <span class="tok-number">0</span><span class="tok-punctuation">)</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">classList</span><span class="tok-operator">.</span><span class="tok-propertyName">remove</span><span class="tok-punctuation">(</span><span class="tok-string">"empty"</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">else</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">classList</span><span class="tok-operator">.</span><span class="tok-propertyName">add</span><span class="tok-punctuation">(</span><span class="tok-string">"empty"</span><span class="tok-punctuation">)</span>
+    <span class="tok-keyword">return</span> <span class="tok-bool">true</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>图片永远没有内容，所以在之前的示例中，我们不需要担心内容的渲染方式。但段落是有内容的。节点视图支持两种处理内容的方式：你可以让 ProseMirror 库管理它，也可以完全由自己管理。如果你提供 <a href="/docs/ref/#view.NodeView.contentDOM"><code>contentDOM</code>
+属性</a>，库会将节点内容渲染到其中，并处理内容更新。如果不提供，内容对编辑器来说就是一个黑盒，如何显示它以及让用户如何与之交互完全取决于你。</p>
+<p>在这个例子中，我们希望段落内容表现得像常规的可编辑文本，因此 <code>contentDOM</code> 属性被定义为与 <code>dom</code> 属性相同，因为内容需要直接渲染到外部节点中。</p>
+<p>神奇之处在于 <a href="/docs/ref/#view.NodeView.update"><code>update</code> 方法</a>。
+首先，该方法负责决定节点视图是否<em>可以</em>更新以显示新节点。当无法更新时，它应返回 false。</p>
+<p>示例中的 <code>update</code> 方法确保根据新节点的内容是否存在 <code>"empty"</code> class，并返回 true，表示更新成功（此时节点内容将被更新）。</p>
+
+<h2 id="commands">命令</h2><p>在 ProseMirror 的术语中，<em>命令</em>是一个实现编辑操作的函数，用户可以通过按下某个键组合或与菜单交互来执行该操作。</p>
+<p>出于实际原因，命令的接口略显复杂。在其简单形式下，它们是接受一个<a href="#state">编辑器状态</a>和一个<em>派发函数</em>（<a href="/docs/ref/#view.EditorView.dispatch"><code>EditorView.dispatch</code></a>或其他接受 Transaction 的函数），并返回一个布尔值的函数。下面是一个非常简单的例子：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">deleteSelection</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">dispatch</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">empty</span><span class="tok-punctuation">)</span> <span class="tok-keyword">return</span> <span class="tok-bool">false</span>
+  <span class="tok-variableName">dispatch</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">deleteSelection</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+  <span class="tok-keyword">return</span> <span class="tok-bool">true</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>当命令不适用时，它应返回 false 且不做任何操作。当命令适用时，它应派发一个 Transaction 并返回 true。例如，<a href="/docs/ref/#keymap">keymap 插件</a>就利用这一点，在绑定到某个键的命令已被执行后，停止对该键事件的后续处理。</p>
+<p>为了能够在不实际执行命令的情况下查询该命令对给定状态是否适用，<code>dispatch</code>参数是可选的——当命令适用但未提供<code>dispatch</code>参数时，命令应直接返回 true 而不做任何操作。因此上面的示例命令实际上应该写成这样：</p>
+<pre><code class="language-javascript"><span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">deleteSelection</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">state</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">dispatch</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">selection</span><span class="tok-operator">.</span><span class="tok-propertyName">empty</span><span class="tok-punctuation">)</span> <span class="tok-keyword">return</span> <span class="tok-bool">false</span>
+  <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">dispatch</span><span class="tok-punctuation">)</span> <span class="tok-variableName">dispatch</span><span class="tok-punctuation">(</span><span class="tok-variableName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">tr</span><span class="tok-operator">.</span><span class="tok-propertyName">deleteSelection</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+  <span class="tok-keyword">return</span> <span class="tok-bool">true</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>要判断当前选区是否可以被删除，你可以调用<code>deleteSelection(view.state, null)</code>；而要实际执行该命令，你需要执行类似<code>deleteSelection(view.state, view.dispatch)</code>的操作。菜单栏可以利用这一点来决定哪些菜单项应该置灰。</p>
+<p>在这种形式下，命令无法访问实际的编辑器视图——大多数命令并不需要它，这样它们就可以在没有视图可用的环境中被应用和测试。但有些命令确实需要与 DOM 交互——它们可能需要<a href="/docs/ref/#view.EditorView.endOfTextblock">查询</a>某个给定位置是否位于文本块的末尾，或者想要打开一个相对于视图定位的对话框。为此，大多数调用命令的插件会给它们传入<em>第三个</em>参数，即整个视图。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">blinkView</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">_state</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">dispatch</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">view</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">dispatch</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">style</span><span class="tok-operator">.</span><span class="tok-propertyName">background</span> <span class="tok-operator">=</span> <span class="tok-string">"yellow"</span>
+    <span class="tok-variableName">setTimeout</span><span class="tok-punctuation">(</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">=&gt;</span> <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">dom</span><span class="tok-operator">.</span><span class="tok-propertyName">style</span><span class="tok-operator">.</span><span class="tok-propertyName">background</span> <span class="tok-operator">=</span> <span class="tok-string">""</span><span class="tok-punctuation">,</span> <span class="tok-number">1000</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+  <span class="tok-keyword">return</span> <span class="tok-bool">true</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>这个（相当无用的）示例表明，命令<em>不一定</em>要派发一个 Transaction——它们被调用是为了产生副作用，副作用<em>通常</em>是派发一个 Transaction，但也可能是其他操作，比如弹出一个对话框。</p>
+<p><a href="/docs/ref/#commands"><code>prosemirror-commands</code></a>模块提供了许多编辑命令，从简单的命令（如<a href="/docs/ref/#commands.deleteSelection"><code>deleteSelection</code></a>命令的变体），到相当复杂的命令（如<a href="/docs/ref/#commands.joinBackward"><code>joinBackward</code></a>，它实现了在文本块开头按下退格键时应该发生的块合并行为）。它还附带了一个<a href="/docs/ref/#commands.baseKeymap">基础键映射</a>，将许多与 Schema 无关的命令绑定到通常使用的按键上。</p>
+<p>在可能的情况下，不同的行为——即使通常绑定到同一个键——也会被放在不同的命令中。工具函数<a href="/docs/ref/#commands.chainCommands"><code>chainCommands</code></a>可以用来组合多个命令——它们会依次尝试，直到其中一个返回 true。</p>
+<p>例如，基础键映射将退格键绑定到命令链<a href="/docs/ref/#commands.deleteSelection"><code>deleteSelection</code></a>（当选区不为空时生效）、<a href="/docs/ref/#commands.joinBackward"><code>joinBackward</code></a>（当光标位于文本块开头时生效）和<a href="/docs/ref/#commands.selectNodeBackward"><code>selectNodeBackward</code></a>（当 Schema 禁止常规合并行为时，选中选区前的节点）。当这些命令都不适用时，浏览器被允许运行其自身的退格行为，这对于在文本块内部执行退格删除是合适的（这样原生的拼写检查等功能就不会受到干扰）。</p>
+<p>commands 模块还导出了许多命令构造器，例如<a href="/docs/ref/#commands.toggleMark"><code>toggleMark</code></a>，它接受一个标记类型和可选的一组属性，并返回一个在当前选区上切换该标记的命令函数。</p>
+<p>其他一些模块也导出命令函数——例如历史模块中的<a href="/docs/ref/#history.undo"><code>undo</code></a>和<a href="/docs/ref/#history.redo"><code>redo</code></a>。要定制你的编辑器，或允许用户与自定义文档节点交互，你可能也需要编写自己的自定义命令。</p>
+
+<h2 id="collab">协同编辑</h2><p>实时协同编辑允许多人同时编辑同一文档。他们所做的更改会立即应用到本地文档，然后发送给对等端，对等端自动合并这些更改（无需手动冲突解决），从而使编辑可以不间断地进行，并且文档始终保持收敛。</p>
+<p>本指南介绍如何接入 ProseMirror 的协同编辑功能。</p>
+<h3><a id="collab.algorithm"></a>算法</h3>
+<p>ProseMirror 的协同编辑系统采用一个中心授权来决定更改的应用顺序。如果两个编辑器同时进行更改，它们都会将自己的更改提交给中心授权。中心授权会接受其中一方的更改，并将这些更改广播给所有编辑器。另一方的更改将不被接受，当该编辑器从服务器收到新的更改时，它必须将其本地更改<a href="#transform.rebasing">变基</a>到来自另一个编辑器的更改之上，然后重新尝试提交。</p>
+<h3><a id="collab.the_authority"></a>中心授权</h3>
+<p>中心授权的角色实际上相当简单。它必须……</p>
+<ul>
+<li>
+<p>追踪当前文档版本</p>
+</li>
+<li>
+<p>接受来自编辑器的更改，当这些更改可以被应用时，将它们添加到其更改列表中</p>
+</li>
+<li>
+<p>提供一种方式让编辑器获取自某个版本以来的更改</p>
+</li>
+</ul>
+<p>让我们实现一个在与编辑器相同的 JavaScript 环境中运行的简单中心授权。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">class</span> <span class="tok-className">Authority</span> <span class="tok-punctuation">{</span>
+  <span class="tok-propertyName tok-definition">constructor</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">doc</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span> <span class="tok-operator">=</span> <span class="tok-variableName">doc</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span> <span class="tok-operator">=</span> <span class="tok-punctuation">[</span><span class="tok-punctuation">]</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">stepClientIDs</span> <span class="tok-operator">=</span> <span class="tok-punctuation">[</span><span class="tok-punctuation">]</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">onNewSteps</span> <span class="tok-operator">=</span> <span class="tok-punctuation">[</span><span class="tok-punctuation">]</span>
+  <span class="tok-punctuation">}</span>
+
+  <span class="tok-propertyName tok-definition">receiveSteps</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">version</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">steps</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">clientID</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">version</span> <span class="tok-operator">!=</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-operator">.</span><span class="tok-propertyName">length</span><span class="tok-punctuation">)</span> <span class="tok-keyword">return</span>
+
+    <span class="tok-comment">// Apply and accumulate new steps</span>
+    <span class="tok-variableName">steps</span><span class="tok-operator">.</span><span class="tok-propertyName">forEach</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">step</span> <span class="tok-punctuation">=&gt;</span> <span class="tok-punctuation">{</span>
+      <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span> <span class="tok-operator">=</span> <span class="tok-variableName">step</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">)</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span>
+      <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-operator">.</span><span class="tok-propertyName">push</span><span class="tok-punctuation">(</span><span class="tok-variableName">step</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">stepClientIDs</span><span class="tok-operator">.</span><span class="tok-propertyName">push</span><span class="tok-punctuation">(</span><span class="tok-variableName">clientID</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+    <span class="tok-comment">// Signal listeners</span>
+    <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">onNewSteps</span><span class="tok-operator">.</span><span class="tok-propertyName">forEach</span><span class="tok-punctuation">(</span><span class="tok-keyword">function</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">f</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span> <span class="tok-variableName">f</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span>
+
+  <span class="tok-propertyName tok-definition">stepsSince</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">version</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">return</span> <span class="tok-punctuation">{</span>
+      <span class="tok-propertyName tok-definition">steps</span><span class="tok-punctuation">:</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-operator">.</span><span class="tok-propertyName">slice</span><span class="tok-punctuation">(</span><span class="tok-variableName">version</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+      <span class="tok-propertyName tok-definition">clientIDs</span><span class="tok-punctuation">:</span> <span class="tok-keyword">this</span><span class="tok-operator">.</span><span class="tok-propertyName">stepClientIDs</span><span class="tok-operator">.</span><span class="tok-propertyName">slice</span><span class="tok-punctuation">(</span><span class="tok-variableName">version</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p>当编辑器想要尝试将其更改提交给中心授权时，可以调用其 <code>receiveSteps</code> 方法，传入它们最后收到的版本号、它们新增的更改以及它们的客户端 ID（这是一种让它们稍后识别哪些更改来自自己的方式）。</p>
+<p>当步骤被接受时，客户端会注意到，因为中心授权通知它们有新的步骤可用，然后给它们<em>自己的</em>步骤。在实际实现中，你也可以让 <code>receiveSteps</code> 返回一个状态，并立即确认发送的步骤，作为一种优化。但此处使用的机制对于在不可靠连接上保证同步是必要的，因此你应该始终将其作为基础方案。</p>
+<p>这个中心授权的实现保留了一个无限增长的步骤数组，其长度表示当前版本。</p>
+<h3><a id="collab.the_collab_module"></a><code>collab</code> 模块</h3>
+<p><a href="/docs/ref/#collab"><code>collab</code></a> 模块导出一个 <a href="/docs/ref/#collab.collab"><code>collab</code></a> 函数，该函数返回一个插件，负责追踪本地更改、接收远程更改，以及指示何时需要向中心授权发送内容。</p>
+<pre><code class="language-javascript"><span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorState</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-state"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">EditorView</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-view"</span>
+<span class="tok-keyword">import</span> <span class="tok-punctuation">{</span><span class="tok-variableName tok-definition">schema</span><span class="tok-punctuation">}</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-schema-basic"</span>
+<span class="tok-keyword">import</span> <span class="tok-variableName tok-definition">collab</span> <span class="tok-keyword">from</span> <span class="tok-string">"prosemirror-collab"</span>
+
+<span class="tok-keyword">function</span> <span class="tok-variableName tok-definition">collabEditor</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">authority</span><span class="tok-punctuation">,</span> <span class="tok-variableName tok-definition">place</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">view</span> <span class="tok-operator">=</span> <span class="tok-keyword">new</span> <span class="tok-className">EditorView</span><span class="tok-punctuation">(</span><span class="tok-variableName">place</span><span class="tok-punctuation">,</span> <span class="tok-punctuation">{</span>
+    <span class="tok-propertyName tok-definition">state</span><span class="tok-punctuation">:</span> <span class="tok-variableName">EditorState</span><span class="tok-operator">.</span><span class="tok-propertyName">create</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span>
+      <span class="tok-propertyName tok-definition">doc</span><span class="tok-punctuation">:</span> <span class="tok-variableName">authority</span><span class="tok-operator">.</span><span class="tok-propertyName">doc</span><span class="tok-punctuation">,</span>
+      <span class="tok-propertyName tok-definition">plugins</span><span class="tok-punctuation">:</span> <span class="tok-punctuation">[</span><span class="tok-variableName">collab</span><span class="tok-operator">.</span><span class="tok-propertyName">collab</span><span class="tok-punctuation">(</span><span class="tok-punctuation">{</span><span class="tok-propertyName tok-definition">version</span><span class="tok-punctuation">:</span> <span class="tok-variableName">authority</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-operator">.</span><span class="tok-propertyName">length</span><span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">]</span>
+    <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span><span class="tok-punctuation">,</span>
+    <span class="tok-propertyName tok-definition">dispatchTransaction</span><span class="tok-punctuation">(</span><span class="tok-variableName tok-definition">transaction</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+      <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">newState</span> <span class="tok-operator">=</span> <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">state</span><span class="tok-operator">.</span><span class="tok-propertyName">apply</span><span class="tok-punctuation">(</span><span class="tok-variableName">transaction</span><span class="tok-punctuation">)</span>
+      <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">updateState</span><span class="tok-punctuation">(</span><span class="tok-variableName">newState</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">sendable</span> <span class="tok-operator">=</span> <span class="tok-variableName">collab</span><span class="tok-operator">.</span><span class="tok-propertyName">sendableSteps</span><span class="tok-punctuation">(</span><span class="tok-variableName">newState</span><span class="tok-punctuation">)</span>
+      <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-variableName">sendable</span><span class="tok-punctuation">)</span>
+        <span class="tok-variableName">authority</span><span class="tok-operator">.</span><span class="tok-propertyName">receiveSteps</span><span class="tok-punctuation">(</span><span class="tok-variableName">sendable</span><span class="tok-operator">.</span><span class="tok-propertyName">version</span><span class="tok-punctuation">,</span> <span class="tok-variableName">sendable</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-punctuation">,</span>
+                               <span class="tok-variableName">sendable</span><span class="tok-operator">.</span><span class="tok-propertyName">clientID</span><span class="tok-punctuation">)</span>
+    <span class="tok-punctuation">}</span>
+  <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+  <span class="tok-variableName">authority</span><span class="tok-operator">.</span><span class="tok-propertyName">onNewSteps</span><span class="tok-operator">.</span><span class="tok-propertyName">push</span><span class="tok-punctuation">(</span><span class="tok-keyword">function</span><span class="tok-punctuation">(</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">let</span> <span class="tok-variableName tok-definition">newData</span> <span class="tok-operator">=</span> <span class="tok-variableName">authority</span><span class="tok-operator">.</span><span class="tok-propertyName">stepsSince</span><span class="tok-punctuation">(</span><span class="tok-variableName">collab</span><span class="tok-operator">.</span><span class="tok-propertyName">getVersion</span><span class="tok-punctuation">(</span><span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">state</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+    <span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">dispatch</span><span class="tok-punctuation">(</span>
+      <span class="tok-variableName">collab</span><span class="tok-operator">.</span><span class="tok-propertyName">receiveTransaction</span><span class="tok-punctuation">(</span><span class="tok-variableName">view</span><span class="tok-operator">.</span><span class="tok-propertyName">state</span><span class="tok-punctuation">,</span> <span class="tok-variableName">newData</span><span class="tok-operator">.</span><span class="tok-propertyName">steps</span><span class="tok-punctuation">,</span> <span class="tok-variableName">newData</span><span class="tok-operator">.</span><span class="tok-propertyName">clientIDs</span><span class="tok-punctuation">)</span><span class="tok-punctuation">)</span>
+  <span class="tok-punctuation">}</span><span class="tok-punctuation">)</span>
+
+  <span class="tok-keyword">return</span> <span class="tok-variableName">view</span>
+<span class="tok-punctuation">}</span>
+</code></pre>
+<p><code>collabEditor</code> 函数创建一个加载了 <code>collab</code> 插件的编辑器视图。每当状态更新时，它会检查是否有内容需要发送给中心授权。如果有，就发送。</p>
+<p>它还注册了一个函数，供中心授权在有新步骤可用时调用，该函数创建一个<a href="/docs/ref/#state.Transaction">事务</a>来更新本地编辑器状态以反映这些步骤。</p>
+<p>当一组步骤被中心授权拒绝时，它们将保持未确认状态，直到——大概很快之后——我们从中心授权收到新的步骤。在此之后，由于 <code>onNewSteps</code> 回调会调用 <code>dispatch</code>，而 <code>dispatch</code> 又会调用我们的 <code>dispatchTransaction</code> 函数，代码将再次尝试提交其更改。</p>
+<p>这就是全部内容了。当然，使用异步数据通道（例如<a href="https://code.haverbeke.berlin/prosemirror/website/src/branch/main/src/collab/client/collab.js">collab 演示</a>中的长轮询或 WebSocket），你需要更复杂的通信和同步代码。而且你可能还希望中心授权在某个时刻开始丢弃旧步骤，以免其内存消耗无限增长。但总体方法已由这个小示例完整描述。</p>
+</article>
+
+<footer>
+  <nav>
+    <a class="logo" href=".">&nbsp;</a>
+    <div class="navlinks">
+      <a href="/backers.html">赞助者</a>
+      <a href="http://contributor-covenant.org/version/1/1/0/">行为准则</a>
+      <a href="https://discuss.prosemirror.net/">讨论</a>
+      <a href="https://code.haverbeke.berlin/prosemirror/prosemirror/issues">报告问题</a>
+    </div>
+  </nav>
+</footer>
+
+</body></html>

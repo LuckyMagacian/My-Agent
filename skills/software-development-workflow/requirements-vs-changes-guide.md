@@ -6,7 +6,7 @@
 |---------|---------|---------|
 | **代码状态** | 从零开始 | 已有代码基础 |
 | **模块性质** | 新增独立模块 | 修改现有模块 |
-| **文档路径** | `docs/requirements/` | `docs/changes/` |
+| **文档路径** | `.ai/docs/requirements/` | `.ai/docs/changes/` |
 | **前置依赖** | 无历史约束 | 需分析现有实现 |
 
 ---
@@ -131,11 +131,11 @@
 
 ### 第三步：确认路径
 
-- 需求 → `docs/requirements/`
-- 变更 → `docs/changes/`
-- 问题 → `docs/bugs/`
-- 分析 → `docs/analysis/`
-- 方案 → `docs/solution-optimization/`
+- 需求 → `.ai/docs/requirements/`
+- 变更 → `.ai/docs/changes/`
+- 问题 → `.ai/docs/bugs/`
+- 分析 → `.ai/docs/analysis/`
+- 方案 → `.ai/docs/solution-optimization/`
 ```
 
 ---
@@ -146,19 +146,19 @@
 
 **判断：需求**
 - 原因：新增独立模块
-- 文档：`docs/requirements/2026-06-23-评论功能-需求说明书.md`
+- 文档：`.ai/docs/requirements/2026-06-23-评论功能-需求说明书.md`
 
 ### 案例 2：修改「评论功能 - 增加表情」
 
 **判断：变更**
 - 原因：在现有模块上扩展
-- 文档：`docs/changes/2026-06-23-评论增加表情.md`
+- 文档：`.ai/docs/changes/2026-06-23-评论增加表情.md`
 
 ### 案例 3：修复「评论无法删除」
 
 **判断：问题修复**
 - 原因：修复异常行为
-- 文档：`docs/bugs/2026-06-23-评论无法删除.md`
+- 文档：`.ai/docs/bugs/2026-06-23-评论无法删除.md`
 
 ---
 

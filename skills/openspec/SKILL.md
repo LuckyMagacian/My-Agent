@@ -366,7 +366,7 @@ The system SHALL {behavior}.
 | --- | --- | --- |
 | 核心定位 | **变更管理结构** — 管理变更的生命周期 | **开发流程策略** — 决定走哪种开发模式 |
 | 提供什么 | change folder + delta specs + archive 循环 | 需求开发/变更/修复/分析/优化 五种模式 |
-| 文档容器 | `openspec/changes/{name}/` | `docs/requirements/` `docs/design/` 等 |
+| 文档容器 | `openspec/changes/{name}/` | `.ai/docs/requirements/` `.ai/docs/design/` 等 |
 | 流程控制 | explore → propose → apply → verify → archive | 文档先行 → 用户确认 → 按文档编码 |
 | 核心价值 | Delta 描述差异，适合存量项目迭代 | 文档先行，适合从零到一的规范开发 |
 | Specs 作用 | 行为契约 + 自动合并 | 无对应概念（文档是执行依据） |
@@ -428,10 +428,10 @@ OpenSpec sync → 将 sdw 产出的文档同步到 openspec/specs/ 作为行为�
 
 | sdw 文档 | OpenSpec spec 对应 |
 | --- | --- |
-| `docs/requirements/{主题}-需求说明书.md` | `openspec/specs/{domain}/spec.md` 的 Requirements |
-| `docs/design/{主题}-设计说明书.md` | `openspec/changes/{name}/design.md` |
-| `docs/changes/{主题}.md` | `openspec/changes/{name}/proposal.md` + delta specs |
-| `docs/bugs/{问题}.md` | `openspec/changes/fix-{bug}/proposal.md` + delta specs |
+| `.ai/docs/requirements/{主题}-需求说明书.md` | `openspec/specs/{domain}/spec.md` 的 Requirements |
+| `.ai/docs/design/{主题}-设计说明书.md` | `openspec/changes/{name}/design.md` |
+| `.ai/docs/changes/{主题}.md` | `openspec/changes/{name}/proposal.md` + delta specs |
+| `.ai/docs/bugs/{问题}.md` | `openspec/changes/fix-{bug}/proposal.md` + delta specs |
 
 ### 协作决策
 

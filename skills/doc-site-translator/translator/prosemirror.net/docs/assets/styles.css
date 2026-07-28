@@ -1,0 +1,177 @@
+/* ProseMirror 中文翻译站样式 */
+/* 基于原站 /css/site.css 的关键样式 + 翻译横幅 */
+
+/* 基础排版 */
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #1a1a1a;
+}
+
+a { color: #0366d6; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 代码块 */
+pre {
+  background: #f6f8fa;
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: 6px;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+code {
+  font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+}
+
+pre code { background: none; padding: 0; }
+:not(pre) > code { background: #f6f8fa; padding: 2px 6px; border-radius: 3px; }
+
+/* 表格 */
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+
+/* 翻译横幅 */
+.translation-banner {
+  background: #fff3cd;
+  padding: 8px 16px;
+  margin-bottom: 1rem;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ffc107;
+}
+
+.translation-banner a { color: #856404; font-weight: 600; }
+
+/* 导航 */
+header nav {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 2rem;
+}
+
+header nav a.logo {
+  font-weight: 700;
+  font-size: 1.2em;
+  color: #333;
+  margin-right: 2rem;
+}
+
+header nav .navlinks a {
+  margin-right: 1rem;
+  color: #0366d6;
+}
+
+header nav .navlinks a.active {
+  font-weight: 600;
+  color: #333;
+}
+
+/* 侧边目录 */
+nav#toc {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 200px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  font-size: 0.85em;
+  padding: 0.5rem;
+  border-left: 2px solid #eee;
+}
+
+nav#toc ul { list-style: none; padding-left: 0; }
+nav#toc li { margin: 0.3em 0; }
+nav#toc a { color: #666; }
+nav#toc a:hover { color: #0366d6; }
+
+/* Grid list (docs index) */
+.grid-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.grid-list li { margin: 0; }
+
+.blocklink {
+  display: block;
+  padding: 1rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  color: #333;
+  transition: border-color 0.2s;
+}
+
+.blocklink:hover {
+  border-color: #0366d6;
+  text-decoration: none;
+}
+
+.blocklink h3 { margin-top: 0; color: #0366d6; }
+
+/* Footer */
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-size: 0.85em;
+  color: #666;
+}
+
+footer nav {
+  display: flex;
+  align-items: center;
+}
+
+footer nav a.logo { margin-right: 2rem; }
+footer nav .navlinks a { margin-right: 1rem; color: #666; }
+
+/* 图表 */
+.figure { margin: 1rem 0; text-align: center; }
+
+/* 提示框 */
+.tip, .warning, .danger { padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+.tip { background: #f0fff4; border-left: 4px solid #38a169; }
+.warning { background: #fffff0; border-left: 4px solid #d69e2e; }
+.danger { background: #fff5f5; border-left: 4px solid #e53e3e; }
+
+/* 折叠面板 */
+details { margin: 1rem 0; border: 1px solid #d0d7de; border-radius: 6px; padding: 0.5rem 1rem; }
+summary { cursor: pointer; font-weight: 600; padding: 0.5rem 0; }
+
+/* Class box (ProseMirror specific) */
+.classbox {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: #f9fafb;
+}
+
+/* 响应式 */
+@media (max-width: 1100px) {
+  nav#toc { display: none; }
+}
+
+@media (max-width: 768px) {
+  body { padding: 1rem; }
+  .grid-list { grid-template-columns: 1fr; }
+}

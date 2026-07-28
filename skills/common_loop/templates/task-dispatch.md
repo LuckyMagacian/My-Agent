@@ -21,10 +21,10 @@
 
 ## 任务来源
 > **模式说明**：
-> - **self 模式**（executor 自执行）：executor 读取 `docs/loop-runs/{日期}-{目标}/tasks.md` 中 **T{n}** 任务条目
+> - **self 模式**（executor 自执行）：executor 读取 `.ai/docs/loop-runs/{日期}-{目标}/tasks.md` 中 **T{n}** 任务条目
 > - **adapter 模式**（转交技术域 agent）：executor 已用 `pack_task_entry` 将任务条目内容内联注入 `{task_content}`，被转交 agent 无需读取 tasks.md、无需了解 common_loop 格式
 
-self 模式：读取 `docs/loop-runs/{日期}-{目标}/tasks.md` 中 **T{n}** 任务条目（含描述/预期产出/完成标准/依赖）
+self 模式：读取 `.ai/docs/loop-runs/{日期}-{目标}/tasks.md` 中 **T{n}** 任务条目（含描述/预期产出/完成标准/依赖）
 adapter 模式（内联内容）：{task_content}
 
 ## 执行要求
