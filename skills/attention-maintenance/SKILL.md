@@ -1,6 +1,6 @@
 ---
 name: attention-maintenance
-description: "短期上下文维护系统 v19 + workspace：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集 + 跨对话工作上下文快照 + 架构决策库（promote/replace/remove 失效机制）。"
+description: "短期上下文维护系统 v19 + workspace：工作记忆模型。Decision（问题）+Knowledge（结论）+Evidence（来源标记：constraint/fact/test/hypothesis）+State（doing/until）。4 组件最小充分集 + 跨对话工作上下文快照 + 架构决策库（promote/replace/remove 失效机制）。持久化按项目目录隔离（persistence/projects/{project-key}/），不同项目数据互不污染。"
 ---
 
 # 短期上下文维护系统 v19
@@ -502,9 +502,37 @@ v19 中使用 `<knowledge>` 存储已确定结论。但持久化后，这些条�
 
 ```
 skills/attention-maintenance/persistence/
-  workspace.xml                   # 工作上下文（pending-decision + state）
-  principles.xml                  # 架构决策库（已确定结论 + reason）
+  projects/
+    {project-key}/                # 按项目隔离
+      workspace.xml               # 工作上下文（pending-decision + state）
+      principles.xml              # 架构决策库（已确定结论 + reason）
+    {project-key}/                # 另一项目独立目录
+      workspace.xml
+      principles.xml
 ```
+
+**项目隔离**：不同项目（由项目根目录生成 project-key）拥有独立 workspace.xml + principles.xml，互不污染。同一项目跨会话共享数据（保留跨对话恢复能力）。
+
+### project-key 生成规则
+
+执行任何持久化命令前，Claude 用 bash 计算 project-key：
+
+```bash
+# 1. 确定项目根：优先 git 仓库根，回退 cwd
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+# 2. 生成 key：目录名 + 绝对路径 hash 前6位（可读 + 唯一）
+PROJECT_KEY="$(basename "$PROJECT_ROOT")-$(echo -n "$PROJECT_ROOT" | shasum | cut -c1-6)"
+```
+
+**示例**：
+- `/Users/whiteyang/aiCoder/My-Agent` -> `My-Agent-a1b2c3`
+- `/Users/whiteyang/work/transformer-numpy` -> `transformer-numpy-d4e5f6`
+
+**设计理由**：
+- `目录名` 前缀：人可读，`status` 输出时一眼识别归属
+- `hash 前6位` 后缀：避免同名目录冲突，保证唯一
+- 基于**绝对路径**：跨会话稳定，不同路径下同名项目不混淆
 
 **拆分理由**：Workspace 和 Principles 生命周期不同。
 - Workspace（pending-decision + state）：强时效，Decision 解决即清空
@@ -514,6 +542,8 @@ skills/attention-maintenance/persistence/
 **无 archive**：v19 是工作记忆，只关心当前状态，不关心历史状态。archive 是项目历史，不是工作记忆。
 
 ## workspace.xml 格式
+
+路径：`persistence/projects/{project-key}/workspace.xml`
 
 ```xml
 <workspace>
@@ -541,6 +571,8 @@ skills/attention-maintenance/persistence/
 - 与 v19 保持一致：Decision ⇔ State 绑定
 
 ## principles.xml 格式
+
+路径：`persistence/projects/{project-key}/principles.xml`
 
 ```xml
 <principles>
@@ -665,9 +697,11 @@ principles.xml（旧） + v19 Knowledge（当前） → principles.xml（新）
 
 ## 恢复机制
 
+**隔离范围**：restore 仅读取**当前 project-key** 下的快照，不接触其他项目数据。因数据已按项目隔离，同项目数据天然高相关，LLM 相关性判断更准确，且不会恢复到其他项目上下文。
+
 ### 三级恢复策略
 
-SessionStart 时，根据 **LLM 相关性判断** 自动选择恢复策略：
+SessionStart 时，根据 **LLM 相关性判断** 自动选择恢复策略（仅针对当前 project-key 快照）：
 
 | 判断结果 | 策略 | 行为 |
 |---------|------|------|
@@ -684,8 +718,8 @@ SessionStart 时，根据 **LLM 相关性判断** 自动选择恢复策略：
 ```
 Given:
 - Current topic: {用户第一条消息的核心主题}
-- Pending decision: {workspace.xml 中的 pending-decision}
-- Principles summary: {principles.xml 中 active 条目的摘要}
+- Pending decision: {当前 project-key 下 workspace.xml 中的 pending-decision}
+- Principles summary: {当前 project-key 下 principles.xml 中 active 条目的摘要}
 
 Output one of:
 - HIGH: same project, same module, or direct dependency
@@ -799,10 +833,12 @@ Principles 条目可迁移到 MEMORY.md，但判定标准是**作用域**而非�
 MEMORY.md           ← Global Scope 决策（跨项目通用）
     ↑ Promotion（Global Scope）
 principles.xml      ← Project Scope 决策（项目级 ADR + replace/remove 失效）
-    ↑ Restore
+    ↑ Restore（仅当前 project-key）
 workspace.xml       ← 短期工作上下文（pending-decision 驱动）
     ↑ Activate
 v19 Working Memory  ← 实时工作记忆（4 组件）
+
+持久化层按 project-key 隔离：persistence/projects/{project-key}/
 ```
 
 ## 保存机制：Merge + 失效
@@ -818,11 +854,12 @@ workspace.xml 不需要 merge，因为它是强时效状态：
 
 ### save 操作指令
 
+0. **计算 project-key**（见「存储位置 -> project-key 生成规则」），确定目标目录 `persistence/projects/{project-key}/`。如目录不存在则创建
 1. 读取当前 v19 工作记忆状态（Decision/Knowledge/Evidence/State）
-2. **workspace.xml**：直接覆盖写入
+2. **workspace.xml**：直接覆盖写入（`persistence/projects/{project-key}/workspace.xml`）
    - Decision 未解决 → 写入 `<pending-decision>` + `<state>`
    - Decision 已解决 → workspace 清空
-3. **principles.xml**：merge + 失效检查
+3. **principles.xml**：merge + 失效检查（`persistence/projects/{project-key}/principles.xml`）
    - 读取旧 principles.xml
    - 与 v19 当前 Knowledge 合并（去重，新 reason 覆盖旧 reason）
    - 检查是否有矛盾：新 Knowledge 与旧 active 条目冲突 → 旧条目标记 replaced-by
@@ -832,21 +869,22 @@ workspace.xml 不需要 merge，因为它是强时效状态：
 
 ## Skill 命令
 
-通过 Skill tool 触发，args 传入命令名：
+通过 Skill tool 触发，args 传入命令名。**所有命令执行前先计算 project-key，操作 `persistence/projects/{project-key}/` 下的文件**：
 
 | 命令 | 行为 |
 |------|------|
 | `save` | 保存当前工作上下文（workspace 覆盖，principles merge + 失效检查） |
-| `restore` | 从快照恢复工作上下文（含 LLM 相关性判断） |
-| `status` | 查看快照状态（workspace + principles） |
-| `clear` | 清除 workspace.xml |
-| `promote` | 手动触发 Principles → MEMORY.md Promotion |
-| `replace` | 手动标记条目为 replaced-by |
-| `remove` | 手动标记条目为 removed |
+| `restore` | 从快照恢复工作上下文（含 LLM 相关性判断，仅当前 project-key） |
+| `status` | 查看当前项目快照状态（workspace + principles），附带显示 project-key |
+| `clear` | 清除当前项目 workspace.xml（`clear --all` 同时清 principles.xml） |
+| `promote` | 手动触发当前项目 Principles → MEMORY.md Promotion |
+| `replace` | 手动标记当前项目条目为 replaced-by |
+| `remove` | 手动标记当前项目条目为 removed |
+| `projects-list` | 列出所有 project-key 及各自 principles 条目数、pending-decision 状态 |
 
 ### restore 操作指令
 
-1. 读取 workspace.xml + principles.xml（如都不存在，提示"无快照"）
+1. 计算 project-key，读取 `persistence/projects/{project-key}/` 下 workspace.xml + principles.xml（如都不存在，提示"无快照"）
 2. LLM 判断相关性（HIGH / MEDIUM / LOW）
 3. 按三级策略处理（Auto / Prompt / Ignore）
 4. pending-decision → Agent 判断是否激活为当前 Decision
@@ -854,20 +892,22 @@ workspace.xml 不需要 merge，因为它是强时效状态：
 
 ### status 操作指令
 
-1. 读取 workspace.xml + principles.xml（如不存在，输出"无快照"）
+1. 计算 project-key，读取 `persistence/projects/{project-key}/` 下 workspace.xml + principles.xml（如不存在，输出"无快照"）
 2. 输出：
+   - project-key（确认当前归属）
    - pending-decision 状态（有/无）
    - Principles 条目数（active / replaced-by / removed 分别统计）
 
 ### clear 操作指令
 
-1. 清除 workspace.xml
-2. principles.xml 保留（Principles 生命周期 ≠ Workspace 生命周期）
-3. 如需同时清除 principles.xml，使用 `clear --all`
+1. 计算 project-key
+2. 清除 `persistence/projects/{project-key}/workspace.xml`
+3. principles.xml 保留（Principles 生命周期 ≠ Workspace 生命周期）
+4. 如需同时清除当前项目 principles.xml，使用 `clear --all`
 
 ### promote 操作指令
 
-1. 读取 principles.xml
+1. 计算 project-key，读取 `persistence/projects/{project-key}/principles.xml`
 2. 识别 Global Scope 条目（跨项目通用，非项目级 ADR）
 3. 迁移到 MEMORY.md
 4. 从 principles.xml 删除已迁移条目
@@ -875,15 +915,27 @@ workspace.xml 不需要 merge，因为它是强时效状态：
 
 ### replace 操作指令
 
-1. 指定旧条目关键词
-2. 标记 `status="replaced-by" ref="{新决策关键词}"`
-3. 保留 reason（防止重新做出已废弃的决策）
+1. 计算 project-key，操作 `persistence/projects/{project-key}/principles.xml`
+2. 指定旧条目关键词
+3. 标记 `status="replaced-by" ref="{新决策关键词}"`
+4. 保留 reason（防止重新做出已废弃的决策）
 
 ### remove 操作指令
 
-1. 指定条目关键词
-2. 标记 `status="removed"`
-3. 更新 reason 为废弃原因
+1. 计算 project-key，操作 `persistence/projects/{project-key}/principles.xml`
+2. 指定条目关键词
+3. 标记 `status="removed"`
+4. 更新 reason 为废弃原因
+
+### projects-list 操作指令
+
+1. 列出 `persistence/projects/` 下所有子目录（即所有 project-key）
+2. 对每个 project-key 读取其 workspace.xml + principles.xml
+3. 输出表格：
+   - project-key
+   - pending-decision 状态（有/无）
+   - Principles 条目数（active / replaced-by / removed）
+4. 用于跨项目总览，不修改任何数据
 
 ## 保存/恢复时机
 
@@ -922,8 +974,11 @@ workspace.xml 不需要 merge，因为它是强时效状态：
 MEMORY.md       ← Global Scope（跨项目通用，作用域判定 Promotion）
     ↑ Promotion
 principles.xml  ← Project Scope（项目级 ADR + reason/avoid + replace/remove 失效）
-    ↑ Restore
+    ↑ Restore（仅当前 project-key）
 workspace.xml   ← 短期（pending-decision 驱动，覆盖保存）
     ↑ Activate
 v19 Working Memory ← 实时（4 组件，relevance-first 遗忘）
+
+持久化按 project-key 隔离：persistence/projects/{project-key}/
+不同 project-key 互不干扰，同 project-key 跨会话共享
 ```
