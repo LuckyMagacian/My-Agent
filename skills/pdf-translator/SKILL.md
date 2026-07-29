@@ -1,11 +1,11 @@
 ---
 name: pdf-translator
-description: 将文档型 PDF 原位翻译为中文（或指定语言），保留页面排版与格式，基于 OpenAI 协议翻译 API（可配置 baseUrl/model/apikey）。
+description: 将文档型 PDF 原位翻译为中文（或指定语言），页级流水线（extract->translate->layout->render）保留并优化页面排版，基于 OpenAI 协议翻译 API（可配置 baseUrl/model/apikey）。
 ---
 
 # pdf-translator
 
-将文档型（非扫描版）PDF 原位翻译为指定语言（当前中文），保留原有页面排版与格式：提取文本块 → 调用 OpenAI 协议 API 翻译 → 原位覆盖写入中文（CJK 字体 + 字号自适应）。
+将文档型（非扫描版）PDF 原位翻译为指定语言（当前中文），**页级流水线**保留并优化排版：每页 extract（提取文本块 + 行级元信息）→ translate（OpenAI 协议 API，seg 片段上下文）→ layout（对齐/字号/换行/字体规划）→ render（原位覆盖写入中文，CJK 字体 + 排版优化）。排版优化逻辑独立为 `layout.py`。
 
 ## 前置条件
 
@@ -28,11 +28,13 @@ uv run skills/pdf-translator/pdf_translate.py <input.pdf> --pages 1-5,8 --output
 
 ### 分步调试
 ```bash
-# 1. 仅提取文本块为 JSON
+# 1. 仅提取文本块为 JSON（含行级 lines 元信息）
 uv run skills/pdf-translator/pdf_translate.py <input.pdf> --extract-only --out blocks.json
 # 2. 仅翻译（input 为 extract JSON）
 uv run skills/pdf-translator/pdf_translate.py blocks.json --translate-only --out trans.json
-# 3. 仅渲染（input 为原 PDF + blocks + trans）
+# 3. 仅排版规划（input 为原 PDF + blocks + trans，输出 layout JSON）
+uv run skills/pdf-translator/pdf_translate.py <input.pdf> --layout-only --blocks blocks.json --trans trans.json --out layout.json
+# 4. 仅渲染（input 为原 PDF + blocks + trans）
 uv run skills/pdf-translator/pdf_translate.py <input.pdf> --render-only --blocks blocks.json --trans trans.json --output out.pdf
 ```
 
@@ -45,11 +47,13 @@ uv run skills/pdf-translator/pdf_translate.py <input.pdf> --render-only --blocks
 | `--lang` | 目标语言 | `zh` |
 | `--pages` | 页码范围（1-based），如 `1-5,8` | 全部 |
 | `--config` | 配置文件路径 | 同目录 `config.json` |
-| `--extract-only` | 仅提取文本块为 JSON | off |
+| `--extract-only` | 仅提取文本块为 JSON（含行级 lines 元信息） | off |
 | `--translate-only` | 仅翻译（input 为 extract JSON） | off |
+| `--layout-only` | 仅排版规划（input 为原 PDF + blocks + trans，输出 layout JSON） | off |
 | `--render-only` | 仅渲染（input 为原 PDF） | off |
-| `--blocks` | render-only 的 extract JSON | `<input>.extract.json` |
-| `--trans` | render-only 的译文 JSON | `<input>.trans.json` |
+| `--blocks` | render-only / layout-only 的 extract JSON | `<input>.extract.json` |
+| `--trans` | render-only / layout-only 的译文 JSON | `<input>.trans.json` |
+| `--layout` | render-only 的 layout JSON | `<input>.layout.json` |
 | `--out` | 调试模式中间产物路径 | 自动 |
 
 ## 配置
@@ -75,9 +79,12 @@ uv run skills/pdf-translator/pdf_translate.py <input.pdf> --render-only --blocks
 
 ## 工作原理
 
-1. **提取**：PyMuPDF dict 模式按文本块提取 bbox/字号/字体/颜色/文本，图片块仅记录 bbox
-2. **翻译**：先为同段文本块标注 `seg_id`（bbox 邻近 + 排版一致，不合并文本、不破坏渲染）；按 seg 不拆批 + 块数/字符/输出 token 预算分批，每批携带前文 seg 作参考上下文（滑动窗口）；`max_tokens` 按批动态估算，输出截断时二分降批自愈，失败重试 5 次
-3. **渲染**：每文本块原位 redact 原文（白底覆盖、保留图片）→ 以 CJK 字体逐行写入译文，字号二分自适应原区域
+**页级流水线**：以页面为粒度，每页依次执行 extract → translate → layout → render。
+
+1. **提取（extract_page）**：PyMuPDF dict 模式按文本块提取 bbox/字号/字体/颜色/文本 + 行级 `lines`（每行 x0/y0/x1/y1/text，供排版对齐识别）；同段块标注 `seg_id`；图片块仅记录 bbox
+2. **翻译（translate_page）**：保留原 seg 片段滑动窗口上下文（页内批间衔接）；按 seg 不拆批 + 块数/字符/输出 token 预算分批；`max_tokens` 按批动态估算，输出截断时二分降批自愈，失败重试 5 次
+3. **排版规划（layout_page，layout.py）**：基于行级元信息规划每块：对齐识别（行级 x0/x1/center 方差判 left/center/right/justify）、智能换行（wrap_cjk 标点禁则）、字号策略（下限 max(7, 原字号*0.7)，塞不下时向下扩展不覆盖相邻 block）、字体风格（标题加粗）；输出 layout 供 render 消费
+4. **渲染（render_page）**：原位 redact 原文（白底覆盖、保留图片）→ 按 layout 以 CJK 字体写入译文（两端对齐调整字间距、居中/右对齐、标题加粗）
 
 ## 限制
 

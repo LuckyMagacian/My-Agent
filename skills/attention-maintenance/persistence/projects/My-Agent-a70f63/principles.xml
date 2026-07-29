@@ -1,0 +1,43 @@
+<principles>
+<item>
+译文 PDF 排版问题：字号被压到4pt不可读、对齐丢失、逐字符硬换行不均
+<reason>render 用 _fit_fontsize 二分自适应严格塞进原 bbox，译文变长时字号崩溃；insert_text 统一左对齐</reason>
+</item>
+<item>
+排版优化须纯几何/文本数据驱动
+<reason>后端模型不支持多模态，禁止截图分析</reason>
+</item>
+<item>
+采用页级流水线：每页 extract->translate->layout->render 一次性处理
+<reason>用户要求以页面为粒度，内存友好，排版基于当页元信息</reason>
+<avoid>全局批处理 extract->translate->render</avoid>
+</item>
+<item>
+extract 须保留行级元信息（bbox/size/font/color/lines）
+<reason>排版优化（对齐识别/字号策略/字体风格）依赖原文元信息</reason>
+</item>
+<item>
+翻译跨页上下文：处理第N页时携带 N-1 页信息
+<reason>留存高层次信息，维持翻译连贯</reason>
+<avoid>仅批内 seg 滑动窗口</avoid>
+</item>
+<item>
+排版优化代码独立为 layout.py 模块
+<reason>职责分离，符合独立阶段定位，便于单独调试</reason>
+</item>
+<item>
+标题/单行 block 字号用原文行高系数（bbox高/字号）保留更大字号
+<reason>原文标题 bbox 行高紧凑（高≈字号），固定1.25行高致同字号塞不下被压缩到min_fs</reason>
+<avoid>固定1.25行高系数压小标题字号</avoid>
+</item>
+<item>
+目录 block 用 toc 对齐：标题左对齐 + 页码右对齐（拆分末尾数字）
+<reason>目录条目是"标题左+页码右"混合结构，left/right/justify 都会错乱（right堆右侧、justify逐字符拉伸）</reason>
+<avoid>目录用 justify（短行逐字符拉伸）或 right（条目堆右）</avoid>
+</item>
+<item>
+翻译未翻译检测：译文=原文且原文可翻译（长度>30+拉丁占比>60%）才判未翻译
+<reason>API 偶发不翻译直接返回原文；短文本（人名/标题）保留原文属合理行为，不判未翻译</reason>
+<avoid>对人名等短文本判未翻译触发死循环重试</avoid>
+</item>
+</principles>

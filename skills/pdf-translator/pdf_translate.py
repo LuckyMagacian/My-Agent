@@ -20,6 +20,11 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+try:
+    import layout as layout_mod
+except ImportError:  # pragma: no cover
+    layout_mod = None
+
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
 
 # CJK 字体候选（T4 render 使用），按优先级
@@ -71,88 +76,107 @@ def _get_fitz():
     return fitz
 
 
-def extract(pdf_path: str, pages: str | None = None) -> list[dict]:
-    """提取每页文本块（bbox/font/size/color/text），区分图片。
+def extract_page(doc, pno: int) -> list[dict]:
+    """提取单页文本块（含行级 lines 元信息），区分图片。
 
-    使用 PyMuPDF 的 dict 模式，按 block（段落/行级）输出，保留阅读顺序。
-    图片块仅记录 bbox 不提取文本（render 时原样保留）。
+    使用 PyMuPDF 的 dict 模式，按 block 输出，保留阅读顺序。
+    每个文本块含 bbox/font/size/color/text/lines（行级 {x0,y0,x1,y1,text}），
+    lines 供排版阶段做对齐识别。图片块仅记录 bbox。
     """
+    page = doc[pno]
+    page_dict = page.get_text("dict")
+    blocks_out: list[dict] = []
+    for bidx, block in enumerate(page_dict.get("blocks", [])):
+        bbox = [round(float(c), 2) for c in block.get("bbox", [0, 0, 0, 0])]
+        if block.get("type") == 1:  # 图片块
+            blocks_out.append({
+                "page": pno,
+                "id": f"p{pno}b{bidx}",
+                "type": "image",
+                "bbox": bbox,
+            })
+            continue
+        # 文本块：按行聚合 span
+        size_counter: Counter = Counter()
+        font_counter: Counter = Counter()
+        color_counter: Counter = Counter()
+        # 收集每个非空 line 的几何信息：(y0, y1, x0, x1, text)
+        line_infos: list[tuple[float, float, float, float, str]] = []
+        for line in block.get("lines", []):
+            spans = line.get("spans", [])
+            line_text = "".join(s.get("text", "") for s in spans)
+            if line_text.strip():
+                lbbox = line.get("bbox", [0, 0, 0, 0])
+                line_infos.append(
+                    (float(lbbox[1]), float(lbbox[3]), float(lbbox[0]), float(lbbox[2]), line_text)
+                )
+            for s in spans:
+                txt = s.get("text", "")
+                if not txt:
+                    continue
+                cnt = len(txt)
+                size_counter[round(float(s.get("size", 12.0)), 2)] += cnt
+                font_counter[s.get("font", "")] += cnt
+                color_counter[int(s.get("color", 0))] += cnt
+        # 同一视觉行的 line 按 x 顺序用空格连接，不同视觉行用 \n。
+        # PyMuPDF 常把目录/页眉等 x 不连续的同行文本拆成多 line，直接 \n 连接
+        # 会把一行误变多行，故按 y 区间重叠判定真实视觉行。
+        line_infos.sort(key=lambda t: (t[0], t[2]))
+        visual_rows: list[list[tuple[float, float, float, float, str]]] = []
+        for info in line_infos:
+            if visual_rows:
+                prev = visual_rows[-1][-1]
+                min_h = min(prev[1] - prev[0], info[1] - info[0])
+                overlap = min(prev[1], info[1]) - max(prev[0], info[0])
+                if min_h > 0 and overlap >= min_h * 0.5:
+                    visual_rows[-1].append(info)
+                    continue
+            visual_rows.append([info])
+        # 每个 visual_row 聚合为一条 line：x0=min/x1=max，text 按 x 排序空格连接
+        lines_out: list[dict] = []
+        row_texts: list[str] = []
+        for row in visual_rows:
+            row_sorted = sorted(row, key=lambda t: t[2])
+            row_text = " ".join(t[4] for t in row_sorted)
+            lines_out.append({
+                "x0": round(min(t[2] for t in row_sorted), 2),
+                "y0": round(min(t[0] for t in row_sorted), 2),
+                "x1": round(max(t[3] for t in row_sorted), 2),
+                "y1": round(max(t[1] for t in row_sorted), 2),
+                "text": row_text,
+            })
+            row_texts.append(row_text)
+        text = "\n".join(row_texts).strip()
+        if not text:
+            continue
+        dom_size = size_counter.most_common(1)[0][0] if size_counter else 12.0
+        dom_font = font_counter.most_common(1)[0][0] if font_counter else ""
+        dom_color = color_counter.most_common(1)[0][0] if color_counter else 0
+        blocks_out.append({
+            "page": pno,
+            "id": f"p{pno}b{bidx}",
+            "type": "text",
+            "bbox": bbox,
+            "font": dom_font,
+            "size": dom_size,
+            "color": dom_color,
+            "text": text,
+            "lines": lines_out,
+        })
+    return _group_segments(blocks_out)
+
+
+def extract(pdf_path: str, pages: str | None = None) -> list[dict]:
+    """提取每页文本块（含行级 lines 元信息），区分图片。逐页 extract_page 拼接。"""
     fitz = _get_fitz()
     doc = fitz.open(pdf_path)
     total = doc.page_count
     page_indices = parse_pages(pages, total) or list(range(total))
     blocks_out: list[dict] = []
     for pno in page_indices:
-        page = doc[pno]
-        page_dict = page.get_text("dict")
-        for bidx, block in enumerate(page_dict.get("blocks", [])):
-            bbox = [round(float(c), 2) for c in block.get("bbox", [0, 0, 0, 0])]
-            if block.get("type") == 1:  # 图片块
-                blocks_out.append({
-                    "page": pno,
-                    "id": f"p{pno}b{bidx}",
-                    "type": "image",
-                    "bbox": bbox,
-                })
-                continue
-            # 文本块：按行聚合 span
-            size_counter: Counter = Counter()
-            font_counter: Counter = Counter()
-            color_counter: Counter = Counter()
-            # 收集每个非空 line 的几何信息：(y0, y1, x0, text)
-            line_infos: list[tuple[float, float, float, str]] = []
-            for line in block.get("lines", []):
-                spans = line.get("spans", [])
-                line_text = "".join(s.get("text", "") for s in spans)
-                if line_text.strip():
-                    lbbox = line.get("bbox", [0, 0, 0, 0])
-                    line_infos.append(
-                        (float(lbbox[1]), float(lbbox[3]), float(lbbox[0]), line_text)
-                    )
-                for s in spans:
-                    txt = s.get("text", "")
-                    if not txt:
-                        continue
-                    cnt = len(txt)
-                    size_counter[round(float(s.get("size", 12.0)), 2)] += cnt
-                    font_counter[s.get("font", "")] += cnt
-                    color_counter[int(s.get("color", 0))] += cnt
-            # 同一视觉行的 line 按 x 顺序用空格连接，不同视觉行用 \n。
-            # PyMuPDF 常把目录/页眉等 x 不连续的同行文本拆成多 line，直接 \n 连接
-            # 会把一行误变多行，故按 y 区间重叠判定真实视觉行。
-            line_infos.sort(key=lambda t: (t[0], t[2]))
-            visual_rows: list[list[tuple[float, float, float, str]]] = []
-            for info in line_infos:
-                if visual_rows:
-                    prev = visual_rows[-1][-1]
-                    min_h = min(prev[1] - prev[0], info[1] - info[0])
-                    overlap = min(prev[1], info[1]) - max(prev[0], info[0])
-                    if min_h > 0 and overlap >= min_h * 0.5:
-                        visual_rows[-1].append(info)
-                        continue
-                visual_rows.append([info])
-            row_texts = [
-                " ".join(t[3] for t in sorted(row, key=lambda t: t[2]))
-                for row in visual_rows
-            ]
-            text = "\n".join(row_texts).strip()
-            if not text:
-                continue
-            dom_size = size_counter.most_common(1)[0][0] if size_counter else 12.0
-            dom_font = font_counter.most_common(1)[0][0] if font_counter else ""
-            dom_color = color_counter.most_common(1)[0][0] if color_counter else 0
-            blocks_out.append({
-                "page": pno,
-                "id": f"p{pno}b{bidx}",
-                "type": "text",
-                "bbox": bbox,
-                "font": dom_font,
-                "size": dom_size,
-                "color": dom_color,
-                "text": text,
-            })
+        blocks_out.extend(extract_page(doc, pno))
     doc.close()
-    return _group_segments(blocks_out)
+    return blocks_out
 
 
 def _group_segments(blocks: list[dict]) -> list[dict]:
@@ -274,6 +298,15 @@ def translate(blocks: list[dict], config: dict) -> dict[str, str]:
     return translations
 
 
+def translate_page(blocks: list[dict], config: dict) -> dict[str, str]:
+    """页级翻译：对单页 blocks 翻译，保留原 seg 滑动窗口上下文（页内批间传递）。
+
+    与 translate 等价，仅限单页 blocks 传入；滑动窗口上下文在页内批间衔接，
+    不跨页（跨页信息由排版阶段使用）。供页级流水线调用。
+    """
+    return translate(blocks, config)
+
+
 def _tail_group(batch: list[dict]) -> list[dict]:
     """取一批末尾连续同 seg_id 的 block，作为下一批的滑动窗口上下文来源。"""
     if not batch:
@@ -317,6 +350,20 @@ def _looks_truncated(content: str) -> bool:
     return not (c.endswith("}") or c.endswith("]"))
 
 
+def _is_translatable(text: str) -> bool:
+    """判断文本是否为可翻译的英文正文（长度 > 30 且拉丁字母占比 > 60%）。
+
+    短文本（人名/标题/专有名词）保留原文属合理行为，不判未翻译。
+    """
+    if len(text.strip()) <= 30:
+        return False
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return False
+    latin = [c for c in letters if c.isascii()]
+    return len(latin) / len(letters) > 0.6
+
+
 def _translate_batch(
     client,
     config: dict,
@@ -336,7 +383,7 @@ def _translate_batch(
         f"你是专业翻译。将给定文本块翻译为{lang_name}。要求："
         "1) 译文准确、自然、符合原意与语气；"
         "2) 译文尽量简洁以适配原排版；"
-        "3) 代码、变量名、数字、数学公式符号保持原样不翻译；"
+        "3) 仅代码、变量名、数字、数学公式符号保持原样不翻译；完整句子与段落必须翻译为中文，不得原样返回原文；"
         "4) 输入为 JSON 数组，元素形如 {\"id\":\"...\",\"text\":\"...\"}；"
         "仅返回 JSON 对象，键为每个元素的 id、值为译文，例如 {\"p1b0\":\"译文\"}；"
         "必须覆盖全部 id，不得遗漏；"
@@ -381,12 +428,20 @@ def _translate_batch(
             missing = [it["id"] for it in items if it["id"] not in parsed]
             if missing:
                 raise ValueError(f"译文缺失 id: {missing[:5]}")
+            # 未翻译检测：译文=原文且原文可翻译（英文为主）-> 视为未翻译
+            untranslated = [
+                it["id"] for it in items
+                if it["id"] in parsed and parsed[it["id"]].strip() == it["text"].strip()
+                and _is_translatable(it["text"])
+            ]
+            if untranslated:
+                raise ValueError(f"译文未翻译 id: {untranslated[:5]}")
             return {k: v for k, v in parsed.items() if k in ids}
         except Exception as e:  # noqa: BLE001
             last_err = e
             # 自愈：截断立即降批；漏译重试>=2次降批；网络/解析错误只重试
             truncated = finish_reason == "length" or _looks_truncated(content)
-            is_missing = isinstance(e, ValueError) and "译文缺失" in str(e)
+            is_missing = isinstance(e, ValueError) and ("译文缺失" in str(e) or "译文未翻译" in str(e))
             do_split = depth < 2 and len(items) > 1 and (
                 truncated or (is_missing and attempt >= 2)
             )
@@ -510,6 +565,95 @@ def _fit_fontsize(
     return best_fs, best_lines
 
 
+def _insert_justified_line(page, line, x0, x1, y, fs, fontname, fontfile, color, font):
+    """两端对齐：逐字符均匀分布间距填满 [x0, x1]。"""
+    if len(line) <= 1:
+        page.insert_text((x0, y), line, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+        return
+    char_w = [font.text_length(ch, fs) for ch in line]
+    sum_w = sum(char_w)
+    target_w = x1 - x0
+    if sum_w >= target_w:
+        page.insert_text((x0, y), line, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+        return
+    gap = (target_w - sum_w) / (len(line) - 1)
+    x = x0
+    for i, ch in enumerate(line):
+        page.insert_text((x, y), ch, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+        x += char_w[i] + gap
+
+
+def _insert_toc_line(page, line, x0, x1, y, fs, fontname, fontfile, color, font):
+    """目录条目：标题左对齐 + 页码右对齐到 x1。"""
+    import re
+    m = re.match(r"^(.*?)(\s+)(\d+)$", line.strip())
+    if m:
+        title = m.group(1).rstrip()
+        page_num = m.group(3)
+        page.insert_text((x0, y), title, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+        pw = font.text_length(page_num, fs)
+        page.insert_text((x1 - pw, y), page_num, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+    else:
+        page.insert_text((x0, y), line, fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+
+
+def render_page(page, page_blocks, translations, layout, cjk_font, cjk_font_bold, fitz):
+    """渲染单页：redact 原文区域 + 按 layout 渲染译文（对齐/字号/换行/字体）。
+
+    layout 为 {block_id: {alignment,fontsize,lines,fontname,fontfile,color,rect}}。
+    无 layout 的块跳过（调用方保证 layout 覆盖待渲染块）。
+    """
+    text_blocks = [
+        b for b in page_blocks
+        if b.get("type") == "text" and b["id"] in translations and translations[b["id"]]
+    ]
+    if not text_blocks:
+        return
+    for b in text_blocks:
+        page.add_redact_annot(fitz.Rect(b["bbox"]), fill=(1, 1, 1))
+    page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+    for b in text_blocks:
+        lay = layout.get(b["id"])
+        if not lay:
+            continue
+        rect = fitz.Rect(lay["rect"])
+        fs = lay["fontsize"]
+        lines = lay["lines"]
+        color = lay["color"]
+        fontname = lay["fontname"]
+        fontfile = lay["fontfile"]
+        font = cjk_font_bold if fontname == "cjk-bold" else cjk_font
+        line_h = fs * lay.get("line_h_factor", 1.25)
+        y = rect.y0 + fs
+        for li, line in enumerate(lines):
+            if y - fs > rect.y1:
+                break
+            is_last = li == len(lines) - 1
+            align = lay["alignment"]
+            if align == "center":
+                w = font.text_length(line, fs)
+                page.insert_text((rect.x0 + (rect.width - w) / 2, y), line,
+                    fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+            elif align == "right":
+                w = font.text_length(line, fs)
+                page.insert_text((rect.x1 - w, y), line,
+                    fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+            elif align == "toc":
+                _insert_toc_line(page, line, rect.x0, rect.x1, y, fs,
+                    fontname, fontfile, color, font)
+            elif align == "justify" and not is_last and len(line) > 1:
+                if font.text_length(line, fs) >= rect.width * 0.85:
+                    _insert_justified_line(page, line, rect.x0, rect.x1, y, fs,
+                        fontname, fontfile, color, font)
+                else:
+                    page.insert_text((rect.x0, y), line,
+                        fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+            else:  # left 或 justify 末行
+                page.insert_text((rect.x0, y), line,
+                    fontsize=fs, fontname=fontname, fontfile=fontfile, color=color)
+            y += line_h
+
+
 def render(pdf_path: str, blocks: list[dict], translations: dict[str, str], output: str) -> str:
     """原位 redact 原文 + 写入中文（CJK 字体 + 字号自适应换行），保留图片。"""
     fitz = _get_fitz()
@@ -571,6 +715,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--extract-only", action="store_true", help="仅提取文本块为 JSON，不翻译")
     p.add_argument("--translate-only", action="store_true", help="从 extract JSON 读取并翻译为译文 JSON（input 为 JSON 路径）")
     p.add_argument("--render-only", action="store_true", help="从 extract JSON + 译文 JSON 渲染 PDF（input 为原 PDF 路径）")
+    p.add_argument("--layout-only", action="store_true", help="从 extract JSON + 译文 JSON 规划排版 layout JSON（input 为原 PDF）")
+    p.add_argument("--layout", help="render-only 时的 layout JSON 路径（默认 <input>.layout.json）")
     p.add_argument("--blocks", help="render-only 时的 extract JSON 路径（默认 <input>.extract.json）")
     p.add_argument("--trans", help="render-only 时的译文 JSON 路径（默认 <input>.trans.json）")
     p.add_argument("--out", help="调试模式 JSON/中间产物输出路径")
@@ -643,17 +789,58 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[info] 渲染完成 -> {out_path}")
         return 0
 
-    # 完整流程：extract -> translate -> render
+    if args.layout_only:
+        if layout_mod is None:
+            raise RuntimeError("未找到 layout 模块（应与 pdf_translate.py 同目录）")
+        blocks_path = args.blocks or (str(Path(pdf_path).with_suffix("")) + ".extract.json")
+        trans_path = args.trans or (str(Path(pdf_path).with_suffix("")) + ".trans.json")
+        blocks_all = json.loads(Path(blocks_path).read_text(encoding="utf-8"))
+        translations = json.loads(Path(trans_path).read_text(encoding="utf-8"))
+        fitz = _get_fitz()
+        doc = fitz.open(pdf_path)
+        cjk_reg = layout_mod._first_exists(layout_mod.CJK_FONTS)
+        cjk_bold = layout_mod._first_exists(layout_mod.CJK_FONTS_BOLD)
+        by_page: dict[int, list[dict]] = {}
+        for b in blocks_all:
+            by_page.setdefault(b["page"], []).append(b)
+        layout_by_page: dict[str, dict] = {}
+        for pno, pg_blocks in by_page.items():
+            page_width = doc[pno].rect.width
+            layout_by_page[f"p{pno}"] = layout_mod.layout_page(pg_blocks, translations, page_width, cjk_reg, cjk_bold)
+        doc.close()
+        out_path = args.out or (str(Path(pdf_path).with_suffix("")) + ".layout.json")
+        Path(out_path).write_text(json.dumps(layout_by_page, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[info] 排版规划完成: {sum(len(v) for v in layout_by_page.values())} 块 -> {out_path}")
+        return 0
+
+    # 完整流程：页级 extract -> translate -> layout -> render
+    if layout_mod is None:
+        raise RuntimeError("未找到 layout 模块（应与 pdf_translate.py 同目录）")
     _print_config(config)
-    print("[info] 提取文本块...", file=sys.stderr)
-    blocks = extract(pdf_path, args.pages)
-    text_n = sum(1 for b in blocks if b.get("type") == "text")
-    print(f"[info] 提取 {len(blocks)} 块（文本 {text_n}），开始翻译...", file=sys.stderr)
-    translations = translate(blocks, config)
-    print(f"[info] 翻译 {len(translations)} 条，开始渲染...", file=sys.stderr)
+    fitz = _get_fitz()
+    doc = fitz.open(pdf_path)
+    total = doc.page_count
+    page_indices = parse_pages(args.pages, total) or list(range(total))
+    cjk_reg = layout_mod._first_exists(layout_mod.CJK_FONTS)
+    cjk_bold = layout_mod._first_exists(layout_mod.CJK_FONTS_BOLD)
+    if not cjk_reg:
+        doc.close()
+        raise RuntimeError("未找到 CJK 字体（Songti.ttc/Hiragino Sans GB/STHeiti）")
+    cjk_font = fitz.Font(fontfile=cjk_reg)
+    cjk_font_bold = fitz.Font(fontfile=cjk_bold) if cjk_bold else cjk_font
     output = args.output or (str(Path(pdf_path).with_suffix("")) + f".{args.lang}.pdf")
-    render(pdf_path, blocks, translations, output)
-    print(f"[info] 译文 PDF: {output}")
+    total_trans = 0
+    for idx, pno in enumerate(page_indices, 1):
+        print(f"[info] 第 {idx}/{len(page_indices)} 页（页码 {pno+1}）：提取->翻译->排版->渲染...", file=sys.stderr)
+        blocks = extract_page(doc, pno)
+        trans = translate_page(blocks, config)
+        total_trans += len(trans)
+        page_width = doc[pno].rect.width
+        lay = layout_mod.layout_page(blocks, trans, page_width, cjk_reg, cjk_bold)
+        render_page(doc[pno], blocks, trans, lay, cjk_font, cjk_font_bold, fitz)
+    doc.save(output, garbage=4, deflate=True)
+    doc.close()
+    print(f"[info] 译文 PDF（页级流水线，{total_trans} 条）: {output}")
     return 0
 
 
