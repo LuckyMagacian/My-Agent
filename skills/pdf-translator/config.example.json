@@ -1,0 +1,10 @@
+{
+  "base_url": "https://api.siliconflow.cn/v1",
+  "model": "THUDM/GLM-4-9B-0414",
+  "api_key": "YOUR_API_KEY",
+  "target_lang": "zh",
+  "batch_size": 20,
+  "max_chars_per_batch": 6000,
+  "max_output_tokens": 8192,
+  "context_overlap": 1
+}

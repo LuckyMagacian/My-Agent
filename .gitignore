@@ -1,3 +1,10 @@
 .ai
 openspec
 .claude
+
+# pdf-translator
+skills/pdf-translator/config.json
+skills/pdf-translator/__pycache__/
+skills/pdf-translator/*.extract.json
+skills/pdf-translator/*.zh.pdf
+skills/pdf-translator/*_translated.pdf
