@@ -10,6 +10,8 @@ from __future__ import annotations
 import statistics
 from pathlib import Path
 
+from common import trans_text
+
 # CJK 字体候选（常规）
 CJK_FONTS = [
     "/System/Library/Fonts/Supplemental/Songti.ttc",
@@ -128,6 +130,57 @@ def wrap_cjk(text: str, font, fs: float, rect_w: float) -> list[str]:
     return lines
 
 
+def wrap_segments(segments: list[dict], font, text_fs: float, rect_w: float) -> list[list[dict]]:
+    """按 segment 类型流式换行，返回 [line, ...]，line = [run, ...]。
+
+    run = {text, type, size}：text 段用 text_fs 逐字 CJK 换行（行首禁则）；
+    formula 段用原字号、作为原子单位不拆分，放不下整体移到下一行。
+    供含行内公式的 block 生成 run 级 lines，渲染时 formula 不被换行/拉伸。
+    """
+    lines: list[list[dict]] = []
+    cur_runs: list[dict] = []
+    cur_w = 0.0
+    pending = ""  # 累积的 text 字符（合并为单个 text run）
+
+    def flush_text() -> None:
+        nonlocal pending
+        if pending:
+            cur_runs.append({"text": pending, "type": "text", "size": text_fs})
+            pending = ""
+
+    def new_line() -> None:
+        nonlocal cur_runs, cur_w
+        flush_text()
+        if cur_runs:
+            lines.append(cur_runs)
+        cur_runs = []
+        cur_w = 0.0
+
+    for seg in segments:
+        stype = seg.get("type", "text")
+        stext = seg.get("text", "")
+        if stype == "formula":
+            flush_text()
+            fsize = float(seg.get("size", text_fs))
+            fw = font.text_length(stext, fsize)
+            if (cur_runs or pending) and cur_w + fw > rect_w:
+                new_line()
+            cur_runs.append({"text": stext, "type": "formula", "size": fsize})
+            cur_w += fw
+        else:
+            for ch in stext:
+                if ch == "\n":
+                    new_line()
+                    continue
+                cw = font.text_length(ch, text_fs)
+                if (cur_runs or pending) and cur_w + cw > rect_w and ch not in CLOSE_PUNCT:
+                    new_line()
+                pending += ch
+                cur_w += cw
+    new_line()
+    return lines
+
+
 def _fit_fs(font, text, rect_w, rect_h, min_fs, max_fs, line_h_factor=1.25):
     """二分查找适配矩形的最大字号（下限 min_fs），返回 (fs, lines)。"""
     lo, hi = min_fs, max(max_fs, min_fs)
@@ -207,7 +260,7 @@ def layout_page(blocks, translations, page_width, cjk_regular_path, cjk_bold_pat
     font_bold = fitz.Font(fontfile=cjk_bold_path) if cjk_bold_path else font_reg
     text_blocks = [
         b for b in blocks
-        if b.get("type") == "text" and b["id"] in translations and translations[b["id"]]
+        if b.get("type") == "text" and b["id"] in translations and trans_text(translations[b["id"]])
     ]
     if not text_blocks:
         return {}
@@ -228,7 +281,10 @@ def layout_page(blocks, translations, page_width, cjk_regular_path, cjk_bold_pat
     text_blocks_sorted = sorted(text_blocks, key=lambda b: b["bbox"][1])
     layout = {}
     for i, b in enumerate(text_blocks_sorted):
-        trans = translations[b["id"]]
+        trans_obj = translations[b["id"]]
+        trans = trans_text(trans_obj)
+        segments = trans_obj.get("segments") if isinstance(trans_obj, dict) else None
+        has_formula = bool(segments) and any(s.get("type") == "formula" for s in segments)
         rect = b["bbox"]
         inset_w = max(rect[2] - rect[0] - 2, 1)
         rect_h = rect[3] - rect[1]  # 上下不 inset，单行标题保留原字号空间
@@ -247,7 +303,7 @@ def layout_page(blocks, translations, page_width, cjk_regular_path, cjk_bold_pat
             alignment = detect_alignment(b, col_left, col_right)
         fs, lines, ext_y1, lhf = plan_fontsize(b, font, trans, inset_w, rect_h, y0, next_below_y0)
         y1_out = ext_y1 if ext_y1 is not None else rect[3]
-        layout[b["id"]] = {
+        entry = {
             "alignment": alignment,
             "fontsize": round(fs, 2),
             "lines": lines,
@@ -257,4 +313,8 @@ def layout_page(blocks, translations, page_width, cjk_regular_path, cjk_bold_pat
             "rect": [rect[0] + 1, rect[1], rect[2] - 1, y1_out],
             "line_h_factor": round(lhf, 3),
         }
+        # 含行内公式：生成 run 级 lines，formula 原字号原子不换行，渲染差异化
+        if has_formula:
+            entry["runs"] = wrap_segments(segments, font, fs, inset_w)
+        layout[b["id"]] = entry
     return layout
