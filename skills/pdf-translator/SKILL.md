@@ -11,7 +11,9 @@ description: 将文档型 PDF 原位翻译为中文（或指定语言），页�
 
 - `uv`（自动安装 PyMuPDF + openai 依赖，无需手动装包）
 - CJK 字体（macOS 自带 Songti.ttc / Hiragino Sans GB / STHeiti；Linux 需自备并修改脚本顶部 `CJK_FONTS`）
-- OpenAI 协议翻译 API（默认硅基流动 GLM-4-9B-0414，可配置）
+- 翻译后端二选一：
+  - **本地模型**（默认）：Hy-MT2-7B via llama.cpp，需 `brew install llama.cpp` + 模型文件，详见 [model_service.md](model_service.md)
+  - **远程 API**：OpenAI 协议兼容 API（DeepSeek / 硅基流动等）
 
 ## 用法
 
@@ -58,10 +60,24 @@ uv run skills/pdf-translator/pdf_translate.py <input.pdf> --render-only --blocks
 
 ## 配置
 
-翻译 API 基于 OpenAI 协议，优先级：**环境变量 > config.json > 内置默认**。
+翻译 API 基于 OpenAI 协议，优先级：**环境变量 > local_model 覆盖 > config.json 字段 > 内置默认**。
 
-| 环境变量 | config 字段 | 说明 |
+### 本地模型 vs 远程 API
+
+通过 `config.json` 中 `local_model.enabled` 切换：
+
+| 开关 | 行为 |
+|------|------|
+| `"enabled": true` | 使用本地 Hy-MT2-7B 模型（默认 Q6_K 精度），需先启动服务 |
+| `"enabled": false` | 使用远程 API（DeepSeek / 硅基流动等） |
+
+本地模型管理详见 [model_service.md](model_service.md)。`local_model.enabled=true` 时自动覆盖 `base_url`/`model`/`api_key`，并适当降低批参数以适应本地模型上下文限制。
+
+### 环境变量
+
+| 环境变量 | 覆盖字段 | 说明 |
 |----------|-------------|------|
+| `LOCAL_MODEL` | `local_model.enabled` | `1`/`true` 启用，`0`/`false` 禁用本地模型 |
 | `OPENAI_API_KEY` | `api_key` | API 密钥 |
 | `OPENAI_BASE_URL` | `base_url` | 接口地址 |
 | `OPENAI_MODEL` | `model` | 模型名 |
@@ -96,6 +112,7 @@ uv run skills/pdf-translator/pdf_translate.py <input.pdf> --render-only --blocks
 ## 排错
 
 - **`未找到 CJK 字体`**：修改脚本顶部 `CJK_FONTS` 指向系统 CJK 字体路径
-- **翻译失败/超时**：减小 `batch_size`，或换更强模型（`OPENAI_MODEL`）
+- **翻译失败/超时**：减小 `batch_size`，或换更强模型（`OPENAI_MODEL`）；本地模型可尝试 `Q8` 精度
+- **本地模型未就绪**：检查 `~/scripts/hy-mt2 status`，确保服务已启动，详见 [model_service.md](model_service.md)
 - **输出截断频繁**：增大 `max_output_tokens`，或减小 `max_chars_per_batch`（单批输入过大导致译文超 token）
 - **译文溢出**：脚本已字号自适应；原区域过小属 PDF 本身限制

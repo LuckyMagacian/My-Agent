@@ -30,7 +30,18 @@ def load_config(config_path: Path | None = None) -> dict[str, Any]:
                 cfg.update(data)
         except Exception as e:  # noqa: BLE001
             print(f"[warn] 读取配置失败 {path}: {e}", file=sys.stderr)
-    # 环境变量覆盖
+    # 本地模型覆盖：当 local_model.enabled=true 时，用本地模型地址/模型名/密钥覆盖
+    local = cfg.get("local_model")
+    if isinstance(local, dict) and local.get("enabled"):
+        cfg["base_url"] = local.get("base_url", "http://127.0.0.1:9000/v1")
+        cfg["model"] = local.get("model", "hy-mt2-7b")
+        cfg["api_key"] = local.get("api_key", "not-needed")
+        # 本地模型上下文有限，适当降低批参数
+        cfg.setdefault("batch_size", 10)
+        cfg.setdefault("max_chars_per_batch", 3000)
+        cfg.setdefault("max_output_tokens", 4096)
+
+    # 环境变量覆盖（优先级最高，覆盖 local_model 已设值）
     if os.getenv("OPENAI_API_KEY"):
         cfg["api_key"] = os.environ["OPENAI_API_KEY"]
     if os.getenv("OPENAI_BASE_URL"):
@@ -39,6 +50,13 @@ def load_config(config_path: Path | None = None) -> dict[str, Any]:
         cfg["model"] = os.environ["OPENAI_MODEL"]
     if os.getenv("TARGET_LANG"):
         cfg["target_lang"] = os.environ["TARGET_LANG"]
+    if os.getenv("LOCAL_MODEL"):
+        val = os.environ["LOCAL_MODEL"].lower()
+        if val in ("0", "false", "no"):
+            cfg["local_model"] = {"enabled": False}
+        else:
+            cfg.setdefault("local_model", {})
+            cfg["local_model"]["enabled"] = True
     return cfg
 
 
