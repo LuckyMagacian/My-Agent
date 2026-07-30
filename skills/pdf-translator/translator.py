@@ -186,17 +186,17 @@ def _looks_truncated(content: str) -> bool:
 
 
 def _is_translatable(text: str) -> bool:
-    """判断文本是否为可翻译的英文正文（长度 > 30 且拉丁字母占比 > 60%）。
+    """判断文本是否为可翻译的英文正文（长度 > 15 且拉丁字母占比 > 50%）。
 
-    短文本（人名/标题/专有名词）保留原文属合理行为，不判未翻译。
+    极短文本（<16字符，如单个人名/缩写）保留原文属合理行为，不判未翻译。
     """
-    if len(text.strip()) <= 30:
+    if len(text.strip()) <= 15:
         return False
     letters = [c for c in text if c.isalpha()]
     if not letters:
         return False
     latin = [c for c in letters if c.isascii()]
-    return len(latin) / len(letters) > 0.6
+    return len(latin) / len(letters) > 0.5
 
 
 def _is_formula_dominant(item: dict) -> bool:
@@ -230,14 +230,18 @@ def _translate_batch(
     model = config["model"]
     has_formula = any(it.get("formula_map") for it in items)
     sys_prompt = (
-        f"你是专业翻译。将给定文本块翻译为{lang_name}。要求："
-        "1) 译文准确、自然、符合原意与语气；"
-        "2) 译文尽量简洁以适配原排版；"
-        "3) 仅代码、变量名、数字、数学公式符号保持原样不翻译；完整句子与段落必须翻译为中文，不得原样返回原文；"
+        f"你是专业科技文献翻译。将英文文本块翻译为{lang_name}。"
+        "铁律：每个文本块都必须翻译为中文，严禁原样返回英文原文，严禁以'术语'为由跳过翻译。"
+        "规则："
+        "1) 译文准确、自然、简洁，适配原排版；"
+        "2) 所有英文自然语言必须翻译——包括标题、术语、图注、表格文字、说明、人名机构名；"
+        "3) 仅以下三类保持原样不翻译："
+        "   a) 纯数学公式符号（∫, Σ, ∂, √ 等）及其所在表达式；"
+        "   b) 完整代码行（如 for (int i=0; i<n; i++)）；"
+        "   c) 纯数字；"
         "4) 输入为 JSON 数组，元素形如 {\"id\":\"...\",\"text\":\"...\"}；"
-        "仅返回 JSON 对象，键为每个元素的 id、值为译文，例如 {\"p1b0\":\"译文\"}；"
-        "必须覆盖全部 id，不得遗漏；"
-        "禁止数组、禁止 markdown 围栏、禁止额外说明。"
+        "仅返回 JSON 对象，键为 id、值为译文，如 {\"p1b0\":\"译文\"}；"
+        "必须覆盖全部 id，不得遗漏；禁止数组、禁止 markdown 围栏、禁止额外说明。"
     )
     if has_formula:
         sys_prompt += (
