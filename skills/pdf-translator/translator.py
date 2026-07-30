@@ -67,20 +67,29 @@ def translate(blocks: list[dict], config: dict) -> dict[str, dict]:
     图片块与空文本块跳过。按 seg_id 语义段不拆批，叠加 batch_size / 字符预算 /
     输出 token 预算分批；每批携带前文 seg 作参考上下文（滑动窗口），失败重试。
     行内公式段以占位符替换送译，还原时保留原文不译。
+
+    本地模型（local_model.enabled=true）自动使用简化模式：逐块直译，无需 JSON
+    结构化输出，适配 Hy-MT2-7B 等专业翻译模型（指令遵循能力弱于通用 LLM）。
     """
     from openai import OpenAI
 
     lang_map = {"zh": "中文（简体）", "en": "English", "ja": "日本語"}
     lang_name = lang_map.get(config.get("target_lang", "zh"), config.get("target_lang", "zh"))
+    text_blocks = [b for b in blocks if b.get("type") == "text" and b.get("text", "").strip()]
+    if not text_blocks:
+        return {}
+    client = OpenAI(base_url=config["base_url"], api_key=config["api_key"])
+
+    # 本地模型：逐块简化翻译，不走 JSON 批处理流程
+    local_cfg = config.get("local_model")
+    if isinstance(local_cfg, dict) and local_cfg.get("enabled"):
+        return _translate_simple(client, config, text_blocks, lang_name)
+
     batch_size = int(config.get("batch_size", 20))
     max_chars = int(config.get("max_chars_per_batch", 6000))
     max_out = int(config.get("max_output_tokens", 8192))
     out_budget = int(max_out * 0.8)  # 单批输出 token 预算，留余量防截断
     context_overlap = int(config.get("context_overlap", 1))
-    text_blocks = [b for b in blocks if b.get("type") == "text" and b.get("text", "").strip()]
-    if not text_blocks:
-        return {}
-    client = OpenAI(base_url=config["base_url"], api_key=config["api_key"])
 
     # 按 seg_id 保序聚合成段组（同段 block 不拆批）；无 seg_id 时每块自成一组
     groups: list[list[dict]] = []
@@ -353,6 +362,105 @@ def _translate_batch(
         it["id"]: _restore_segments(it["text"], it.get("formula_map") or {})
         for it in items
     }
+
+
+def _translate_simple(
+    client,
+    config: dict,
+    blocks: list[dict],
+    lang_name: str,
+) -> dict[str, dict]:
+    """简化翻译模式：逐块直译，无需 JSON 结构化输出。
+
+    适配 Hy-MT2-7B 等专业翻译模型（指令遵循能力弱于通用 LLM）。
+    每块独立发送简单 prompt，直接取模型输出作为译文。
+    携带前一块译文作为上下文（滑动窗口），保持术语连贯。
+    """
+    max_retries = int(config.get("max_retries", 5))
+    ctx_size = int(config.get("context_overlap", 2))
+    translations: dict[str, dict] = {}
+    total = len(blocks)
+    ctx_buffer: list[str] = []  # 最近 N 条译文，作为上下文窗口
+
+    for i, b in enumerate(blocks, 1):
+        item, _ = _build_item(b, 0)
+        has_formula = bool(item.get("formula_map"))
+
+        sys_prompt = (
+            f"你是专业科技文献翻译。将英文文本翻译为{lang_name}。"
+            "铁律：必须翻译为中文，严禁原样返回英文原文。"
+            "规则：译文准确、自然、简洁。仅输出译文，禁止任何额外说明、禁止加前缀后缀。"
+        )
+        if has_formula:
+            sys_prompt += (
+                "文本中的 ⟦Fk⟧ 形式标记为公式占位符，必须原样保留在译文对应位置，"
+                "不得翻译、改写、拆分或增删。"
+            )
+
+        user_text = item["text"]
+        if ctx_buffer:
+            ctx_text = "\n".join(
+                f"[上文{i}] {t}" for i, t in enumerate(ctx_buffer[-ctx_size:], 1)
+            )
+            user_text = f"【上文参考，勿翻译】\n{ctx_text}\n\n【待译】\n{user_text}"
+
+        est_out = int(len(item["text"]) * 2.5)
+        max_tokens = max(256, min(est_out, int(config.get("max_output_tokens", 4096))))
+
+        translated = ""
+        for attempt in range(1, max_retries + 1):
+            try:
+                resp = client.chat.completions.create(
+                    model=config["model"],
+                    messages=[
+                        {"role": "system", "content": sys_prompt},
+                        {"role": "user", "content": user_text},
+                    ],
+                    temperature=0.3,
+                    max_tokens=max_tokens,
+                )
+                translated = (resp.choices[0].message.content or "").strip()
+
+                # 公式占位符校验
+                if has_formula:
+                    expected = set(item["formula_map"].keys())
+                    found = set(_PLACEHOLDER_RE.findall(translated))
+                    if found != expected:
+                        raise ValueError(
+                            f"公式占位符不匹配: 期望 {expected}, 实际 {found}"
+                        )
+
+                # 未翻译检测
+                if translated == item["text"].strip() and _is_translatable(item["text"]):
+                    raise ValueError("译文与原文一致，未翻译")
+
+                break  # 成功
+            except Exception as e:
+                if attempt < max_retries:
+                    print(
+                        f"[translate] 块 {i}/{total} 重试 {attempt}/{max_retries}: "
+                        f"{type(e).__name__}: {str(e)[:80]}",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(
+                        f"[translate] 警告: 块 {i}/{total} 耗尽重试，保留原文: "
+                        f"{item['id']}（{str(e)[:80]}）",
+                        file=sys.stderr,
+                    )
+                    translated = item["text"]
+
+        translations[item["id"]] = _restore_segments(
+            translated, item.get("formula_map") or {}
+        )
+        ctx_buffer.append(translated)
+        if i % 10 == 0 or i == total:
+            print(
+                f"[translate] 进度 {i}/{total} 块",
+                file=sys.stderr,
+            )
+
+    return translations
 
 
 def _parse_translation_json(content: str) -> dict[str, str]:
