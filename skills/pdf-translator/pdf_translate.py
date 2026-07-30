@@ -287,7 +287,7 @@ def translate(blocks: list[dict], config: dict) -> dict[str, str]:
     total = len(batches)
     prev_ctx: list[dict] = []  # 上一批末尾段组（滑动窗口上下文来源）
     for i, batch in enumerate(batches, 1):
-        items = [{"id": b["id"], "text": b["text"]} for b in batch]
+        items = [{"id": b["id"], "text": b["text"], "font": b.get("font", "")} for b in batch]
         ctx = _build_context(prev_ctx, context_overlap)
         print(
             f"[translate] 批次 {i}/{total}（{len(items)} 块，上下文 {len(ctx)} 块）...",
@@ -350,12 +350,44 @@ def _looks_truncated(content: str) -> bool:
     return not (c.endswith("}") or c.endswith("]"))
 
 
-def _is_translatable(text: str) -> bool:
+# 等宽代码字体与数学公式字体的名称特征（小写子串匹配）。
+# 代码字体原样保留（代码不应翻译）；数学字体为公式符号，亦不应翻译。
+_NONTRANSL_FONT_PATTERNS = (
+    # 等宽 / 代码字体
+    "lettergothic", "courier", "mono", "menlo", "monaco", "consolas", "inconsolata",
+    "source code", "fira code", "jetbrains", "lucida console", "andale",
+    "dejavu sans mono", "noto sans mono", "ubuntu mono", "robotomono",
+    "typewriter", "prestige", "ocr",
+    # 数学公式字体（TeX / MathTime 符号字体）
+    "mtex", "mtsyn", "mtmi", "mtmub", "msam", "msbm", "cmsy", "cmmi", "cmex", "esint", "wasy",
+)
+
+
+def _is_nontranslatable_font(font: str) -> bool:
+    """判断字体是否为代码/数学字体（此类块不应翻译，原样返回属正确行为）。"""
+    f = (font or "").lower()
+    return any(p in f for p in _NONTRANSL_FONT_PATTERNS)
+
+
+def _looks_like_code(text: str) -> bool:
+    """保守启发式：两行及以上以 ; { } 结尾视为代码（散文几乎不会）。
+
+    字体未知或为比例字体时的兜底；主信号见 _is_nontranslatable_font。
+    """
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    strong_end = sum(1 for ln in lines if ln.rstrip().endswith((";", "{", "}")))
+    return strong_end >= 2
+
+
+def _is_translatable(text: str, font: str = "") -> bool:
     """判断文本是否为可翻译的英文正文（长度 > 30 且拉丁字母占比 > 60%）。
 
     短文本（人名/标题/专有名词）保留原文属合理行为，不判未翻译。
+    代码/数学字体块或明显代码文本原样返回属正确行为，不判未翻译。
     """
     if len(text.strip()) <= 30:
+        return False
+    if _is_nontranslatable_font(font) or _looks_like_code(text):
         return False
     letters = [c for c in text if c.isalpha()]
     if not letters:
@@ -394,20 +426,23 @@ def _translate_batch(
             "5) 用户消息开头的【上文参考】段落仅供理解指代与术语，"
             "不得翻译、其 id 不得出现在返回结果中。"
         )
+    # 发往 API 的负载仅含 id/text，剥离 font 等元信息
+    api_items = [{"id": it["id"], "text": it["text"]} for it in items]
     # context 作为 user 前缀参考文本；items 保持数组（兼容模型原输入格式，降低漏译）
     if context:
         ctx_lines = "\n".join(f"[{c['id']}] {c['text']}" for c in context)
         user_text = (
             "【上文参考，勿翻译】\n" + ctx_lines
             + "\n\n【待译，请逐条翻译并返回全部 id】\n"
-            + json.dumps(items, ensure_ascii=False)
+            + json.dumps(api_items, ensure_ascii=False)
         )
     else:
-        user_text = json.dumps(items, ensure_ascii=False)
+        user_text = json.dumps(api_items, ensure_ascii=False)
     ids = {it["id"] for it in items}
     est_out = int(sum(len(it["text"]) for it in items) * 1.3)
     max_tokens = max(1024, min(est_out + 512, int(config.get("max_output_tokens", 8192))))
     last_err: Exception | None = None
+    last_parsed: dict[str, str] = {}
     content = ""
     finish_reason = None
     for attempt in range(1, max_retries + 1):
@@ -425,6 +460,14 @@ def _translate_batch(
             finish_reason = getattr(choice, "finish_reason", None)
             content = (choice.message.content or "").strip()
             parsed = _parse_translation_json(content)
+            last_parsed = parsed
+            # 兜底：代码块缺失时回退原文（代码不应翻译，原样即正确），
+            # 避免模型漏掉代码块导致"译文缺失 id"失败。
+            for it in items:
+                if it["id"] not in parsed and (
+                    _is_nontranslatable_font(it.get("font", "")) or _looks_like_code(it["text"])
+                ):
+                    parsed[it["id"]] = it["text"]
             missing = [it["id"] for it in items if it["id"] not in parsed]
             if missing:
                 raise ValueError(f"译文缺失 id: {missing[:5]}")
@@ -432,16 +475,24 @@ def _translate_batch(
             untranslated = [
                 it["id"] for it in items
                 if it["id"] in parsed and parsed[it["id"]].strip() == it["text"].strip()
-                and _is_translatable(it["text"])
+                and _is_translatable(it["text"], it.get("font", ""))
             ]
             if untranslated:
-                raise ValueError(f"译文未翻译 id: {untranslated[:5]}")
+                # 整批原样返回：视为模型整体失败，走重试/降批自愈
+                if len(untranslated) == len(items):
+                    raise ValueError(f"整批未翻译 id: {untranslated[:5]}")
+                # 部分原样返回：多为公式/符号等不应翻译内容，保留原文并告警，不中断
+                for uid in untranslated:
+                    print(
+                        f"[translate] 警告: 块 {uid} 疑似不可翻译内容（公式/符号等），保留原文",
+                        file=sys.stderr,
+                    )
             return {k: v for k, v in parsed.items() if k in ids}
         except Exception as e:  # noqa: BLE001
             last_err = e
             # 自愈：截断立即降批；漏译重试>=2次降批；网络/解析错误只重试
             truncated = finish_reason == "length" or _looks_truncated(content)
-            is_missing = isinstance(e, ValueError) and ("译文缺失" in str(e) or "译文未翻译" in str(e))
+            is_missing = isinstance(e, ValueError) and ("译文缺失" in str(e) or "整批未翻译" in str(e))
             do_split = depth < 2 and len(items) > 1 and (
                 truncated or (is_missing and attempt >= 2)
             )
@@ -467,7 +518,13 @@ def _translate_batch(
                 f"[translate] 重试 {attempt}/{max_retries}: {type(e).__name__}: {str(e)[:120]}",
                 file=sys.stderr,
             )
-    raise RuntimeError(f"翻译批次失败（{max_retries} 次）: {last_err}")
+    # 重试耗尽仍未成功：未译块回退原文并告警，避免单块中断全书翻译
+    print(
+        f"[translate] 警告: 批次重试 {max_retries} 次仍失败（{last_err}），未译块保留原文以继续",
+        file=sys.stderr,
+    )
+    result = {it["id"]: (last_parsed.get(it["id"]) or it["text"]) for it in items}
+    return {k: v for k, v in result.items() if k in ids}
 
 
 def _parse_translation_json(content: str) -> dict[str, str]:
