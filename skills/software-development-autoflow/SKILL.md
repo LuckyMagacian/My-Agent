@@ -5,10 +5,10 @@ description: "软件开发全流程自动化工作流。提供从原始需求到
 
 # 软件开发自动化工作流 —— SKILL.md 顶层调度
 
-> 版本：v1.0.9
+> 版本：v1.0.10
 > 文档属性：skill 交付文件（入口调度文件）
 > 交付状态：已交付至 skill 根目录 `SKILL.md`；经 work-mode 双视角评估定稿（评分轨迹 R1 8.0/7.0 → R2 9.0/9.0 收敛），定稿前修 5 条建议项（§9 索引补开发侧三点、§4 图注 §8.2 通道括注、重入分支 4 挂钩例外、INIT 节点标签补全）；早期草图 `docs/00-pipeline-flowchart.md`、`docs/01-pipeline-overview.md` 于交付时删除，全流程图职责由本文 §4 承接
-> 对齐基准：`references/work-mode.md` v1.9；`references/context-system.md` v2.3.4；`references/requirements-stage.md` v0.8.8；`references/design-stage.md` v0.9.1；`references/development-stage.md` v1.2；`references/testing-stage.md` v1.0；`references/version-evolution.md` v1.0
+> 对齐基准：`references/work-mode.md` v1.9；`references/context-system.md` v2.3.5；`references/requirements-stage.md` v0.8.9；`references/design-stage.md` v0.9.2；`references/development-stage.md` v1.3；`references/testing-stage.md` v1.1；`references/version-evolution.md` v1.0
 > 定位：skill 的唯一入口文件，调度组织全部组件，实现**从原始需求到交付终态的全自动流水线**
 > 关键约定：**本文只做顶层调度，不复述、不重定义任何机制**——角色契约、收敛判定、异常处理、出入口契约、归档命名等一律以组件文件为准（组件清单见 §2）；本文与组件冲突时以组件为准；本文对组件的引用均为**路径 + 章节号**形式，不复制内容
 >
@@ -32,11 +32,11 @@ description: "软件开发全流程自动化工作流。提供从原始需求到
 | 组件 | 现行版本 | 角色 | 权威范围 |
 | --- | --- | --- | --- |
 | `references/work-mode.md` | v1.9 | 原子组件 | 执行者-评估者-仲裁者工作模式：角色契约、独立性、收敛判定、异常处理、归档命名、报告结构 |
-| `references/context-system.md` | v2.3.4 | 原子组件 | 上下文体系：隔离域与存储布局、三层上下文、上下文包装配、跨阶段通道（§8）、进度维护与断点恢复（§9）、数据留存生命周期（§10） |
-| `references/requirements-stage.md` | v0.8.8 | 阶段细则 | 需求阶段（第一阶段）：原始需求 → 可交付需求稿 |
-| `references/design-stage.md` | v0.9.1 | 阶段细则 | 设计阶段（第二阶段）：需求定稿产物 → 设计方案集合 + 任务拆解 |
-| `references/development-stage.md` | v1.2 | 阶段细则 | 开发阶段（第三阶段）：任务拆解 → 可编译可启动的工程实现 |
-| `references/testing-stage.md` | v1.0 | 阶段细则 | 测试阶段（第四阶段，最终质量关口）：工程实现 → 测试报告 + 缺陷清单，确认通过即需求交付 |
+| `references/context-system.md` | v2.3.5 | 原子组件 | 上下文体系：隔离域与存储布局（阶段目录 101/201/301/401 编号、需求级 `docs/` 软链接入口）、三层上下文、上下文包装配、跨阶段通道（§8）、进度维护与断点恢复（§9）、数据留存生命周期（§10） |
+| `references/requirements-stage.md` | v0.8.9 | 阶段细则 | 需求阶段（第一阶段）：原始需求 → 阶段定稿产物 `requirements.md`（无论是否注入外部稿均须生成）+ 摘要 |
+| `references/design-stage.md` | v0.9.2 | 阶段细则 | 设计阶段（第二阶段）：需求定稿产物 → 架构设计与详细设计分离的四份独立方案 + API 契约 + UI 设计 + 任务拆解；图表规范 PlantUML 优先 / mermaid 降级 |
+| `references/development-stage.md` | v1.3 | 阶段细则 | 开发阶段（第三阶段）：任务拆解 → 可编译可启动的工程实现（每任务交付物 `tsk-NNN.md`） |
+| `references/testing-stage.md` | v1.1 | 阶段细则 | 测试阶段（第四阶段，最终质量关口）：工程实现 → 测试报告 + 缺陷清单 + 验收核验记录，确认通过即需求交付 |
 | `references/version-evolution.md` | v1.0 | 原子组件 | 版本演进治理：版本号与升版规约、引用侧同步纪律、changelog 用法规约、版本总账（轻量指针表） |
 
 **冲突规则**：本文与任一组件冲突时以组件为准；阶段细则与原子组件冲突时以原子组件为准（设计/开发/测试三细则已声明对《上下文体系》只收紧不放松；需求阶段细则声明未定义机制以《工作模式》为准）。组件升版时本文头部对齐基准同步更新（仅元数据）。辅助工具文件（`references/cross-reference-index.md` 交叉引用索引表、`references/execution-checklist.md` 执行检查清单、`references/convergence-checklist.md` 收敛检查清单）为纯校验/导航工具，不定义机制，不入本表，冲突时一律以组件原文为准。

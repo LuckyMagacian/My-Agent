@@ -3,7 +3,7 @@
 > 性质：**纯校验工具**，不定义任何机制；机制冲突时一律以组件原文为准（冲突规则见 `SKILL.md` §2）
 > 结构：按**被引方**分组（引用方 → 章节 → 引用语义）；组件章节结构变更或重编号时，逐行核对该组件作为被引方的全部行，同步修正引用方并更新「末次校验」
 > 引用口径：组件间引用一律为《别名》§章节号形式（别名映射见各细则头部对齐基准与 `SKILL.md` §2 登记表）；版本耦合另由各文档头部「对齐基准」行承载，本表只校验**章节锚点**有效性
-> 末次校验：2026-08-11（work-mode 能力利用协议新增批次引用侧同步，对应版本：work-mode v1.9 / context-system v2.3.4 / requirements-stage v0.8.8 / design-stage v0.9.1 / development-stage v1.2 / testing-stage v1.0 / SKILL.md v1.0.9 / version-evolution v1.0）
+> 末次校验：2026-08-11（skill 五点优化批次引用侧同步，对应版本：work-mode v1.9 / context-system v2.3.5 / requirements-stage v0.8.9 / design-stage v0.9.2 / development-stage v1.3 / testing-stage v1.1 / SKILL.md v1.0.10 / version-evolution v1.0；本批次关键重编号：design-stage §4.4 拆分为架构设计模板、§4.5 拆分为详细设计模板（强制分离为两份独立文档）、§4.6 新增图表规范、§4.7 任务拆解（原 §4.6）；context-system §4 阶段目录重命名 101-requirements/201-design/301-development/401-testing、§11.10 新增软链接一致性原则）
 > 姊妹工具：`references/execution-checklist.md` 执行检查清单（同为纯引用工具，组件章节结构变更时与本表同批校验指针）
 
 ---
@@ -45,8 +45,8 @@
 | 引用方 | 章节（次数） | 引用语义 |
 | --- | --- | --- |
 | SKILL.md | §4.2（2）、§5（1）、§5.1（2）、§7.4（1） | figma MCP 服务配置与登录就绪校验的定义处（§10 外部服务依赖登记指向）；介入点索引：范围问询/基线提供、外部输入问询（技术方案模板）、双层确认 |
-| context-system.md | §4.6（1） | 任务 ID 续编由设计侧拆解完成（§5.2 重入续编口径） |
-| development-stage.md | §2（1）、§3（1）、§4.6（2） | 定位关系；输入归属（设计出口契约产物来源）；任务拆解为任务清单唯一权威来源、续编编号口径 |
+| context-system.md | §4.7（1） | 任务 ID 续编由设计侧拆解完成（§5.2 重入续编口径） |
+| development-stage.md | §2（1）、§3（1）、§4.7（2） | 定位关系；输入归属（设计出口契约产物来源）；任务拆解为任务清单唯一权威来源、续编编号口径 |
 
 ## 被引方：《开发阶段》（references/development-stage.md）
 

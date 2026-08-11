@@ -1,8 +1,8 @@
 # 软件开发自动化工作流 —— 跨需求跨阶段上下文体系
 
-> 版本：v2.3.4（最终交付版）
+> 版本：v2.3.5
 > 定位：以**隔离**为核心的上下文基础设施，支撑四阶段流水线（需求 / 设计 / 开发 / 测试）与《工作模式》实例化编排
-> 对齐基准：`work-mode.md`《执行者-评估者-仲裁者工作模式》v1.9（以下简称《工作模式》）；`requirements-stage.md`《需求阶段》v0.8.8（以下简称《需求阶段》）。本文档**替代**旧版上下文体系（原 `docs/02-context-system.md` v0.2，已于交付时删除；旧版基于五阶段模型与 `.workspace/` 路径，不再作为对齐依据）
+> 对齐基准：`work-mode.md`《执行者-评估者-仲裁者工作模式》v1.9（以下简称《工作模式》）；`requirements-stage.md`《需求阶段》v0.8.9（以下简称《需求阶段》）。本文档**替代**旧版上下文体系（原 `docs/02-context-system.md` v0.2，已于交付时删除；旧版基于五阶段模型与 `.workspace/` 路径，不再作为对齐依据）
 > 说明：本文档为**最终上下文组件**，存放于 skill 的 `references/` 目录，与 `work-mode.md` 平级；体系运行时的实际工作信息存放于 skill 目录下 `.autoflow/`，与组件、草稿严格隔离
 > 版本演进留痕：本文版本演进注释已迁移至 skill 的版本迭代组件（references/version-evolution.md，含总账与 changelog 明细指针），头部仅保留当前版本与对齐基准
 
@@ -86,7 +86,6 @@ flowchart TB
 
 ```
 <skill-dir>/
-├── docs/                                  # 设计草稿（评估期间临时存放，交付即删）
 ├── changelog/                             # 版本演进留痕（按改动日期命名，一次改动的全部条目记入当日文件）
 ├── SKILL.md                               # skill 入口调度文件（顶层编排，纯引用不重定义机制）
 ├── references/                            # 组件目录（七份组件平级存放，另有两份辅助工具文件）
@@ -102,25 +101,53 @@ flowchart TB
 │   └── convergence-checklist.md           # 收敛检查清单（辅助工具，纯校验不定义机制）
 └── .autoflow/                             # 运行时工作信息（归档根，默认值；外部注入时以注入路径为根）
     ├── work-mode-artifacts/               # 脱离流水线单独运行 work-mode 时的默认归档（《工作模式》§10.5）
+    ├── optimization-log/                  # skill 自身优化事务留痕（方案优化文档，方案与执行可追溯）
     └── <requirement-id>/                  # 需求隔离域
         ├── state.json                     # 需求层：进度主控
         ├── requirement-context.json       # 需求层：跨阶段传递唯一入口
+        ├── docs/                          # 需求级快速访问入口（软链接集合，平权挂载各阶段交付物，见 §11.10）
+        │   ├── requirements.md            # → stages/101-requirements/requirements.md
+        │   ├── ui-design.md               # → stages/201-design/ui-design.md
+        │   ├── api-contract.md            # → stages/201-design/api-contract.md
+        │   ├── frontend-architecture.md   # → stages/201-design/frontend-architecture.md
+        │   ├── frontend-detailed-design.md # → stages/201-design/frontend-detailed-design.md
+        │   ├── backend-architecture.md    # → stages/201-design/backend-architecture.md
+        │   ├── backend-detailed-design.md # → stages/201-design/backend-detailed-design.md
+        │   ├── task-tsk-NNN.md            # → stages/301-development/tsk-NNN.md
+        │   ├── testing-report.md          # → stages/401-testing/testing-report.md
+        │   └── defects.md                 # → stages/401-testing/defects.md
         └── stages/
-            ├── requirements/              # 需求阶段（对齐《需求阶段》）
-            │   ├── stage-context.json     # 阶段编排上下文
+            ├── 101-requirements/          # 需求阶段（对齐《需求阶段》）
+            │   ├── requirements.md        # 阶段定稿正式需求稿（按《需求阶段》§4 模板）
+            │   ├── stage-context.json
             │   ├── clarification-log.md   # 澄清记录（Main Agent 持久维护，《需求阶段》引用制）
-            │   ├── current-state-analysis.md  # 现状分析记录（改动型/问题修复型必备，《需求阶段》§3.2）
+            │   ├── current-state-analysis.md  # 现状分析记录（改动型/问题修复型必备，《需求阶段》§5.2）
             │   └── instance-1/            # work-mode 实例
             │       ├── instance-context.md
             │       ├── planning/          # 规划阶段启用时生成：plan-rN / eval-*-plan-rN / arbitration-plan-rN / plan-replan-rN
             │       └── round-N/           # executor-deliverable / executor-summary / eval-*-rN / arbitration-rN
-            ├── design/                    # 设计阶段（结构同构，出入口契约见 §8.4）
-            ├── development/               # 开发阶段
+            ├── 201-design/                # 设计阶段（结构同构，出入口契约见 §8.4）
+            │   ├── ui-design.md           # UI 设计交付物（《设计阶段》§4.2）
+            │   ├── api-contract.md        # API 契约文档 Markdown 主体（《设计阶段》§4.3）
+            │   ├── api-contract.yaml      # API 契约派生形态
+            │   ├── frontend-architecture.md    # 前端架构设计（《设计阶段》§4.4）
+            │   ├── frontend-detailed-design.md # 前端详细设计（《设计阶段》§4.5）
+            │   ├── backend-architecture.md     # 后端架构设计（《设计阶段》§4.4）
+            │   ├── backend-detailed-design.md  # 后端详细设计（《设计阶段》§4.5）
+            │   ├── design-scope-record.md # 设计范围确认记录（阶段层文件）
+            │   └── instance-*/             # work-mode 实例（ui / api / frontend / backend）
+            ├── 301-development/           # 开发阶段
             │   ├── stage-context.json
             │   ├── task-manifest.json     # 任务清单（条目 ID 追溯锚点）
-            │   ├── instance-<task-id>/    # 每任务一个 work-mode 实例
-            │   └── ...
-            └── testing/                   # 测试阶段（结构同构，出入口契约见 §8.4）
+            │   ├── tsk-NNN.md             # 每任务一份交付物（《开发阶段》§4.2）
+            │   ├── build-gate-record.md   # 构建闸门记录
+            │   ├── entry-confirmation.md  # 入口确认记录
+            │   └── instance-tsk-NNN/      # work-mode 实例
+            └── 401-testing/               # 测试阶段
+                ├── testing-report.md      # 测试报告
+                ├── defects.md             # 缺陷清单
+                ├── acceptance-verification.md  # 验收核验记录
+                └── instance-req-NNN/      # work-mode 实例
 ```
 
 隔离规则：
@@ -365,7 +392,8 @@ flowchart LR
 6. **全量留痕**：所有轮次、裁决、偏离、重规划落盘即不删除，修正以追加新版本方式进行；归档只读；
 7. **计划隔离装配强制**：执行阶段评估者上下文包不含执行计划与规划阶段产物，由装配层校验，违反即装配失败——失败的上下文包**不得派发**，由 Main Agent 修复后重新装配，不静默降级；
 8. **机制不重复定义**：角色契约、收敛判定、异常处理、归档命名一律以《工作模式》为准，本体系只承载其运行时上下文；
-9. **状态可重建**：元数据是派生态、实例落盘产物是权威态，矛盾时以落盘产物为准；断点时可凭核对修复完整重建元数据，缺失写入修复先于继续推进。
+9. **状态可重建**：元数据是派生态、实例落盘产物是权威态，矛盾时以落盘产物为准；断点时可凭核对修复完整重建元数据，缺失写入修复先于继续推进；
+10. **软链接一致性**：`docs/` 软链接集合（§4 目录布局）的链接目标须真实存在；阶段定稿时由 Main Agent 在写入交付物后**同批创建**软链接；阶段未启动时软链接不创建（不预创建悬空链接）；需求结束（§10 归档只读）时软链接随目录转只读——断点恢复（§9.3）时若发现悬空软链接，按"链接目标缺失"登记阻塞项，修复路径二选一：补全缺失交付物后重建链接，或撤销悬空软链接并留痕。
 
 ---
 
@@ -374,19 +402,20 @@ flowchart LR
 | 文档 | 关系 |
 | --- | --- |
 | `work-mode.md` v1.9 | 实例层归档结构、角色可见范围、偏离与重规划机制的权威来源；本文不重复定义；两者同为 `references/` 目录平级原子组件 |
-| `requirements-stage.md` v0.8.8 | 需求阶段的阶段层实现（澄清记录、现状分析记录、人工确认、任务指令注入值、需求分类；v0.8.7 增外部输入问询与登记——已有需求稿/需求稿模板）；后续设计/开发/测试阶段细则文档与本文为同级引用关系 |
-| `design-stage.md` v0.9.1 | 设计阶段的阶段层实现（v0.8 增 figma MCP 接入机制；v0.9 增技术方案模板外部输入问询）；与本文为同级引用关系 |
-| `development-stage.md` v1.2 | 开发阶段的阶段层实现（任务清单、构建闸门、入口技术栈基线、缺陷修复回退侧处置）；与本文为同级引用关系 |
-| `testing-stage.md` v1.0 | 测试阶段的阶段层实现（验收核验记录、缺陷清单归因细化、出口三处置集）；与本文为同级引用关系，对 §8.4 测试出入口契约只收紧不放松 |
-| `SKILL.md` v1.0.9 | skill 入口调度文件（位于 skill 根目录）：顶层编排（启动初始化、主调度循环、阶段切换与回退状态驱动、断点恢复入口、交付收尾）；纯引用不重定义机制，与本文冲突时以本文为准 |
+| `requirements-stage.md` v0.8.9 | 需求阶段的阶段层实现（澄清记录、现状分析记录、人工确认、任务指令注入值、需求分类、外部输入问询与登记——已有需求稿/需求稿模板；v0.8.9 增强制生成正式需求稿、阶段目录编号 101-requirements、定稿产物 `requirements.md` 与 `docs/` 软链接）；后续设计/开发/测试阶段细则文档与本文为同级引用关系 |
+| `design-stage.md` v0.9.2 | 设计阶段的阶段层实现（figma MCP 接入机制、技术方案模板外部输入问询；v0.9.2 增架构设计与详细设计分离为两份独立文档、阶段目录编号 201-design、PlantUML 优先 / mermaid 降级、定稿产物命名与 `docs/` 软链接）；与本文为同级引用关系 |
+| `development-stage.md` v1.3 | 开发阶段的阶段层实现（任务清单、构建闸门、入口技术栈基线、缺陷修复回退侧处置；v1.3 增阶段目录编号 301-development、定稿产物 `tsk-NNN.md` 与 `docs/` 软链接）；与本文为同级引用关系 |
+| `testing-stage.md` v1.1 | 测试阶段的阶段层实现（验收核验记录、缺陷清单归因细化、出口三处置集；v1.1 增阶段目录编号 401-testing、定稿产物 `testing-report.md` / `defects.md` 与 `docs/` 软链接）；与本文为同级引用关系，对 §8.4 测试出入口契约只收紧不放松 |
+| `SKILL.md` v1.0.10 | skill 入口调度文件（位于 skill 根目录）：顶层编排（启动初始化、主调度循环、阶段切换与回退状态驱动、断点恢复入口、交付收尾）；纯引用不重定义机制，与本文冲突时以本文为准；v1.0.10 仅元数据同步（§2 登记版本列） |
 | `version-evolution.md` v1.0 | 版本演进治理原子组件（版本号与升版规约、引用侧同步纪律、changelog 用法规约、版本总账）；与本文为同级平级关系，版本历史细节以下方 changelog/ 目录为唯一权威 |
 | `changelog/` 目录 | 版本演进留痕库：各组件文档的版本演进注释迁移于此，按改动日期命名（`<YYYY-MM-DD>.md`，假定单次改动不超过一天），一次改动的全部条目记入当日文件；文档头部不再承载演进注释 |
 | `references/cross-reference-index.md` | 交叉引用索引表（引用方 → 被引方 → 章节号 → 引用语义），组件章节结构变更时逐行校验引用有效性；纯校验工具，不定义任何机制 |
 | `references/execution-checklist.md` | 执行检查清单（原子动作名 + 权威定义处指针），Main Agent 调度时逐项核对执行动作是否已执行；纯引用式导航工具，不定义任何机制，与交叉引用索引表同批校验 |
 | `references/convergence-checklist.md` | 收敛检查清单（收敛判定条件名 + 权威定义处指针），仲裁者在每轮仲裁中逐项核验收敛条件是否满足；纯引用式校验工具，不定义任何机制，与交叉引用索引表同批校验 |
 | 旧版上下文体系 v0.2（原 `docs/02-context-system.md`，已删除） | 被本文替代：五阶段目录（s1~s5）、`.workspace/` 路径、「轮次不建目录」约定均废止 |
-| `docs/02-context-system-v2.md` | 本文档的草稿形态，v2.0 交付时已删除，本组件为唯一现行版本 |
-| `docs/00-pipeline-flowchart.md`、`docs/01-pipeline-overview.md` | 早期草图，已于 SKILL.md v1.0 交付时删除（五阶段模型与 `.workspace/` 路径早已废止，全流程图职责由 `SKILL.md` §4 承接） |
+| 早期草图（原 `docs/00-pipeline-flowchart.md`、`docs/01-pipeline-overview.md`、`docs/02-context-system-v2.md` 等，已删除） | 五阶段模型与 `.workspace/` 路径早已废止，全流程图职责由 `SKILL.md` §4 承接；skill 根目录 `docs/` 作为"设计草稿（评估期间临时存放，交付即删）"的机制已于 v2.3.5 起废止（评估迭代期已过、组件全部交付，无新草稿产生） |
+| 需求级 `<req-id>/docs/` 软链接入口 | v2.3.5 增；按 §4 目录布局，需求隔离域内对各阶段交付物的平权软链接集合，链接创建/校验/撤销规则见 §11.10 |
+| `.autoflow/optimization-log/` | v2.3.5 增；skill 自身优化事务留痕目录（方案优化文档、变更计划、修复记录），与 `.autoflow/work-mode-artifacts/`（运行时工作信息）职责分离 |
 
 ---
 
