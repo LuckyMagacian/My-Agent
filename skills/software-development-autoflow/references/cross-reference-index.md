@@ -3,7 +3,7 @@
 > 性质：**纯校验工具**，不定义任何机制；机制冲突时一律以组件原文为准（冲突规则见 `SKILL.md` §2）
 > 结构：按**被引方**分组（引用方 → 章节 → 引用语义）；组件章节结构变更或重编号时，逐行核对该组件作为被引方的全部行，同步修正引用方并更新「末次校验」
 > 引用口径：组件间引用一律为《别名》§章节号形式（别名映射见各细则头部对齐基准与 `SKILL.md` §2 登记表）；版本耦合另由各文档头部「对齐基准」行承载，本表只校验**章节锚点**有效性
-> 末次校验：2026-08-10（多视角评估优化批次引用侧同步，对应版本：work-mode v1.8 / context-system v2.3.4 / requirements-stage v0.8.8 / design-stage v0.9.1 / development-stage v1.2 / testing-stage v1.0 / SKILL.md v1.0.8 / version-evolution v1.0）
+> 末次校验：2026-08-11（work-mode 能力利用协议新增批次引用侧同步，对应版本：work-mode v1.9 / context-system v2.3.4 / requirements-stage v0.8.8 / design-stage v0.9.1 / development-stage v1.2 / testing-stage v1.0 / SKILL.md v1.0.9 / version-evolution v1.0）
 > 姊妹工具：`references/execution-checklist.md` 执行检查清单（同为纯引用工具，组件章节结构变更时与本表同批校验指针）
 
 ---

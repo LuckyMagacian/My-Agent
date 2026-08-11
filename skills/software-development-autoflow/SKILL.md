@@ -1,9 +1,9 @@
 # 软件开发自动化工作流 —— SKILL.md 顶层调度
 
-> 版本：v1.0.8
+> 版本：v1.0.9
 > 文档属性：skill 交付文件（入口调度文件）
 > 交付状态：已交付至 skill 根目录 `SKILL.md`；经 work-mode 双视角评估定稿（评分轨迹 R1 8.0/7.0 → R2 9.0/9.0 收敛），定稿前修 5 条建议项（§9 索引补开发侧三点、§4 图注 §8.2 通道括注、重入分支 4 挂钩例外、INIT 节点标签补全）；早期草图 `docs/00-pipeline-flowchart.md`、`docs/01-pipeline-overview.md` 于交付时删除，全流程图职责由本文 §4 承接
-> 对齐基准：`references/work-mode.md` v1.8；`references/context-system.md` v2.3.4；`references/requirements-stage.md` v0.8.8；`references/design-stage.md` v0.9.1；`references/development-stage.md` v1.2；`references/testing-stage.md` v1.0；`references/version-evolution.md` v1.0
+> 对齐基准：`references/work-mode.md` v1.9；`references/context-system.md` v2.3.4；`references/requirements-stage.md` v0.8.8；`references/design-stage.md` v0.9.1；`references/development-stage.md` v1.2；`references/testing-stage.md` v1.0；`references/version-evolution.md` v1.0
 > 定位：skill 的唯一入口文件，调度组织全部组件，实现**从原始需求到交付终态的全自动流水线**
 > 关键约定：**本文只做顶层调度，不复述、不重定义任何机制**——角色契约、收敛判定、异常处理、出入口契约、归档命名等一律以组件文件为准（组件清单见 §2）；本文与组件冲突时以组件为准；本文对组件的引用均为**路径 + 章节号**形式，不复制内容
 >
@@ -26,7 +26,7 @@
 
 | 组件 | 现行版本 | 角色 | 权威范围 |
 | --- | --- | --- | --- |
-| `references/work-mode.md` | v1.8 | 原子组件 | 执行者-评估者-仲裁者工作模式：角色契约、独立性、收敛判定、异常处理、归档命名、报告结构 |
+| `references/work-mode.md` | v1.9 | 原子组件 | 执行者-评估者-仲裁者工作模式：角色契约、独立性、收敛判定、异常处理、归档命名、报告结构 |
 | `references/context-system.md` | v2.3.4 | 原子组件 | 上下文体系：隔离域与存储布局、三层上下文、上下文包装配、跨阶段通道（§8）、进度维护与断点恢复（§9）、数据留存生命周期（§10） |
 | `references/requirements-stage.md` | v0.8.8 | 阶段细则 | 需求阶段（第一阶段）：原始需求 → 可交付需求稿 |
 | `references/design-stage.md` | v0.9.1 | 阶段细则 | 设计阶段（第二阶段）：需求定稿产物 → 设计方案集合 + 任务拆解 |

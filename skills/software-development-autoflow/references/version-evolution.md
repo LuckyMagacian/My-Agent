@@ -3,7 +3,7 @@
 > 版本：v1.0
 > 文档属性：skill 交付文件（原子组件——版本演进治理）
 > 定位：skill 版本演进事务的唯一权威规范与记录组件——承载版本总账、规约 changelog 用法、定义升版与引用侧同步纪律；组件本体机制冲突时不适用本文，以各组件原文为准
-> 对齐基准：SKILL.md v1.0.8、work-mode v1.8、context-system v2.3.4、requirements-stage v0.8.8、design-stage v0.9.1、development-stage v1.2、testing-stage v1.0
+> 对齐基准：SKILL.md v1.0.9、work-mode v1.9、context-system v2.3.4、requirements-stage v0.8.8、design-stage v0.9.1、development-stage v1.2、testing-stage v1.0
 > 关键约定：本文只治理版本演进事务（版本号、升版、记录、同步义务），不定义、不复述任何流程机制，机制冲突一律以组件原文为准（冲突规则见 SKILL.md §2）；总账与 changelog 明细不双写（分工与冲突口径见 §1、§5.2）
 > 版本演进留痕：本文即版本演进记录的权威文档；迁移完成后各组件头部留痕指针行指向本文（模板见 §3.4）；本文自身的版本变更见 §4
 
@@ -85,8 +85,8 @@
 
 | 对象 | 版本范围（以明细为准） | 明细指针 |
 | --- | --- | --- |
-| SKILL.md | v0.1 → v1.0.8 | changelog/2026-08-07.md：【迁移】SKILL.md（历史演进，迁出前版本 v1.0.2）；【当日新增】条目 4、8、11、14；changelog/2026-08-10.md：【当日新增】条目 2、13 |
-| work-mode | v1.6 → v1.8 | changelog/2026-08-07.md：【迁移】work-mode.md（历史演进，迁出前版本 v1.6.2）；changelog/2026-08-10.md：【当日新增】条目 1、9 |
+| SKILL.md | v0.1 → v1.0.9 | changelog/2026-08-07.md：【迁移】SKILL.md（历史演进，迁出前版本 v1.0.2）；【当日新增】条目 4、8、11、14；changelog/2026-08-10.md：【当日新增】条目 2、13；changelog/2026-08-11.md：【当日新增】条目 2 |
+| work-mode | v1.6 → v1.9 | changelog/2026-08-07.md：【迁移】work-mode.md（历史演进，迁出前版本 v1.6.2）；changelog/2026-08-10.md：【当日新增】条目 1、9；changelog/2026-08-11.md：【当日新增】条目 1 |
 | context-system | v1.0 → v2.3.4 | changelog/2026-08-07.md：【迁移】context-system.md（历史演进，迁出前版本 v2.3.2）；【当日新增】条目 1；changelog/2026-08-10.md：【当日新增】条目 14 |
 | requirements-stage | v0.2 → v0.8.8 | changelog/2026-08-07.md：【迁移】requirements-stage.md（历史演进，迁出前版本 v0.8.6）；【当日新增】条目 6；changelog/2026-08-10.md：【当日新增】条目 11 |
 | design-stage | v0.1 → v0.9.1 | changelog/2026-08-07.md：【迁移】design-stage.md（历史演进，迁出前版本 v0.8）；【当日新增】条目 7；changelog/2026-08-10.md：【当日新增】条目 12 |
