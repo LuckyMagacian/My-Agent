@@ -1,2 +1,10 @@
 <workspace>
+  <pending-decision>
+  autoflow-requirements（需求设计阶段子 skill）的详细流程设计
+  </pending-decision>
+
+  <state>
+  doing: 等待用户评审全局架构设计文档
+  until: 用户确认 docs/2026-08-04-autoflow-global-architecture.md 后进入需求阶段设计
+  </state>
 </workspace>
