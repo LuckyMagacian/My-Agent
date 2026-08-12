@@ -1,8 +1,8 @@
 # 软件开发自动化工作流 —— 跨需求跨阶段上下文体系
 
-> 版本：v2.3.5
+> 版本：v2.3.7
 > 定位：以**隔离**为核心的上下文基础设施，支撑四阶段流水线（需求 / 设计 / 开发 / 测试）与《工作模式》实例化编排
-> 对齐基准：`work-mode.md`《执行者-评估者-仲裁者工作模式》v1.9（以下简称《工作模式》）；`requirements-stage.md`《需求阶段》v0.8.9（以下简称《需求阶段》）。本文档**替代**旧版上下文体系（原 `docs/02-context-system.md` v0.2，已于交付时删除；旧版基于五阶段模型与 `.workspace/` 路径，不再作为对齐依据）
+> 对齐基准：`work-mode.md`《执行者-评估者-仲裁者工作模式》v1.9（以下简称《工作模式》）；`requirements-stage.md`《需求阶段》v0.8.10（以下简称《需求阶段》）。本文档**替代**旧版上下文体系（原 `docs/02-context-system.md` v0.2，已于交付时删除；旧版基于五阶段模型与 `.workspace/` 路径，不再作为对齐依据）
 > 说明：本文档为**最终上下文组件**，存放于 skill 的 `references/` 目录，与 `work-mode.md` 平级；体系运行时的实际工作信息存放于 skill 目录下 `.autoflow/`，与组件、草稿严格隔离
 > 版本演进留痕：本文版本演进注释已迁移至 skill 的版本迭代组件（references/version-evolution.md，含总账与 changelog 明细指针），头部仅保留当前版本与对齐基准
 
@@ -113,8 +113,11 @@ flowchart TB
         │   ├── frontend-detailed-design.md # → stages/201-design/frontend-detailed-design.md
         │   ├── backend-architecture.md    # → stages/201-design/backend-architecture.md
         │   ├── backend-detailed-design.md # → stages/201-design/backend-detailed-design.md
+        │   ├── test-cases.md              # → stages/201-design/test-cases.md
         │   ├── task-tsk-NNN.md            # → stages/301-development/tsk-NNN.md
         │   ├── testing-report.md          # → stages/401-testing/testing-report.md
+        │   ├── acceptance-verification.md # → stages/401-testing/acceptance-verification.md
+        │   ├── integration-test-record.md # → stages/401-testing/integration-test-record.md
         │   └── defects.md                 # → stages/401-testing/defects.md
         └── stages/
             ├── 101-requirements/          # 需求阶段（对齐《需求阶段》）
@@ -134,8 +137,9 @@ flowchart TB
             │   ├── frontend-detailed-design.md # 前端详细设计（《设计阶段》§4.5）
             │   ├── backend-architecture.md     # 后端架构设计（《设计阶段》§4.4）
             │   ├── backend-detailed-design.md  # 后端详细设计（《设计阶段》§4.5）
+            │   ├── test-cases.md          # 测试用例设计（《设计阶段》§4.8，恒执行；测试阶段入口必备）
             │   ├── design-scope-record.md # 设计范围确认记录（阶段层文件）
-            │   └── instance-*/             # work-mode 实例（ui / api / frontend / backend）
+            │   └── instance-*/             # work-mode 实例（ui / api / frontend / backend / testcases）
             ├── 301-development/           # 开发阶段
             │   ├── stage-context.json
             │   ├── task-manifest.json     # 任务清单（条目 ID 追溯锚点）
@@ -147,6 +151,7 @@ flowchart TB
                 ├── testing-report.md      # 测试报告
                 ├── defects.md             # 缺陷清单
                 ├── acceptance-verification.md  # 验收核验记录
+                ├── integration-test-record.md  # 接口集成测试记录（《测试阶段》§4.5）
                 └── instance-req-NNN/      # work-mode 实例
 ```
 
@@ -402,11 +407,11 @@ flowchart LR
 | 文档 | 关系 |
 | --- | --- |
 | `work-mode.md` v1.9 | 实例层归档结构、角色可见范围、偏离与重规划机制的权威来源；本文不重复定义；两者同为 `references/` 目录平级原子组件 |
-| `requirements-stage.md` v0.8.9 | 需求阶段的阶段层实现（澄清记录、现状分析记录、人工确认、任务指令注入值、需求分类、外部输入问询与登记——已有需求稿/需求稿模板；v0.8.9 增强制生成正式需求稿、阶段目录编号 101-requirements、定稿产物 `requirements.md` 与 `docs/` 软链接）；后续设计/开发/测试阶段细则文档与本文为同级引用关系 |
-| `design-stage.md` v0.9.2 | 设计阶段的阶段层实现（figma MCP 接入机制、技术方案模板外部输入问询；v0.9.2 增架构设计与详细设计分离为两份独立文档、阶段目录编号 201-design、PlantUML 优先 / mermaid 降级、定稿产物命名与 `docs/` 软链接）；与本文为同级引用关系 |
-| `development-stage.md` v1.3 | 开发阶段的阶段层实现（任务清单、构建闸门、入口技术栈基线、缺陷修复回退侧处置；v1.3 增阶段目录编号 301-development、定稿产物 `tsk-NNN.md` 与 `docs/` 软链接）；与本文为同级引用关系 |
-| `testing-stage.md` v1.1 | 测试阶段的阶段层实现（验收核验记录、缺陷清单归因细化、出口三处置集；v1.1 增阶段目录编号 401-testing、定稿产物 `testing-report.md` / `defects.md` 与 `docs/` 软链接）；与本文为同级引用关系，对 §8.4 测试出入口契约只收紧不放松 |
-| `SKILL.md` v1.0.10 | skill 入口调度文件（位于 skill 根目录）：顶层编排（启动初始化、主调度循环、阶段切换与回退状态驱动、断点恢复入口、交付收尾）；纯引用不重定义机制，与本文冲突时以本文为准；v1.0.10 仅元数据同步（§2 登记版本列） |
+| `requirements-stage.md` v0.8.10 | 需求阶段的阶段层实现（澄清记录、现状分析记录、人工确认、任务指令注入值、需求分类、外部输入问询与登记——已有需求稿/需求稿模板；v0.8.9 增强制生成正式需求稿、阶段目录编号 101-requirements、定稿产物 `requirements.md` 与 `docs/` 软链接；v0.8.10 增头部对齐基准行 + §5.0 强制生成原则下游消费者清单补 instance-testcases）；后续设计/开发/测试阶段细则文档与本文为同级引用关系 |
+| `design-stage.md` v0.9.5 | 设计阶段的阶段层实现（figma MCP 接入机制、技术方案模板外部输入问询；v0.9.2 增架构设计与详细设计分离为两份独立文档、阶段目录编号 201-design、PlantUML 优先 / mermaid 降级、定稿产物命名与 `docs/` 软链接；v0.9.3 增测试用例设计 `test-cases.md` 恒执行产物、§4.8 测试用例设计模板、§5.3 依赖链增 test-cases 实例、§5.4 任务拆解增"测试用例覆盖"核对、§7.4 阶段级确认对象增 test-cases；v0.9.4 增 §5 流程图增 instance-testcases 节点 + 流程图改 PlantUML 与 §4.6 一致；v0.9.5 删除 §5 重复旧版图注 + §5 PlantUML 注脚增第六类情形「测试用例设计达上限」+ §5 流程图增 mermaid 备援代码块 R-S-2 修复）；与本文为同级引用关系 |
+| `development-stage.md` v1.3 | 开发阶段的阶段层实现（任务清单、构建闸门、入口技术栈基线、缺陷修复回退侧处置；v1.3 增阶段目录编号 301-development、定稿产物 `tsk-NNN.md` 与 `docs/` 软链接；v1.3 头部对齐基准行同步 v2.3.6/v0.8.10/v0.9.4——纯元数据不升版）；与本文为同级引用关系 |
+| `testing-stage.md` v1.3 | 测试阶段的阶段层实现（验收核验记录、缺陷清单归因细化、出口三处置集；v1.1 增阶段目录编号 401-testing、定稿产物 `testing-report.md` / `defects.md` 与 `docs/` 软链接；v1.2 增消费设计阶段 `test-cases.md` 入口必备、§4.5 接口集成测试记录模板、§5.1.5 测试基础就绪核验——数据库/token/测试域名/mock 四项问询+探查+升级人工、定稿产物增 `acceptance-verification.md` / `integration-test-record.md`；v1.3 增 §4.3 裁定来源枚举 §5.1.5、§4.5 mock 清理增客观判据、§5 流程图增 §5.1.5 节点、§5.1.5 增按需创建语义）；与本文为同级引用关系，对 §8.4 测试出入口契约只收紧不放松 |
+| `SKILL.md` v1.0.13 | skill 入口调度文件（位于 skill 根目录）：顶层编排（启动初始化、主调度循环、阶段切换与回退状态驱动、断点恢复入口、交付收尾）；纯引用不重定义机制，与本文冲突时以本文为准；v1.0.12 §11 末句改写为"`docs/` 草稿机制已于 v2.3.5 起废止"——与本文 §12 关系表口径一致；v1.0.13 §2 登记表版本列同步 design-stage v0.9.5 / context-system v2.3.7（仅元数据） |
 | `version-evolution.md` v1.0 | 版本演进治理原子组件（版本号与升版规约、引用侧同步纪律、changelog 用法规约、版本总账）；与本文为同级平级关系，版本历史细节以下方 changelog/ 目录为唯一权威 |
 | `changelog/` 目录 | 版本演进留痕库：各组件文档的版本演进注释迁移于此，按改动日期命名（`<YYYY-MM-DD>.md`，假定单次改动不超过一天），一次改动的全部条目记入当日文件；文档头部不再承载演进注释 |
 | `references/cross-reference-index.md` | 交叉引用索引表（引用方 → 被引方 → 章节号 → 引用语义），组件章节结构变更时逐行校验引用有效性；纯校验工具，不定义任何机制 |

@@ -3,7 +3,7 @@
 > 性质：**纯校验工具**，不定义任何机制；机制冲突时一律以组件原文为准（冲突规则见 `SKILL.md` §2）
 > 结构：按**被引方**分组（引用方 → 章节 → 引用语义）；组件章节结构变更或重编号时，逐行核对该组件作为被引方的全部行，同步修正引用方并更新「末次校验」
 > 引用口径：组件间引用一律为《别名》§章节号形式（别名映射见各细则头部对齐基准与 `SKILL.md` §2 登记表）；版本耦合另由各文档头部「对齐基准」行承载，本表只校验**章节锚点**有效性
-> 末次校验：2026-08-11（skill 五点优化批次引用侧同步，对应版本：work-mode v1.9 / context-system v2.3.5 / requirements-stage v0.8.9 / design-stage v0.9.2 / development-stage v1.3 / testing-stage v1.1 / SKILL.md v1.0.10 / version-evolution v1.0；本批次关键重编号：design-stage §4.4 拆分为架构设计模板、§4.5 拆分为详细设计模板（强制分离为两份独立文档）、§4.6 新增图表规范、§4.7 任务拆解（原 §4.6）；context-system §4 阶段目录重命名 101-requirements/201-design/301-development/401-testing、§11.10 新增软链接一致性原则）
+> 末次校验：2026-08-11（work-mode 二轮评估 5 条清理批次引用侧同步，对应版本：work-mode v1.9 / context-system v2.3.7 / requirements-stage v0.8.10 / design-stage v0.9.5 / development-stage v1.3 / testing-stage v1.3 / SKILL.md v1.0.13 / version-evolution v1.0；本批次关键修复：REG-1 / R-T-1 删除 design-stage §5 重复旧版图注；REG-2 修复 context-system 头部对齐基准 v0.8.9→v0.8.10（升 v2.3.6→v2.3.7）；R-S-1 方案优化文档 §1.2 修订备注 v0.8.12 笔误→v0.8.10；REG-3 增 design-stage §5 PlantUML 注脚第六类情形「测试用例设计达上限」；R-S-2 design-stage §5 流程图增 mermaid 备援代码块）
 > 姊妹工具：`references/execution-checklist.md` 执行检查清单（同为纯引用工具，组件章节结构变更时与本表同批校验指针）
 
 ---
