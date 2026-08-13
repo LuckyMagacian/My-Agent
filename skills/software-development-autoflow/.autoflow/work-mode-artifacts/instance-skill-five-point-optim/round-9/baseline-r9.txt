@@ -1,0 +1,53 @@
+# baseline-r9 —— R8 修复核验轮基线快照
+
+> 实例：instance-skill-five-point-optim ｜ 轮次：r9（R8-1/R8-2 重要级问题修复核验轮）
+> 快照时间：2026-08-13 ｜ 方式：git status + diff stat + R8 修复轮变更清单
+
+## 1. git status（工作区未提交变更总览）
+
+```
+ M .autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md
+ M .autoflow/work-mode-artifacts/instance-skill-five-point-optim/issue-log.md
+ M .qoder/rules/white_env.md
+ M SKILL.md
+ M changelog/2026-08-11.md
+ M references/context-system.md
+ M references/cross-reference-index.md
+ M references/design-stage.md
+ M references/development-stage.md
+ M references/execution-checklist.md
+ M references/requirements-stage.md
+ M references/testing-stage.md
+ M references/version-evolution.md
+ M references/work-mode.md
+?? .autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2..round-8/
+?? changelog/2026-08-12.md
+?? changelog/2026-08-13.md
+```
+
+## 2. git diff --stat（累积，r1~r8 修复轮全部未提交）
+
+```
+ references/context-system.md            | 28 +++++----
+ references/cross-reference-index.md     | 10 +--
+ references/version-evolution.md         | 35 +++++----
+ references/work-mode.md                 |  2 +-
+ references/development-stage.md         |  4 +-
+ references/execution-checklist.md       |  2 +-
+ SKILL.md                                | 10 ++-
+（其余为历轮变更，略）
+```
+
+## 3. R8 修复轮变更清单（本轮核验对象）
+
+| 文件 | 变更点 |
+| --- | --- |
+| references/context-system.md | L194/L219/L281 三处《需求阶段》§6 → §4 第 4/3/2 项（双要素口径保留）；§12 关系表 SKILL.md 行 v1.0.15→v1.0.16 + v1.0.16 注记 |
+| references/cross-reference-index.md | L6 末次校验行 → 2026-08-13（版本集 SKILL.md v1.0.16）；L38 context-system 行全量回验（§6 移除 → §4（5）、§5.2（4）、语义注记更新）；L47《设计阶段》组补 §4.1（1）、§5.1（2）→（3）；L62《测试阶段》组补 §5.1.5（1） |
+| references/version-evolution.md | L6 对齐基准 SKILL.md v1.0.15→v1.0.16；§4 总账六行延展 2026-08-13 指针（SKILL/work-mode/context-system/development-stage/交叉引用索引/执行检查清单）+ SKILL 行版本范围 v1.0.16 |
+| SKILL.md | L8 头部版本 v1.0.15→v1.0.16（R7-4 §9 补行补办升号，§2.2 SKILL.md 例外） |
+| changelog/2026-08-13.md | 新建：10 条目登记 R7 修复轮（条目 1-6）+ r8 修复轮（条目 7-10） |
+
+## 4. 评估范围
+
+核心组件全量（SKILL.md + references/ 11 文件）；changelog/ 仅作留痕核验（不评内容）；.autoflow/、.qoder/ 排除追溯核验（历轮约定）。

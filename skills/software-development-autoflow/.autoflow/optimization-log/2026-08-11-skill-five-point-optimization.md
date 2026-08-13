@@ -133,12 +133,12 @@
 **修改 `requirements-stage.md` §5.0**：
 
 - 当前：提供已有需求稿时"分析澄清、非必要不新增"——可能未生成独立阶段定稿
-- 修改后：**无论是否注入外部稿，阶段必须产出 `requirements-final.md` 作为正式需求稿**
+- 修改后：**无论是否注入外部稿，阶段必须产出 `requirements-final.md` 作为正式需求稿**（**计划口径，已被 §2.2 应用 1 推翻**：正式需求稿为 `requirements.md`，无 `final/` 目录与前后缀，见 §1.2 决策修订备注）
 - 处置：
   - 未注入外部稿：按 §4 可交付需求稿模板（内置）生成
   - 注入外部稿：以原稿为输入，按 §4 模板**重新组织并转化**——条目编号化（REQ-NNN）、三分类判定、约束段提取、歧义点进澄清流程、原稿作为引用登记入澄清记录"输入引用"段
   - 注入外部模板：按模板组织正文结构，但强制要素（条目 ID、条目类型、优先级、验收标准、约束段、未决项来源标注）缺失时以独立小节补齐（与现有"模板优先 + 强制要素补齐"规则一致）
-- 不论上述哪种路径，最终交付的"正式需求稿"均为阶段定稿产物 `requirements-final.md`，由 §5.3 初始稿 + §5.5 迭代细化 + §7.4 人工确认定稿
+- 不论上述哪种路径，最终交付的"正式需求稿"均为阶段定稿产物 `requirements-final.md`，由 §5.3 初始稿 + §5.5 迭代细化 + §7.4 人工确认定稿（**计划口径，已被 §2.2 应用 1 推翻**：正式需求稿为 `requirements.md`，见 §1.2 决策修订备注）
 
 **受影响组件**：
 
@@ -282,7 +282,7 @@
 | 组件 | 现版本 | 新版本 | 升版理由 |
 |---|---|---|---|
 | SKILL.md | v1.0.9 | v1.0.10 | 每次变更均升号（§2.2 例外），仅元数据 |
-| context-system.md | v2.3.4 | v2.3.5 | 目录布局树新增 docs/ + final/ + 阶段目录重命名（机制增量） |
+| context-system.md | v2.3.4 | v2.3.5 | 目录布局树新增 docs/ + final/ + 阶段目录重命名（机制增量；**计划口径含 final/，已被 §2.2 应用 1 推翻**——不建 `final/` 子目录） |
 | requirements-stage.md | v0.8.8 | v0.8.9 | 强制生成正式需求稿 + 阶段目录重命名 |
 | design-stage.md | v0.9.1 | v0.9.2 | 架构/详细分离 + PlantUML 优先级 + 阶段目录重命名 |
 | development-stage.md | v1.2 | v1.3 | 阶段目录重命名 |
@@ -325,9 +325,9 @@
 |---|---|
 | SKILL.md | §2 登记表版本列；§9 索引如有相关项；§10 启动参数（如有相关项） |
 | references/context-system.md | §4 目录布局树；§11 一致性规则增软链接一致性；§12 关系表 |
-| references/requirements-stage.md | §3 输出；§4 模板（增 final 产物）；§5.0 外部输入问询；§5.3 初始稿；§7.4 阶段级确认 |
+| references/requirements-stage.md | §3 输出；§4 模板（增 final 产物）；§5.0 外部输入问询；§5.3 初始稿；§7.4 阶段级确认（**计划口径含 final 产物，已被 §2.2 应用 1 推翻**） |
 | references/design-stage.md | §3 输出增 test-cases 产物行；§4.8 新增测试用例设计模板（应用 5）；§5.3 依赖链增 test-cases 实例；§5.4 任务拆解客观自检项增"测试用例覆盖"核对；§7.4 阶段级确认对象增 test-cases 产物 |
-| references/development-stage.md | §3 输出增 final；§3 归档约定路径；§7.4 |
+| references/development-stage.md | §3 输出增 final；§3 归档约定路径；§7.4（**计划口径含 final，已被 §2.2 应用 1 推翻**） |
 | references/testing-stage.md | §3 输入与输出（增 test-cases 入口必备 + integration-test-record 产物）；§4.1 测试报告覆盖来源说明；§4.4 测试实例交付物引用设计用例 ID；新增 §4.5 接口集成测试记录模板；§5.1+§5.2 之间新增"测试基础就绪核验"段（数据库/token/测试域名/mock 四项）；§7.4 阶段级确认对象增 integration-test-record |
 | references/cross-reference-index.md | 末次校验行 |
 | references/version-evolution.md | §4 总账指针行 |
@@ -345,7 +345,7 @@
 | 阶段目录重命名后历史归档路径失效 | 历史归档（DONE 状态）保留原路径——只对**新启动需求**生效新路径；新启动需求 ID 含日期可辨识（YYYYMMDD-序号），断点恢复时按需求 ID 目录的实际路径处理，不依赖硬编码路径 |
 | soft link 跨平台兼容性 | symlink 在 macOS/Linux 透明；Windows 需以「管理员模式」或「开发者模式」开启——本 skill 运行环境为 macOS（当前 OS 已是 Darwin），无平台障碍 |
 | PlantUML skill 加载失败 | 设计阶段 §5 流程图降级为 mermaid（已设计降级路径） |
-| final 文档结构差异大 | final 文档结构由"实例产物摘要 + 文档链接"聚合（不强制汇总全文），保持轻量 |
+| final 文档结构差异大 | final 文档结构由"实例产物摘要 + 文档链接"聚合（不强制汇总全文），保持轻量（**计划口径含 final，已被 §2.2 应用 1 推翻**） |
 
 ---
 

@@ -3,7 +3,7 @@
 > 版本：v0.8.10
 > 文档属性：skill 交付文件（阶段指令细则）
 > 交付状态：已交付至 skill 根目录（后迁移至 `references/` 目录，仅元数据同步）；经 work-mode 四轮双视角评估定稿（评分轨迹 10/7 → 8.5/9 → 9.5/10 → 10/9），并经人工确认定稿
-> 对齐基准：`work-mode.md` v1.9；`context-system.md` v2.3.7；`design-stage.md` v0.9.5；`development-stage.md` v1.3；`testing-stage.md` v1.3
+> 对齐基准：`work-mode.md` v1.9；`context-system.md` v2.3.7；`design-stage.md` v0.9.5；`development-stage.md` v1.3；`testing-stage.md` v1.4
 > 定位：四大阶段（需求 / 设计 / 开发 / 测试）中的**第一阶段**，将原始需求转化为可交付需求稿
 > 关键约定：本阶段的迭代细化以 `work-mode.md`《执行者-评估者-仲裁者工作模式》（位于 `references/` 目录，以下简称《工作模式》）实例化运行；本文只定义需求阶段实例化时注入的参数与细化规则，凡未定义的机制（角色契约、独立性原则、收敛判定、异常处理、归档命名、报告结构等）一律以《工作模式》为准
 >

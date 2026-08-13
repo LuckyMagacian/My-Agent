@@ -1,0 +1,159 @@
+=== git status --porcelain (r3 baseline) ===
+ M skills/software-development-autoflow/.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md
+ M skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/issue-log.md
+ M skills/software-development-autoflow/changelog/2026-08-11.md
+ M skills/software-development-autoflow/references/testing-stage.md
+ M skills/software-development-autoflow/references/version-evolution.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/arbitration-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/eval-convergence-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/eval-executability-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/eval-governance-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/eval-maintainability-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/eval-robustness-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-2/executor-deliverable-r2.md
+?? skills/software-development-autoflow/.autoflow/work-mode-artifacts/instance-skill-five-point-optim/round-3/
+?? skills/software-development-autoflow/changelog/2026-08-12.md
+
+=== git diff HEAD -- <10 files> ===
+diff --git a/skills/software-development-autoflow/.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md b/skills/software-development-autoflow/.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md
+index b31218c..b0f627f 100644
+--- a/skills/software-development-autoflow/.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md
++++ b/skills/software-development-autoflow/.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md
+@@ -133,12 +133,12 @@
+ **修改 `requirements-stage.md` §5.0**：
+ 
+ - 当前：提供已有需求稿时"分析澄清、非必要不新增"——可能未生成独立阶段定稿
+-- 修改后：**无论是否注入外部稿，阶段必须产出 `requirements-final.md` 作为正式需求稿**
++- 修改后：**无论是否注入外部稿，阶段必须产出 `requirements-final.md` 作为正式需求稿**（**计划口径，已被 §2.2 应用 1 推翻**：正式需求稿为 `requirements.md`，无 `final/` 目录与前后缀，见 §1.2 决策修订备注）
+ - 处置：
+   - 未注入外部稿：按 §4 可交付需求稿模板（内置）生成
+   - 注入外部稿：以原稿为输入，按 §4 模板**重新组织并转化**——条目编号化（REQ-NNN）、三分类判定、约束段提取、歧义点进澄清流程、原稿作为引用登记入澄清记录"输入引用"段
+   - 注入外部模板：按模板组织正文结构，但强制要素（条目 ID、条目类型、优先级、验收标准、约束段、未决项来源标注）缺失时以独立小节补齐（与现有"模板优先 + 强制要素补齐"规则一致）
+-- 不论上述哪种路径，最终交付的"正式需求稿"均为阶段定稿产物 `requirements-final.md`，由 §5.3 初始稿 + §5.5 迭代细化 + §7.4 人工确认定稿
++- 不论上述哪种路径，最终交付的"正式需求稿"均为阶段定稿产物 `requirements-final.md`，由 §5.3 初始稿 + §5.5 迭代细化 + §7.4 人工确认定稿（**计划口径，已被 §2.2 应用 1 推翻**：正式需求稿为 `requirements.md`，见 §1.2 决策修订备注）
+ 
+ **受影响组件**：
+ 
+@@ -282,7 +282,7 @@
+ | 组件 | 现版本 | 新版本 | 升版理由 |
+ |---|---|---|---|
+ | SKILL.md | v1.0.9 | v1.0.10 | 每次变更均升号（§2.2 例外），仅元数据 |
+-| context-system.md | v2.3.4 | v2.3.5 | 目录布局树新增 docs/ + final/ + 阶段目录重命名（机制增量） |
++| context-system.md | v2.3.4 | v2.3.5 | 目录布局树新增 docs/ + final/ + 阶段目录重命名（机制增量；**计划口径含 final/，已被 §2.2 应用 1 推翻**——不建 `final/` 子目录） |
+ | requirements-stage.md | v0.8.8 | v0.8.9 | 强制生成正式需求稿 + 阶段目录重命名 |
+ | design-stage.md | v0.9.1 | v0.9.2 | 架构/详细分离 + PlantUML 优先级 + 阶段目录重命名 |
+ | development-stage.md | v1.2 | v1.3 | 阶段目录重命名 |
+@@ -325,9 +325,9 @@
+ |---|---|
+ | SKILL.md | §2 登记表版本列；§9 索引如有相关项；§10 启动参数（如有相关项） |
+ | references/context-system.md | §4 目录布局树；§11 一致性规则增软链接一致性；§12 关系表 |
+-| references/requirements-stage.md | §3 输出；§4 模板（增 final 产物）；§5.0 外部输入问询；§5.3 初始稿；§7.4 阶段级确认 |
++| references/requirements-stage.md | §3 输出；§4 模板（增 final 产物）；§5.0 外部输入问询；§5.3 初始稿；§7.4 阶段级确认（**计划口径含 final 产物，已被 §2.2 应用 1 推翻**） |
+ | references/design-stage.md | §3 输出增 test-cases 产物行；§4.8 新增测试用例设计模板（应用 5）；§5.3 依赖链增 test-cases 实例；§5.4 任务拆解客观自检项增"测试用例覆盖"核对；§7.4 阶段级确认对象增 test-cases 产物 |
+-| references/development-stage.md | §3 输出增 final；§3 归档约定路径；§7.4 |
++| references/development-stage.md | §3 输出增 final；§3 归档约定路径；§7.4（**计划口径含 final，已被 §2.2 应用 1 推翻**） |
+ | references/testing-stage.md | §3 输入与输出（增 test-cases 入口必备 + integration-test-record 产物）；§4.1 测试报告覆盖来源说明；§4.4 测试实例交付物引用设计用例 ID；新增 §4.5 接口集成测试记录模板；§5.1+§5.2 之间新增"测试基础就绪核验"段（数据库/token/测试域名/mock 四项）；§7.4 阶段级确认对象增 integration-test-record |
+ | references/cross-reference-index.md | 末次校验行 |
+ | references/version-evolution.md | §4 总账指针行 |
+@@ -345,7 +345,7 @@
+ | 阶段目录重命名后历史归档路径失效 | 历史归档（DONE 状态）保留原路径——只对**新启动需求**生效新路径；新启动需求 ID 含日期可辨识（YYYYMMDD-序号），断点恢复时按需求 ID 目录的实际路径处理，不依赖硬编码路径 |
+ | soft link 跨平台兼容性 | symlink 在 macOS/Linux 透明；Windows 需以「管理员模式」或「开发者模式」开启——本 skill 运行环境为 macOS（当前 OS 已是 Darwin），无平台障碍 |
+ | PlantUML skill 加载失败 | 设计阶段 §5 流程图降级为 mermaid（已设计降级路径） |
+-| final 文档结构差异大 | final 文档结构由"实例产物摘要 + 文档链接"聚合（不强制汇总全文），保持轻量 |
++| final 文档结构差异大 | final 文档结构由"实例产物摘要 + 文档链接"聚合（不强制汇总全文），保持轻量（**计划口径含 final，已被 §2.2 应用 1 推翻**） |
+ 
+ ---
+ 
+diff --git a/skills/software-development-autoflow/changelog/2026-08-11.md b/skills/software-development-autoflow/changelog/2026-08-11.md
+index 8dee03f..1efe0b9 100644
+--- a/skills/software-development-autoflow/changelog/2026-08-11.md
++++ b/skills/software-development-autoflow/changelog/2026-08-11.md
+@@ -41,7 +41,7 @@
+ 21. **context-system.md v2.3.5 → v2.3.6**（机制增量 + 元数据同步）：§4 目录布局树——`docs/` 软链接集合增 `test-cases.md`（→ `stages/201-design/test-cases.md`）与 `integration-test-record.md`（→ `stages/401-testing/integration-test-record.md`）、`acceptance-verification.md`（此前遗漏软链，现补登）三行；`stages/201-design/` 阶段目录行增 `test-cases.md`（测试用例设计，恒执行，测试阶段入口必备）+ `design-scope-record.md`（设计范围确认记录）+ 实例目录标识 `instance-*/` 增 `testcases`；`stages/401-testing/` 阶段目录行增 `integration-test-record.md`（接口集成测试记录，《测试阶段》§4.5）+ 此前遗漏的 `acceptance-verification.md`（验收核验记录）；§12 关系表 design-stage 行版本 v0.9.2→v0.9.3、testing-stage 行版本 v1.1→v1.2，并增本批新增机制要点（test-cases 恒执行 + §4.5 集成测试记录 + §5.1.5 测试基础就绪核验四项）
+ 22. **SKILL.md v1.0.10 → v1.0.11**（仅元数据同步）：§2 登记表版本列——context-system v2.3.5→v2.3.6、design-stage v0.9.2→v0.9.3、testing-stage v1.1→v1.2；权威范围列——context-system 增补「含 `test-cases.md` / `integration-test-record.md`」、design-stage 增补「**测试用例设计**（恒执行，§4.8）」、testing-stage 增补「消费设计阶段 `test-cases.md` 入口必备」+「**接口集成测试记录**（§4.5，依赖项就绪核验：数据库/token/测试域名/mock 四项）」；头部对齐基准行同步
+ 23. **cross-reference-index.md**（仅元数据 + 引用侧同步）：末次校验行更新——版本集更新至 work-mode v1.9 / context-system v2.3.6 / requirements-stage v0.8.9 / design-stage v0.9.3 / development-stage v1.3 / testing-stage v1.2 / SKILL.md v1.0.11 / version-evolution v1.0；校验说明改写为「skill 七点优化批次应用 5+6 引用侧同步」，列出本批次关键新增（design-stage §4.8 测试用例设计模板、§5.3 依赖链增 test-cases 实例；testing-stage §4.5 接口集成测试记录模板、§5.1.5 测试基础就绪核验段；context-system §4 增 `test-cases.md` 与 `integration-test-record.md` + 对应 docs 软链行）
+-24. **version-evolution.md**（仅元数据）：头部对齐基准行同步；§4 版本总账——SKILL.md 行版本范围 v0.1→v1.0.11、增本 changelog 条目 22 指针；context-system 行 v1.0→v2.3.6、增本 changelog 条目 23 指针；design-stage 行 v0.1→v0.9.3、增本 changelog 条目 19 指针；testing-stage 行 v0.1→v1.2、增本 changelog 条目 20 指针
++24. **version-evolution.md**（仅元数据）：头部对齐基准行同步；§4 版本总账——SKILL.md 行版本范围 v0.1→v1.0.11、增本 changelog 条目 22 指针；context-system 行 v1.0→v2.3.6、增本 changelog 条目 21 指针；design-stage 行 v0.1→v0.9.3、增本 changelog 条目 19 指针；testing-stage 行 v0.1→v1.2、增本 changelog 条目 20 指针
+ 
+ ---
+ 
+diff --git a/skills/software-development-autoflow/references/testing-stage.md b/skills/software-development-autoflow/references/testing-stage.md
+index b91422d..fbd69d0 100644
+--- a/skills/software-development-autoflow/references/testing-stage.md
++++ b/skills/software-development-autoflow/references/testing-stage.md
+@@ -92,7 +92,7 @@
+ 
+ 由 Main Agent 在测试运行阶段就绪核验（§5.1+§5.2 之间新增段）通过后登记维护，记录**接口集成测试**（TI-NNN 编号空间）的依赖项就绪核验、用例执行结果与环境声明，结构固定：
+ 
+-**执行归属**：TI-NNN 用例（接口集成测试）由 **Main Agent（编排者）** 在 §5.1.5 测试基础就绪核验通过后、§5.4 条目实例启动**之前**，以阶段层任务一次性执行（不分配至条目实例——TI 可能跨 REQ-NNN）；执行命令与预期结果取自设计阶段 `test-cases.md` §4.8 第 2 项（接口集成测试用例）的「核验方式」字段；执行结果登记入本节第 2 段「集成测试用例执行记录」；执行成功的 TI 所核验的接口对下游条目实例标记「集成已核验」（下游条目实例仅核验非 TI 覆盖的验收标准），执行失败的 TI 按第 3 段「依赖故障登记」升级路径处置。
++**执行归属**：TI-NNN 用例（接口集成测试）由 **Main Agent（编排者）** 在 §5.1.5 测试基础就绪核验通过后、§5.4 条目实例启动**之前**，以阶段层任务一次性执行（不分配至条目实例——TI 可能跨 REQ-NNN）；执行命令与预期结果取自设计阶段 `test-cases.md` §4.8 第 3 项（用例条目结构）的「核验方式」字段；**测试代码实现归属**：优先复用工程既有测试代码直接执行，代码缺失时由 Main Agent 依 §5.2 测试基础约定编写并登记入 §4.4 对应测试代码清单（标注「测试阶段新增」），或升级人工裁定（登记验收核验记录人工裁定段）；执行结果登记入本节第 2 段「集成测试用例执行记录」；执行成功的 TI 所核验的接口对下游条目实例标记「集成已核验」（标记登记入第 2 段执行记录「下游标记」字段，经 §5.4 任务指令注入消费——下游条目实例仅核验非 TI 覆盖的验收标准），执行失败的 TI 按第 3 段「依赖故障登记」升级路径处置，处置完成后（工程实现缺陷经 §7.2 修复定稿并通过构建闸门复验 / 设计用例缺陷经人工裁订正 / 基础设施缺陷补齐）由 Main Agent **重新执行**并回写第 2 段执行记录，全部 TI 通过（或经人工裁定豁免）后方进入 §5.4 条目实例编排。
+ 
+ 1. **依赖项就绪核验**（关键，核验通过方可启动集成测试执行）：逐项核验设计阶段测试用例《设计阶段》§4.8 第 6 段声明的依赖项——
+    - **数据库**：类型（如 PostgreSQL / MySQL / MongoDB）、schema 迁移状态（已迁移 / 部分迁移 / 未迁移）、数据种子装载命令执行结果、清理命令验证；
+@@ -106,6 +106,7 @@
+    - **运行结果**（通过 / 失败 / 阻塞）；
+    - **证据**（运行日志路径或运行输出摘要——关键行摘录）；
+    - **依赖项引用**（引自第 1 段就绪核验结果）；
++   - **下游标记**（运行结果为通过时必填）：登记「集成已核验」+ 覆盖接口（API-NNN）与验收标准范围——供 §5.4 任务指令注入，下游条目实例仅核验非 TI 覆盖的验收标准；
+ 3. **依赖故障登记**（核验失败或执行阻塞时按故障类别登记）：故障 ID、故障类别（数据库 / token / 测试域名 / 第三方 mock）、影响范围（阻塞的 TI-NNN 列表）、升级方向（设计用例缺陷 / 工程实现缺陷 / 基础设施缺陷）、处置路径：
+    - 基础设施缺陷（数据库 / 测试域名 / mock 不可用）：升级人工（裁定选项：① 补齐基础设施依赖后可重新进入入口判定；② **终止本阶段**——决策留痕；裁定登记验收核验记录人工裁定段并受 §7.4 强制确认约束）；
+    - 工程实现缺陷：按缺陷回退 §7.2 处置（关联任务条目 ID 后经开发阶段缺陷修复回退通道重新激活对应任务实例）；
+@@ -210,7 +211,7 @@ flowchart LR
+ | 项 | 内容 |
+ | --- | --- |
+ | 任务目标 | 对该条目（REQ-NNN）的验收标准执行核验：编写与运行自动化测试（或执行人工核验步骤），产出客观核验结论 |
+-| 上游产物摘要 | 需求定稿产物中该条目的功能描述、验收标准、（关联时）回归边界条目 + 该条目关联任务的开发交付物摘要（经任务清单关联定位）+ 测试基础记录 + 开发入口确认记录（构建/启动命令）+（改动型/问题修复型）现状分析记录（摘要，Main Agent 摘取注入，《上下文体系》§5.2） |
++| 上游产物摘要 | 需求定稿产物中该条目的功能描述、验收标准、（关联时）回归边界条目 + 该条目关联任务的开发交付物摘要（经任务清单关联定位）+ 测试基础记录 + 开发入口确认记录（构建/启动命令）+ 集成测试记录执行结果摘要（§4.5 第 2 段「下游标记」：已核验 TI-NNN 列表 + 覆盖验收标准范围，Main Agent 注入——已被 TI 覆盖的验收标准本条目不重复核验）+（改动型/问题修复型）现状分析记录（摘要，Main Agent 摘取注入，《上下文体系》§5.2） |
+ | 验收标准 | §1 阶段目标 + §6 本实例评估视角与评分标准 |
+ | 约束 | 验收标准原文逐条引用 +（改动型/问题修复型）回归边界与现状分析结论（硬约束）+ 测试代码隔离约定（§5.2）+ 共享 fixture 只读约束 |
+ | 范围 | 该条目（REQ-NNN）的验收核验与其关联回归条目；范围变更须经追加约束重启 |
+diff --git a/skills/software-development-autoflow/references/version-evolution.md b/skills/software-development-autoflow/references/version-evolution.md
+index 65dc237..d2bdefb 100644
+--- a/skills/software-development-autoflow/references/version-evolution.md
++++ b/skills/software-development-autoflow/references/version-evolution.md
+@@ -85,18 +85,19 @@
+ 
+ | 对象 | 版本范围（以明细为准） | 明细指针 |
+ | --- | --- | --- |
+-| SKILL.md | v0.1 → v1.0.13 | changelog/2026-08-07.md：【迁移】SKILL.md（历史演进，迁出前版本 v1.0.2）；【当日新增】条目 4、8、11、14；changelog/2026-08-10.md：【当日新增】条目 2、13；changelog/2026-08-11.md：【当日新增】条目 2、16、22、26、34 |
++| SKILL.md | v0.1 → v1.0.13 | changelog/2026-08-07.md：【迁移】SKILL.md（历史演进，迁出前版本 v1.0.2）；【当日新增】条目 4、8、11、14；changelog/2026-08-10.md：【当日新增】条目 2、13；changelog/2026-08-11.md：【当日新增】条目 2、15、22、26、34 |
+ | work-mode | v1.6 → v1.9 | changelog/2026-08-07.md：【迁移】work-mode.md（历史演进，迁出前版本 v1.6.2）；changelog/2026-08-10.md：【当日新增】条目 1、9；changelog/2026-08-11.md：【当日新增】条目 1 |
+-| context-system | v1.0 → v2.3.7 | changelog/2026-08-07.md：【迁移】context-system.md（历史演进，迁出前版本 v2.3.2）；【当日新增】条目 1；changelog/2026-08-10.md：【当日新增】条目 14；changelog/2026-08-11.md：【当日新增】条目 17、23、35 |
+-| requirements-stage | v0.2 → v0.8.10 | changelog/2026-08-07.md：【迁移】requirements-stage.md（历史演进，迁出前版本 v0.8.6）；【当日新增】条目 6；changelog/2026-08-10.md：【当日新增】条目 11；changelog/2026-08-11.md：【当日新增】条目 18、27 |
+-| design-stage | v0.1 → v0.9.5 | changelog/2026-08-07.md：【迁移】design-stage.md（历史演进，迁出前版本 v0.8）；【当日新增】条目 7；changelog/2026-08-10.md：【当日新增】条目 12；changelog/2026-08-11.md：【当日新增】条目 19、24、28、36 |
+-| development-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】development-stage.md（历史演进，迁出前版本 v1.1）；changelog/2026-08-10.md：【当日新增】条目 10；changelog/2026-08-11.md：【当日新增】条目 20、29（仅头部对齐基准行同步，纯元数据不升版） |
+-| testing-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】testing-stage.md（历史演进，迁出前版本 v1.0）；changelog/2026-08-11.md：【当日新增】条目 21、25、30 |
++| context-system | v1.0 → v2.3.7 | changelog/2026-08-07.md：【迁移】context-system.md（历史演进，迁出前版本 v2.3.2）；【当日新增】条目 1；changelog/2026-08-10.md：【当日新增】条目 14；changelog/2026-08-11.md：【当日新增】条目 7、10、21、31、35、38 |
++| requirements-stage | v0.2 → v0.8.10 | changelog/2026-08-07.md：【迁移】requirements-stage.md（历史演进，迁出前版本 v0.8.6）；【当日新增】条目 6；changelog/2026-08-10.md：【当日新增】条目 11；changelog/2026-08-11.md：【当日新增】条目 3、11、27 |
++| design-stage | v0.1 → v0.9.5 | changelog/2026-08-07.md：【迁移】design-stage.md（历史演进，迁出前版本 v0.8）；【当日新增】条目 7；changelog/2026-08-10.md：【当日新增】条目 12；changelog/2026-08-11.md：【当日新增】条目 4、12、19、28、36 |
++| development-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】development-stage.md（历史演进，迁出前版本 v1.1）；changelog/2026-08-10.md：【当日新增】条目 10；changelog/2026-08-11.md：【当日新增】条目 5、13、29（仅头部对齐基准行同步，纯元数据不升版） |
++| testing-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】testing-stage.md（历史演进，迁出前版本 v1.0）；changelog/2026-08-11.md：【当日新增】条目 6、14、20、30 |
+ | 交叉引用索引（工具文件） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 2（建立事件）；changelog/2026-08-11.md：末次校验行更新 |
+ | 执行检查清单（工具文件） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 10（建立事件） |
+ | 收敛检查清单（工具文件） | 无版本号 | changelog/2026-08-10.md：【当日新增】条目 15（建立事件） |
+ | changelog/ 目录（明细载体） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 3（建立事件） |
+-| 优化事务留痕目录（`.autoflow/optimization-log/`） | 无版本号 | changelog/2026-08-11.md：【当日新增】条目 22（建立事件） |
++| 优化事务留痕目录（`.autoflow/optimization-log/`） | 无版本号 | changelog/2026-08-11.md：【当日新增】条目 18（建立事件） |
++| 方案优化文档（`.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md`） | 无版本号 | changelog/2026-08-11.md：【当日新增】条目 25、37 |
+ | 本文（version-evolution） | v1.0 | changelog/2026-08-07.md：【当日新增】条目 13～15 |
+ 
+ ## 5. 治理流程
+
+=== changelog/2026-08-12.md (r2 修复留痕，全量) ===
+# Changelog — 2026-08-12
+
+> 本文件承载 2026-08-12 当日全部组件改动的版本演进留痕（约定：按改动日期命名，假定单次改动不超过一天，一次改动的全部条目记入当日文件）。
+
+---
+
+## 【当日新增】2026-08-12 改动条目
+
+**触发**：五点优化批次 workmode 评估修复轮——r1 评估（执行阶段第 1 轮）发现 6 条重要级问题（I-1~I-6）并完成修复；r2 评估（第 2 轮）确认 5 条闭合、I-5 部分闭合，并新发现 4 条重要级问题（J-1~J-4）；当日按仲裁整合意见执行本轮修复。修订流程：直接补丁升版口径内的文本修订（按 `references/version-evolution.md` §5.1 修订流程选择口径——机制修订 + 元数据同步）。评估留痕见 `.autoflow/work-mode-artifacts/instance-skill-five-point-optim/`（round-1 / round-2 / round-3）。
+
+1. **requirements-stage.md / development-stage.md / testing-stage.md**（仅元数据同步，不升版）：三文件头部「对齐基准」行修正——`context-system.md` v2.3.6→v2.3.7、`design-stage.md` v0.9.4→v0.9.5（r1 评估修复 I-1；与 SKILL.md §2 登记表、context-system §12 关系表、version-evolution §4 版本总账、cross-reference-index 末次校验对齐）
+2. **testing-stage.md**（文本修订，不升版）：r1 评估修复 I-2~I-6——§7.4 强制确认锚点枚举增「§5.1.5 测试基础就绪核验裁定」；§4.5 / §5.1.5 两处「退回上游工程环境就绪问询」悬空引用替换为直接升级人工路径（裁定选项 + 强制确认约束）；§5 入口条件段增「设计阶段测试用例设计产物已定稿」、§5.1 核验清单增「设计阶段测试用例可引用」；§4.5 头段增「执行归属」定义（TI-NNN 由 Main Agent 在 §5.1.5 通过后、§5.4 前一次性执行）
+3. **design-stage.md**（文本修订，不升版）：r1 评估修复 I-6——§4.8「依赖引用」锚点「第 5 段」→「第 6 段」、「强制路径」锚点「测试阶段 §3 输入①」→「输入②」
+4. **testing-stage.md**（机制修订，不升版）：r2 评估修复 J-1——TI 执行链四要素闭环：① §4.5 执行归属段补「测试代码实现归属」（复用工程既有代码 / Main Agent 依 §5.2 编写并登记 §4.4 / 升级人工裁定）与「失败 TI 重跑时机」（处置完成后由 Main Agent 重新执行并回写，全部通过或裁定豁免后方进入 §5.4）；② §4.5 第 2 段「集成测试用例执行记录」增「下游标记」字段（通过时登记「集成已核验」+ 覆盖接口与验收标准范围）；③ §5.4 任务指令「上游产物摘要」注入「集成测试记录执行结果摘要」（已核验 TI-NNN 列表 + 覆盖验收标准范围，已被 TI 覆盖的验收标准条目实例不重复核验）；④ 顺带修正「核验方式」字段锚点（§4.8 第 2 项→第 3 项用例条目结构）
+5. **version-evolution.md**（仅元数据同步）：r2 评估修复 J-2——§4 版本总账指针逐行修正（SKILL 行「条目 16」→「15」；context-system 行「17、23、35」→「7、10、21、31、35、38」；requirements-stage 行「18、27」→「3、11、27」；design-stage 行「24」→「4、12」；development-stage 行「20」→「5、13」；testing-stage 行「21、25」→「6、14、20」；优化事务留痕目录行「条目 22（建立事件）」→「条目 18（建立事件）」；新增「方案优化文档」行（条目 25、37），与 changelog 条目 40 声称口径对齐）
+6. **changelog/2026-08-11.md**（仅元数据修正）：条目 24 笔误修正——context-system 总账指针「条目 23」→「条目 21」（r2 评估修复 J-2；23 为交叉引用索引条目，context v2.3.6 条目为 21）
+7. **`.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md`**（仅留痕修订）：final 机制残留表述标注「已被 §2.2 应用 1 推翻」——§2.3 应用 2 正文两处（`requirements-final.md`）、§3.1 版本号升版表 context-system 行（final/ 子目录）、§4 受影响文档清单 requirements-stage / development-stage 两行、§5 风险表 final 文档结构行（r2 评估修复 J-4；与 §1.2 决策修订备注口径统一，方案优化文档无版本号）

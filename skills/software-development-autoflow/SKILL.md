@@ -5,10 +5,10 @@ description: "软件开发全流程自动化工作流。提供从原始需求到
 
 # 软件开发自动化工作流 —— SKILL.md 顶层调度
 
-> 版本：v1.0.13
+> 版本：v1.0.16
 > 文档属性：skill 交付文件（入口调度文件）
 > 交付状态：已交付至 skill 根目录 `SKILL.md`；经 work-mode 双视角评估定稿（评分轨迹 R1 8.0/7.0 → R2 9.0/9.0 收敛），定稿前修 5 条建议项（§9 索引补开发侧三点、§4 图注 §8.2 通道括注、重入分支 4 挂钩例外、INIT 节点标签补全）；早期草图 `docs/00-pipeline-flowchart.md`、`docs/01-pipeline-overview.md` 于交付时删除，全流程图职责由本文 §4 承接
-> 对齐基准：`references/work-mode.md` v1.9；`references/context-system.md` v2.3.7；`references/requirements-stage.md` v0.8.10；`references/design-stage.md` v0.9.5；`references/development-stage.md` v1.3；`references/testing-stage.md` v1.3；`references/version-evolution.md` v1.0
+> 对齐基准：`references/work-mode.md` v1.9；`references/context-system.md` v2.3.7；`references/requirements-stage.md` v0.8.10；`references/design-stage.md` v0.9.5；`references/development-stage.md` v1.3；`references/testing-stage.md` v1.4；`references/version-evolution.md` v1.1
 > 定位：skill 的唯一入口文件，调度组织全部组件，实现**从原始需求到交付终态的全自动流水线**
 > 关键约定：**本文只做顶层调度，不复述、不重定义任何机制**——角色契约、收敛判定、异常处理、出入口契约、归档命名等一律以组件文件为准（组件清单见 §2）；本文与组件冲突时以组件为准；本文对组件的引用均为**路径 + 章节号**形式，不复制内容
 >
@@ -36,8 +36,8 @@ description: "软件开发全流程自动化工作流。提供从原始需求到
 | `references/requirements-stage.md` | v0.8.10 | 阶段细则 | 需求阶段（第一阶段）：原始需求 → 阶段定稿产物 `requirements.md`（无论是否注入外部稿均须生成，下游消费者含 instance-testcases）+ 摘要 |
 | `references/design-stage.md` | v0.9.5 | 阶段细则 | 设计阶段（第二阶段）：需求定稿产物 → 架构设计与详细设计分离的四份独立方案 + API 契约 + UI 设计 + **测试用例设计**（恒执行，§4.8，instance-testcases 与前后端实例并行）+ 任务拆解；图表规范 PlantUML 优先 / mermaid 降级（§4.6）；§5 流程图增 testcases 节点 + PlantUML + mermaid 备援代码块；六类终止情形 + PlantUML 注脚同步 |
 | `references/development-stage.md` | v1.3 | 阶段细则 | 开发阶段（第三阶段）：任务拆解 → 可编译可启动的工程实现（每任务交付物 `tsk-NNN.md`） |
-| `references/testing-stage.md` | v1.3 | 阶段细则 | 测试阶段（第四阶段，最终质量关口）：消费设计阶段 `test-cases.md` 入口必备 + 工程实现 → 测试报告 + 缺陷清单 + 验收核验记录 + **接口集成测试记录**（§4.5，依赖项就绪核验：数据库/token/测试域名/mock 四项含 §5.1.5 客观判据）；§5 流程图增 §5.1.5 节点 |
-| `references/version-evolution.md` | v1.0 | 原子组件 | 版本演进治理：版本号与升版规约、引用侧同步纪律、changelog 用法规约、版本总账（轻量指针表） |
+| `references/testing-stage.md` | v1.4 | 阶段细则 | 测试阶段（第四阶段，最终质量关口）：消费设计阶段 `test-cases.md` 入口必备 + 工程实现 → 测试报告 + 缺陷清单 + 验收核验记录 + **接口集成测试记录**（§4.5，依赖项就绪核验：数据库/token/测试域名/mock 四项含 §5.1.5 客观判据）；§5 流程图增 §5.1.5 节点 |
+| `references/version-evolution.md` | v1.1 | 原子组件 | 版本演进治理：版本号与升版规约、引用侧同步纪律、changelog 用法规约、版本总账（轻量指针表） |
 
 **冲突规则**：本文与任一组件冲突时以组件为准；阶段细则与原子组件冲突时以原子组件为准（设计/开发/测试三细则已声明对《上下文体系》只收紧不放松；需求阶段细则声明未定义机制以《工作模式》为准）。组件升版时本文头部对齐基准同步更新（仅元数据）。辅助工具文件（`references/cross-reference-index.md` 交叉引用索引表、`references/execution-checklist.md` 执行检查清单、`references/convergence-checklist.md` 收敛检查清单）为纯校验/导航工具，不定义机制，不入本表，冲突时一律以组件原文为准。
 
@@ -188,6 +188,7 @@ Main Agent 无状态化调度（《上下文体系》§9.3）：任一时刻重�
 | 信息征询 | 外部输入问询与登记（已有需求稿、需求稿模板）及读取失败替代裁定 | 《需求阶段》§5.0 |
 | 信息征询 | 工程清单确认、构建/启动命令与技术栈问询 | 《开发阶段》§5.1 |
 | 信息征询 | 测试运行入口问询 | 《测试阶段》§5.2 |
+| 信息征询 | 测试基础就绪核验问询 | 《测试阶段》§5.1.5 |
 | 阶段确认 | 需求阶段定稿确认 | 《需求阶段》§7.4 |
 | 阶段确认 | 设计阶段实例级 + 阶段级确认（阶段级不可关闭） | 《设计阶段》§7.4 |
 | 阶段确认 | 开发阶段级确认（不可关闭） | 《开发阶段》§7.4 |
@@ -197,6 +198,7 @@ Main Agent 无状态化调度（《上下文体系》§9.3）：任一时刻重�
 | 升级裁决 | 构建闸门连续失败升级（定位续流 / 终止） | 《开发阶段》§5.4 |
 | 升级裁决 | 入口退回补充与入口升级裁定 | 各细则 §5 入口条件 |
 | 升级裁决 | 确认/问询环节需求方不可达的暂停（等待恢复）/终止裁定 | 各细则 §7.4 / §5.1 |
+| 升级裁决 | figma 就绪校验升级 | 《设计阶段》§5.1 / §4.1 |
 | 迭代问询 | 迭代中阻断级疑问向需求方问询、不可达时裁决者替代裁定 | 各细则 §7.3 |
 | 缺陷处置 | 缺陷归因裁定、接受/转出裁定、缺陷重新归因裁定 | 《测试阶段》§5.5、§7.2；《开发阶段》§7.2 |
 

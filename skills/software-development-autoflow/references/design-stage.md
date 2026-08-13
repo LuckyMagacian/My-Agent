@@ -3,7 +3,7 @@
 > 版本：v0.9.5
 > 文档属性：skill 交付文件（阶段指令细则）
 > 交付状态：已交付至 skill 根目录 `design-stage.md`（文件名去编号；后迁移至 `references/` 目录，仅元数据同步）；经 work-mode 双视角评估定稿（评分轨迹：R1 8.2/7 → R2 9/7.5 → R3 9/7 → R4 9/6.5 → R5 8/7 → R6 8/7；v0.7 减法轮后 R7 9.5/8.5 收敛）并经人工确认定稿；草稿 `docs/05-design-stage.md` 于交付时删除
-> 对齐基准：`work-mode.md` v1.9；`context-system.md` v2.3.7；`requirements-stage.md` v0.8.10；`development-stage.md` v1.3；`testing-stage.md` v1.3
+> 对齐基准：`work-mode.md` v1.9；`context-system.md` v2.3.7；`requirements-stage.md` v0.8.10；`development-stage.md` v1.3；`testing-stage.md` v1.4
 > 定位：四大阶段（需求 / 设计 / 开发 / 测试）中的**第二阶段**，将定稿需求转化为可实施的设计方案与任务拆解
 > 关键约定：本阶段的迭代细化以 `work-mode.md`《执行者-评估者-仲裁者工作模式》（位于 `references/` 目录，以下简称《工作模式》）实例化运行；本文只定义设计阶段实例化时注入的参数与细化规则，凡未定义的机制（角色契约、独立性原则、收敛判定、异常处理、归档命名、报告结构等）一律以《工作模式》为准
 >

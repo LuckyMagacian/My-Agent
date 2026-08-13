@@ -1,9 +1,9 @@
 # 版本迭代组件（version-evolution）
 
-> 版本：v1.0
+> 版本：v1.1
 > 文档属性：skill 交付文件（原子组件——版本演进治理）
 > 定位：skill 版本演进事务的唯一权威规范与记录组件——承载版本总账、规约 changelog 用法、定义升版与引用侧同步纪律；组件本体机制冲突时不适用本文，以各组件原文为准
-> 对齐基准：SKILL.md v1.0.13、work-mode v1.9、context-system v2.3.7、requirements-stage v0.8.10、design-stage v0.9.5、development-stage v1.3、testing-stage v1.3
+> 对齐基准：SKILL.md v1.0.16、work-mode v1.9、context-system v2.3.7、requirements-stage v0.8.10、design-stage v0.9.5、development-stage v1.3、testing-stage v1.4
 > 关键约定：本文只治理版本演进事务（版本号、升版、记录、同步义务），不定义、不复述任何流程机制，机制冲突一律以组件原文为准（冲突规则见 SKILL.md §2）；总账与 changelog 明细不双写（分工与冲突口径见 §1、§5.2）
 > 版本演进留痕：本文即版本演进记录的权威文档；迁移完成后各组件头部留痕指针行指向本文（模板见 §3.4）；本文自身的版本变更见 §4
 
@@ -39,7 +39,7 @@
 
 ### 2.3 记录粒度
 
-总账一行一组件/事件，指针直指明细节，不复述细节；历史版本细节以 changelog 明细为唯一权威。
+总账一行一组件/事件；指针按日登记（changelog/<日期>.md），当日批次为最小登记单位，不枚举条目号、不复述细节；历史版本细节以 changelog 明细为唯一权威。
 
 ### 2.4 引用侧同步义务
 
@@ -81,23 +81,24 @@
 
 ## 4. 版本总账
 
-轻量指针表：一行一组件/事件，指针直指 changelog 明细对应节；细节不在总账复述。本文自身的建立行在定稿流程中写入；后续升版定稿时同批延展本表——新增组件加行，既有组件更新版本范围与指针；行指针跨多日文件时自带完整文件路径。
+轻量指针表：一行一组件/事件，指针按日指向 changelog 明细文件（changelog/<日期>.md：当日批次），不枚举条目号、不复述细节；建立事件类行保留「建立事件」标注，末次校验类行保留事件标注（如「末次校验行更新」）。本文自身的建立行在定稿流程中写入；后续升版定稿时同批延展本表——新增组件加行，既有组件更新版本范围与指针；行指针跨多日文件时自带完整文件路径。
 
 | 对象 | 版本范围（以明细为准） | 明细指针 |
 | --- | --- | --- |
-| SKILL.md | v0.1 → v1.0.13 | changelog/2026-08-07.md：【迁移】SKILL.md（历史演进，迁出前版本 v1.0.2）；【当日新增】条目 4、8、11、14；changelog/2026-08-10.md：【当日新增】条目 2、13；changelog/2026-08-11.md：【当日新增】条目 2、16、22、26、34 |
-| work-mode | v1.6 → v1.9 | changelog/2026-08-07.md：【迁移】work-mode.md（历史演进，迁出前版本 v1.6.2）；changelog/2026-08-10.md：【当日新增】条目 1、9；changelog/2026-08-11.md：【当日新增】条目 1 |
-| context-system | v1.0 → v2.3.7 | changelog/2026-08-07.md：【迁移】context-system.md（历史演进，迁出前版本 v2.3.2）；【当日新增】条目 1；changelog/2026-08-10.md：【当日新增】条目 14；changelog/2026-08-11.md：【当日新增】条目 17、23、35 |
-| requirements-stage | v0.2 → v0.8.10 | changelog/2026-08-07.md：【迁移】requirements-stage.md（历史演进，迁出前版本 v0.8.6）；【当日新增】条目 6；changelog/2026-08-10.md：【当日新增】条目 11；changelog/2026-08-11.md：【当日新增】条目 18、27 |
-| design-stage | v0.1 → v0.9.5 | changelog/2026-08-07.md：【迁移】design-stage.md（历史演进，迁出前版本 v0.8）；【当日新增】条目 7；changelog/2026-08-10.md：【当日新增】条目 12；changelog/2026-08-11.md：【当日新增】条目 19、24、28、36 |
-| development-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】development-stage.md（历史演进，迁出前版本 v1.1）；changelog/2026-08-10.md：【当日新增】条目 10；changelog/2026-08-11.md：【当日新增】条目 20、29（仅头部对齐基准行同步，纯元数据不升版） |
-| testing-stage | v0.1 → v1.3 | changelog/2026-08-07.md：【迁移】testing-stage.md（历史演进，迁出前版本 v1.0）；changelog/2026-08-11.md：【当日新增】条目 21、25、30 |
-| 交叉引用索引（工具文件） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 2（建立事件）；changelog/2026-08-11.md：末次校验行更新 |
-| 执行检查清单（工具文件） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 10（建立事件） |
-| 收敛检查清单（工具文件） | 无版本号 | changelog/2026-08-10.md：【当日新增】条目 15（建立事件） |
-| changelog/ 目录（明细载体） | 无版本号 | changelog/2026-08-07.md：【当日新增】条目 3（建立事件） |
-| 优化事务留痕目录（`.autoflow/optimization-log/`） | 无版本号 | changelog/2026-08-11.md：【当日新增】条目 22（建立事件） |
-| 本文（version-evolution） | v1.0 | changelog/2026-08-07.md：【当日新增】条目 13～15 |
+| SKILL.md | v0.1 → v1.0.16 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次；changelog/2026-08-13.md：当日批次 |
+| work-mode | v1.6 → v1.9 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-13.md：当日批次 |
+| context-system | v1.0 → v2.3.7 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次；changelog/2026-08-13.md：当日批次 |
+| requirements-stage | v0.2 → v0.8.10 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次 |
+| design-stage | v0.1 → v0.9.5 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次 |
+| development-stage | v0.1 → v1.3 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次；changelog/2026-08-13.md：当日批次 |
+| testing-stage | v0.1 → v1.4 | changelog/2026-08-07.md：当日批次；changelog/2026-08-10.md：当日批次；changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次 |
+| 交叉引用索引（工具文件） | 无版本号 | changelog/2026-08-07.md：建立事件；changelog/2026-08-10.md：末次校验行更新；changelog/2026-08-11.md：末次校验行更新；changelog/2026-08-12.md：末次校验行更新；changelog/2026-08-13.md：末次校验行更新 |
+| 执行检查清单（工具文件） | 无版本号 | changelog/2026-08-07.md：建立事件；changelog/2026-08-13.md：当日批次 |
+| 收敛检查清单（工具文件） | 无版本号 | changelog/2026-08-10.md：建立事件 |
+| changelog/ 目录（明细载体） | 无版本号 | changelog/2026-08-07.md：建立事件 |
+| 优化事务留痕目录（`.autoflow/optimization-log/`） | 无版本号 | changelog/2026-08-11.md：建立事件 |
+| 方案优化文档（`.autoflow/optimization-log/2026-08-11-skill-five-point-optimization.md`） | 无版本号 | changelog/2026-08-11.md：当日批次；changelog/2026-08-12.md：当日批次 |
+| 本文（version-evolution） | v1.0 → v1.1 | changelog/2026-08-07.md：建立事件；changelog/2026-08-12.md：当日批次 |
 
 ## 5. 治理流程
 
